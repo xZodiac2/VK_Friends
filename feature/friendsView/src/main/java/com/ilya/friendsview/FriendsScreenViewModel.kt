@@ -1,48 +1,54 @@
 package com.ilya.friendsview
 
-import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ilya.data.VkRepository
-import com.ilya.friendsview.screen.FiendsScreenEvent
+import com.ilya.friendsview.screen.FriendsScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class FriendsScreenViewModel @Inject constructor(
     private val repository: VkRepository,
-    @Named("accessToken")
-    private val accessToken: String,
-    @ApplicationContext context: Context,
+    shPrefs: SharedPreferences,
 ) : ViewModel() {
     
-    private val _screenMutableState = MutableStateFlow(FriendsScreenState.Loading)
+    private val _screenMutableState = MutableStateFlow<FriendsScreenState>(FriendsScreenState.Loading)
     val screenState = _screenMutableState.asStateFlow()
     
-    fun handleEvent(event: FiendsScreenEvent) {
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        _screenMutableState.value = FriendsScreenState.Error(ErrorType.NoInternet)
+    }
+    
+    private val accessToken = shPrefs.getString(ACCESS_TOKEN_KEY, "") ?: ""
+    
+    fun handleEvent(event: FriendsScreenEvent) {
         when (event) {
-            FiendsScreenEvent.Start -> onStart()
-            FiendsScreenEvent.Restart -> onRestart()
+            is FriendsScreenEvent.Start -> onStart()
+            is FriendsScreenEvent.Retry -> onStart()
         }
     }
     
     private fun onStart() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (accessToken.isEmpty()) {
-            
-            }
+        if (accessToken.isEmpty()) {
+            _screenMutableState.value = FriendsScreenState.Error(ErrorType.NoAccessToken)
+            return
+        }
+        
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            val friends = repository.getFriends(accessToken)
+            _screenMutableState.value = FriendsScreenState.Success(friends)
         }
     }
     
-    private fun onRestart() {
-    
+    companion object {
+        private const val ACCESS_TOKEN_KEY = "accessToken"
     }
-    
     
 }

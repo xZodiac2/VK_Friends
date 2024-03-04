@@ -10,15 +10,13 @@ import androidx.compose.ui.Modifier
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
-fun SessionsAppTheme(content: @Composable () -> Unit) {
+fun VkFriendsAppTheme(content: @Composable () -> Unit) {
     val colorScheme = if (isSystemInDarkTheme()) {
         ColorScheme(
             primary = DarkColorScheme.primary,
             secondary = DarkColorScheme.secondary,
             cardContainerColor = DarkColorScheme.cardContainerColor,
             background = DarkColorScheme.background,
-            filledHeartIconTint = DarkColorScheme.heartIconTint,
-            outlinedHeartIconTint = DarkColorScheme.outlinedHeartIconTint,
             primaryTextColor = DarkColorScheme.primaryTextColor,
             secondaryTextColor = DarkColorScheme.secondaryTextColor,
             containerTextFieldColor = DarkColorScheme.containerTextFieldColor,

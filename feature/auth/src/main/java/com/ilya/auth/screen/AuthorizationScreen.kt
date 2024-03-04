@@ -1,5 +1,6 @@
 package com.ilya.auth.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,8 @@ fun AuthorizationScreen(
 ) {
     val screenState by authViewModel.authorizationScreenState.collectAsState()
     val context = LocalContext.current
+    
+    Log.d("mytag", screenState.toString())
     
     when (screenState) {
         AuthorizationScreenState.NotAuthorized -> {

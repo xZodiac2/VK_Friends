@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_no_internet">Не получается получить список друзей. Проверьте подключение к интернету и попробуйте снова</string>
+    <string name="error_no_access_token">Что-то пошло не так. Авторизируйтесь снова</string>
+    <string name="ok">Ок</string>
+    <string name="retry">Попробовать снова</string>
+</resources>

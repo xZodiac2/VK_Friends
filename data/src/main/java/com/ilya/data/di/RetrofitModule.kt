@@ -1,5 +1,6 @@
 package com.ilya.data.di
 
+import android.util.Log
 import com.ilya.data.VkApi
 import dagger.Module
 import dagger.Provides
@@ -16,8 +17,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 internal object RetrofitModule {
     @Provides
     fun provideApi(): VkApi {
+        val loggingInterceptor = HttpLoggingInterceptor { Log.d("okhttptag", it) }
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        
         val okHttpsClient = OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            .addInterceptor(loggingInterceptor)
             .build()
         
         val retrofit = Retrofit.Builder()

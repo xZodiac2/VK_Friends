@@ -10,4 +10,5 @@ sealed interface FriendsScreenState {
 
 sealed interface ErrorType {
     object NoInternet : ErrorType
+    object NoAccessToken : ErrorType
 }

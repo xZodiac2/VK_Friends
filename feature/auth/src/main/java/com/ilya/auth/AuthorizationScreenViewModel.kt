@@ -1,6 +1,7 @@
 package com.ilya.auth
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.ilya.auth.screen.AuthorizationScreenEvent
 import com.ilya.auth.screen.AuthorizationScreenState
@@ -15,8 +16,7 @@ class AuthorizationScreenViewModel @Inject constructor(
     private val shPrefs: SharedPreferences,
 ) : ViewModel() {
     
-    private val _authorizationScreenState =
-        MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.Idle)
+    private val _authorizationScreenState = MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.Idle)
     val authorizationScreenState = _authorizationScreenState.asStateFlow()
     
     private val accessToken = shPrefs.getString(ACCESS_TOKEN_KEY, "") ?: ""
@@ -37,9 +37,12 @@ class AuthorizationScreenViewModel @Inject constructor(
     }
     
     private fun onAuthorize(token: AccessToken) {
-        shPrefs.edit()
-            .putString(ACCESS_TOKEN_KEY, token.token)
-            .apply()
+        Log.d("mytag", "Auth")
+        
+        with(shPrefs.edit()) {
+            putString(ACCESS_TOKEN_KEY, token.token)
+            apply()
+        }
         
         _authorizationScreenState.value = AuthorizationScreenState.Authorized
     }
@@ -47,5 +50,5 @@ class AuthorizationScreenViewModel @Inject constructor(
     companion object {
         private const val ACCESS_TOKEN_KEY = "accessToken"
     }
-    
 }
+

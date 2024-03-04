@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_no_internet">Have not able to get friends list. Check your internet connection and try again</string>
+    <string name="error_no_access_token">Something went wrong. Authorize again</string>
+    <string name="ok">Ok</string>
+    <string name="retry">Try again</string>
+</resources>

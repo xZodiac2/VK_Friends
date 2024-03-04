@@ -23,7 +23,7 @@ android {
         addManifestPlaceholders(
             mapOf(
                 "VKIDRedirectHost" to "vk.com",
-                "VKIDRedirectScheme" to "vkcom.ilya.vkfriends",
+                "VKIDRedirectScheme" to "vk51848121",
                 "VKIDClientID" to "51848121",
                 "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
             )
@@ -60,6 +60,8 @@ dependencies {
     // Project
     implementation(project(":feature:auth"))
     implementation(project(":feature:friendsView"))
+    implementation(project(":core"))
+    implementation(project(":theme"))
     
     // Hilt
     implementation("com.google.dagger:hilt-android:2.44")

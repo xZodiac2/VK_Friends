@@ -7,7 +7,7 @@ import retrofit2.http.Query
 
 internal interface VkApi {
     
-    @GET("/friends.get?v=${CURRENT_API_VERSION}")
+    @GET("friends.get?v=${CURRENT_API_VERSION}")
     suspend fun getFriends(
         @Query("access_token") accessToken: String,
         @Query("fields") fields: List<String> = listOf("photo_200_orig"),

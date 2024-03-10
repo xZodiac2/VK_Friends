@@ -1,4 +1,4 @@
-package com.ilya.core
+package com.ilya.core.commonDi
 
 import android.content.Context
 import android.content.SharedPreferences

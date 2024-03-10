@@ -2,6 +2,8 @@ package com.ilya.data.di
 
 import android.util.Log
 import com.ilya.data.VkApi
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +29,13 @@ internal object RetrofitModule {
         val retrofit = Retrofit.Builder()
             .baseUrl(VkApi.BASE_URL)
             .client(okHttpsClient)
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(
+                MoshiConverterFactory.create(
+                    Moshi.Builder()
+                        .addLast(KotlinJsonAdapterFactory())
+                        .build()
+                )
+            )
             .build()
         
         return retrofit.create(VkApi::class.java)

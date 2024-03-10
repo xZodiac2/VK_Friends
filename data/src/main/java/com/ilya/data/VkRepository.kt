@@ -10,4 +10,8 @@ class VkRepository @Inject internal constructor(private val vkApi: VkApi) {
         return withContext(Dispatchers.IO) { vkApi.getFriends(accessToken, fields) }.response.items
     }
     
+    suspend fun searchFriends(userId: Long, fields: List<String> = listOf("photo_200_orig")): List<User> {
+        return withContext(Dispatchers.IO) { vkApi.searchFriends(userId, fields) }.response.items
+    }
+    
 }

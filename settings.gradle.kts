@@ -1,12 +1,12 @@
 import java.net.URI
 
+include(":feature:profileView")
+
+
 include(":core")
 
 
 include(":feature:auth")
-
-
-include(":feature:profileView")
 
 
 include(":feature:friendsView")

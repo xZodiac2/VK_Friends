@@ -25,7 +25,8 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
             leadingIconTextFieldColor = DarkColorScheme.leadingIconTextFieldColor,
             focusedIndicatorTextFieldColor = DarkColorScheme.focusedIndicatorTextFieldColor,
             unfocusedIndicatorTextFieldColor = DarkColorScheme.unfocusedIndicatorTextFieldColor,
-            placeholderTextFieldColor = DarkColorScheme.placeholderTextFieldColor
+            placeholderTextFieldColor = DarkColorScheme.placeholderTextFieldColor,
+            buttonColor = DarkColorScheme.buttonColor
         )
     } else {
         ColorScheme()
@@ -34,11 +35,5 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(colorScheme.secondary)
     
-    CompositionLocalProvider(LocalColorScheme provides colorScheme) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LocalColorScheme.current.background)
-        ) { content() }
-    }
+    CompositionLocalProvider(LocalColorScheme provides colorScheme, content = content)
 }

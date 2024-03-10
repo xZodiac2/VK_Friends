@@ -50,6 +50,13 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
     
+    // OneTap
+    implementation("com.vk.id:onetap-compose:1.0.0")
+    
+    // Moshi
+    implementation("com.squareup.moshi:moshi:1.15.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")

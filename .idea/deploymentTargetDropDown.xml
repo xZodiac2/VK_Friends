@@ -2,18 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="BaseButton">
-        <State />
-      </entry>
-      <entry key="NoAccessToken">
-        <State />
-      </entry>
-      <entry key="NoInternet">
-        <State />
-      </entry>
-      <entry key="OnLoadingState">
-        <State />
-      </entry>
       <entry key="app">
         <State>
           <targetSelectedWithDropDown>
@@ -27,7 +15,7 @@
               </deviceKey>
             </Target>
           </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-03-04T13:02:17.463769500Z" />
+          <timeTargetWasSelectedWithDropDown value="2024-03-10T11:37:09.802717Z" />
         </State>
       </entry>
     </value>

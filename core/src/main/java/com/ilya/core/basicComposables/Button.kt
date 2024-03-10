@@ -28,7 +28,7 @@ fun BaseButton(
 ) {
     Button(
         onClick,
-        modifier = modifier.padding(10.dp),
+        modifier,
         enabled,
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(containerColor = LocalColorScheme.current.buttonColor),

@@ -3,7 +3,6 @@ package com.ilya.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -21,19 +20,22 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
             secondaryTextColor = DarkColorScheme.secondaryTextColor,
             containerTextFieldColor = DarkColorScheme.containerTextFieldColor,
             valueTextFieldColor = DarkColorScheme.valueTextFieldColor,
-            trailingIconTextFieldColor = DarkColorScheme.trailingIconTextFieldColor,
-            leadingIconTextFieldColor = DarkColorScheme.leadingIconTextFieldColor,
             focusedIndicatorTextFieldColor = DarkColorScheme.focusedIndicatorTextFieldColor,
             unfocusedIndicatorTextFieldColor = DarkColorScheme.unfocusedIndicatorTextFieldColor,
             placeholderTextFieldColor = DarkColorScheme.placeholderTextFieldColor,
-            buttonColor = DarkColorScheme.buttonColor
+            buttonColor = DarkColorScheme.buttonColor,
+            selectedIconColor = DarkColorScheme.selectedIconColor,
+            unselectedIconColor = DarkColorScheme.unselectedIconColor,
+            bottomNavSelectedIndicatorColor = DarkColorScheme.bottomNavSelectedIndicatorColor
         )
     } else {
         ColorScheme()
     }
-    
+
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(colorScheme.secondary)
-    
-    CompositionLocalProvider(LocalColorScheme provides colorScheme, content = content)
+
+    CompositionLocalProvider(LocalColorScheme provides colorScheme) {
+        Box(modifier = Modifier.background(colorScheme.primary)) { content() }
+    }
 }

@@ -2,7 +2,9 @@ package com.ilya.friendsview.screen
 
 
 sealed interface FriendsScreenEvent {
+    object PlaceholderAvatarClick : FriendsScreenEvent
+    object SnackbarConsumed : FriendsScreenEvent
     object Start : FriendsScreenEvent
-    object Retry : FriendsScreenEvent
-    object Refresh : FriendsScreenEvent
+    data class UnknownError(val error: Throwable) : FriendsScreenEvent
+    data class BackPress(val onConfirm: () -> Unit) : FriendsScreenEvent
 }

@@ -12,11 +12,14 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object JsonAdapterModule {
+
     @Provides
-    fun provideAccessTokenJsonAdapter(): JsonAdapter<AccessToken> {
+    fun provideJsonAdapter(): JsonAdapter<AccessToken> {
         val moshi = Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build()
+
         return moshi.adapter(AccessToken::class.java)
     }
+
 }

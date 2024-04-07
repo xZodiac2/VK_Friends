@@ -6,4 +6,8 @@
     <string name="retry">Try again</string>
     <string name="search">Search</string>
     <string name="view_profile">View profile</string>
+    <string name="screen_name">Friends</string>
+    <string name="app_exit_warning">Are you sure you want to quit?</string>
+    <string name="data_not_loaded_yet">The data is not loaded yet. Please wait</string>
+    <string name="unknown_error">Unknown error: %s</string>
 </resources>

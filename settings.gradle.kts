@@ -1,5 +1,9 @@
 import java.net.URI
 
+
+include(":feature:search")
+
+
 include(":feature:profileView")
 
 
@@ -32,7 +36,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = URI("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-andorid/") }
+        maven {
+            url = URI("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-andorid/")
+        }
     }
 }
 

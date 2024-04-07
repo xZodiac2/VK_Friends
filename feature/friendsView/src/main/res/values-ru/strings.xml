@@ -6,4 +6,8 @@
     <string name="retry">Попробовать снова</string>
     <string name="search">Поиск</string>
     <string name="view_profile">Показать профиль</string>
+    <string name="screen_name">Друзья</string>
+    <string name="app_exit_warning">Вы уверены что хотите выйти?</string>
+    <string name="data_not_loaded_yet">Данные ещё не загрузились. Пожалуйста подождите</string>
+    <string name="unknown_error">Неизвестная ошибка: %s</string>
 </resources>

@@ -11,12 +11,12 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object SharedPreferencesModule {
-    
+
     @Provides
     fun provideSharedPrefs(@ApplicationContext context: Context): SharedPreferences {
         return context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
     }
-    
-    private const val SHARED_PREFERENCES_NAME = "vkFriendsAppPrefs"
-    
+
+    private const val SHARED_PREFERENCES_NAME = "com.ilya.vkfriends.accessToken"
+
 }

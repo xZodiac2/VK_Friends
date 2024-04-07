@@ -12,54 +12,61 @@ data class ColorScheme(
     val secondaryTextColor: Color = LightColorScheme.secondaryTextColor,
     val containerTextFieldColor: Color = LightColorScheme.containerTextFieldColor,
     val valueTextFieldColor: Color = LightColorScheme.valueTextFieldColor,
-    val trailingIconTextFieldColor: Color = LightColorScheme.trailingIconTextFieldColor,
-    val leadingIconTextFieldColor: Color = LightColorScheme.leadingIconTextFieldColor,
     val focusedIndicatorTextFieldColor: Color = LightColorScheme.focusedIndicatorTextFieldColor,
     val unfocusedIndicatorTextFieldColor: Color = LightColorScheme.unfocusedIndicatorTextFieldColor,
     val placeholderTextFieldColor: Color = LightColorScheme.placeholderTextFieldColor,
     val buttonColor: Color = LightColorScheme.buttonColor,
+    val selectedIconColor: Color = LightColorScheme.primaryIconColor,
+    val unselectedIconColor: Color = LightColorScheme.secondaryIconColor,
+    val bottomNavSelectedIndicatorColor: Color = LightColorScheme.bottomNavSelectedIndicatorColor
 )
 
 object LightColorScheme {
     val primary = Color.White
-    val secondary = Color(224, 224, 224, 255)
-    
+    val secondary = Color(245, 245, 245, 255)
+
     val cardContainerColor = Color.White
     val background = Color.White
-    
+
     val primaryTextColor = Color.Black
     val secondaryTextColor = Color(126, 126, 126)
-    
+
     val containerTextFieldColor = Color.White
     val valueTextFieldColor = Color.Black
-    val trailingIconTextFieldColor = Color.Black
-    val leadingIconTextFieldColor = Color.Black
     val focusedIndicatorTextFieldColor = Color.Black
     val unfocusedIndicatorTextFieldColor = Color.Gray
     val placeholderTextFieldColor = Color.Black
-    
+
     val buttonColor = Color(31, 127, 245, 255)
+
+    val primaryIconColor = Color.Black
+    val secondaryIconColor = Color(61, 61, 61, 255)
+
+    val bottomNavSelectedIndicatorColor = Color(235, 235, 235, 255)
 }
 
 object DarkColorScheme {
     val primary = Color(48, 48, 48, 255)
     val secondary = Color(66, 66, 66, 255)
-    
+
     val cardContainerColor = Color(58, 58, 58, 255)
     val background = Color(48, 48, 48, 255)
-    
+
     val primaryTextColor = Color.White
     val secondaryTextColor = Color(170, 170, 170, 255)
-    
+
     val containerTextFieldColor = cardContainerColor
     val valueTextFieldColor = Color.White
-    val trailingIconTextFieldColor = Color.White
-    val leadingIconTextFieldColor = Color.White
     val focusedIndicatorTextFieldColor = Color.White
     val unfocusedIndicatorTextFieldColor = Color.DarkGray
     val placeholderTextFieldColor = Color.LightGray
-    
+
     val buttonColor = Color(77, 157, 255, 255)
+
+    val selectedIconColor = Color.White
+    val unselectedIconColor = Color(226, 226, 226, 255)
+
+    val bottomNavSelectedIndicatorColor = Color(70, 70, 70, 255)
 }
 
 

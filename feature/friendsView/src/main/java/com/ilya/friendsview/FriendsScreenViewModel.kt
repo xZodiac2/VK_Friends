@@ -54,7 +54,6 @@ class FriendsScreenViewModel @Inject constructor(
             FriendsScreenEvent.PlaceholderAvatarClick -> onPlaceholderAvatarClick()
             FriendsScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
             FriendsScreenEvent.Start -> onStart()
-            is FriendsScreenEvent.UnknownError -> onUnknownError(event.error)
             is FriendsScreenEvent.BackPress -> onBackPress(event.onConfirm)
         }
     }
@@ -62,15 +61,6 @@ class FriendsScreenViewModel @Inject constructor(
     private fun onStart() {
         val accessTokenValue = accessTokenManager.accessToken ?: return
         _accountOwnerState.value = accessTokenValue.userData.toUser(accessTokenValue)
-    }
-
-    private fun onUnknownError(error: Throwable) {
-        _snackbarState.value = SnackbarState.Triggered(
-            StringResource.Resource(
-                id = R.string.unknown_error,
-                arguments = listOf(error.message ?: "")
-            )
-        )
     }
 
     private fun onSnackbarConsumed() {

@@ -2,6 +2,9 @@ package com.ilya.core.appCommon
 
 import android.content.SharedPreferences
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vk.id.AccessToken
 import javax.inject.Inject
 

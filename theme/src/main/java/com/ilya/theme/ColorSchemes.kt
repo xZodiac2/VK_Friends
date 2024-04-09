@@ -47,7 +47,7 @@ object LightColorScheme {
 
 object DarkColorScheme {
     val primary = Color(48, 48, 48, 255)
-    val secondary = Color(66, 66, 66, 255)
+    val secondary = Color(52, 52, 52, 255)
 
     val cardContainerColor = Color(58, 58, 58, 255)
     val background = Color(48, 48, 48, 255)

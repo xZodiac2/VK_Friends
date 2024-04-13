@@ -21,12 +21,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.search.R
 import com.ilya.theme.LocalColorScheme
 
 @Composable
-fun Search(
+fun SearchBar(
     onSearch: (String) -> Unit,
     heightOffset: Float,
     heightOffsetLimit: Float,
@@ -68,7 +70,7 @@ fun Search(
                 onSearch(inputStateValue)
                 keyboardController?.hide()
             }),
-            placeholder = { Text(text = "Search") },
+            placeholder = { Text(text = stringResource(id = R.string.search)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = LocalColorScheme.current.valueTextFieldColor,
                 unfocusedTextColor = LocalColorScheme.current.valueTextFieldColor,

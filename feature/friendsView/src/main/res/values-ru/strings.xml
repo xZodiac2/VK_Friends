@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_no_internet">Не получается получить список друзей. Проверьте подключение к интернету и попробуйте снова</string>
+    <string name="error_no_able_to_get_data">Не получается получить список друзей. Проверьте подключение к интернету и попробуйте снова</string>
     <string name="error_no_access_token">Что-то пошло не так. Авторизируйтесь снова</string>
     <string name="ok">Ок</string>
     <string name="retry">Попробовать снова</string>
-    <string name="search">Поиск</string>
     <string name="view_profile">Показать профиль</string>
-    <string name="screen_name">Друзья</string>
+    <string name="friends_screen_name">Друзья</string>
     <string name="app_exit_warning">Вы уверены что хотите выйти?</string>
     <string name="data_not_loaded_yet">Данные ещё не загрузились. Пожалуйста подождите</string>
-    <string name="unknown_error">Неизвестная ошибка: %s</string>
+    <string name="error_unknown">Неизвестная ошибка: %s</string>
 </resources>

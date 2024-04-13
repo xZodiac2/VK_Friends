@@ -17,7 +17,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
-import com.ilya.core.basicComposables.UserCard
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.friendsview.R
@@ -39,10 +38,7 @@ fun FriendsList(
             val user = pagingState[index]
             if (user != null) {
                 UserCard(
-                    id = user.id,
-                    firstName = user.firstName,
-                    lastName = user.lastName,
-                    photoUrl = user.photoUrl,
+                    user = user,
                     onCardClick = onProfileViewButtonClick
                 )
             }
@@ -75,7 +71,7 @@ private fun OnAppendError(
     when (error) {
         is ErrorType.NoInternet -> OnError(
             modifier = Modifier.height(140.dp),
-            message = StringResource.Resource(R.string.error_no_internet),
+            message = StringResource.Resource(R.string.error_no_able_to_get_data),
             buttonText = StringResource.Resource(R.string.retry),
             onTryAgainClick = onAppendRetry
         )
@@ -84,7 +80,7 @@ private fun OnAppendError(
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.height(140.dp),
             message = StringResource.Resource(
-                id = R.string.unknown_error,
+                id = R.string.error_unknown,
                 arguments = listOf(error.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),

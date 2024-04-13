@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="no_internet_error">Не удается загрузить список друзей. Проверьте подключение к интернету и попробуйте снова.</string>
-    <string name="no_access_token_error">Для продолжения необходимо авторизоваться</string>
+    <string name="error_no_able_to_load_data">Не удается загрузить список друзей. Проверьте подключение к интернету и попробуйте снова.</string>
+    <string name="error_no_access_token_error">Для продолжения необходимо авторизоваться</string>
     <string name="retry">Попробовать снова</string>
     <string name="authorize">Авторизироваться</string>
     <string name="search">Поиск</string>
     <string name="search_screen_name">Поиск друзей</string>
     <string name="data_not_loaded_yet">Данные ещё не загрузились. Пожалуйста подождите</string>
-    <string name="unknown_error">Неизвестная ошибка: %s</string>
+    <string name="error_unknown">Неизвестная ошибка: %s</string>
 </resources>

@@ -13,9 +13,13 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -50,13 +54,14 @@ class MainActivity : ComponentActivity() {
         Log.d("token", accessTokenManager.accessToken?.token ?: "no token")
         setContent {
             VkFriendsAppTheme {
+                val mainViewModel = hiltViewModel<MainViewModel>()
+                val mainState by mainViewModel.mainState.collectAsState()
+
                 val navController = rememberNavController()
 
-                val accessTokenListener = AccessTokenOperationsListener { token ->
-                    token ?: navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
+                val accessTokenObserver = remember {
+                    AccessTokenOperationsListener { token ->
+                        Log.d("token", token?.token ?: "")
                     }
                 }
 
@@ -67,11 +72,23 @@ class MainActivity : ComponentActivity() {
                     Navigation(navController = navController, paddingValues = paddingValues)
                 }
 
-                DisposableEffect(key1 = lifecycle) {
-                    accessTokenManager.addAccessTokenListener(accessTokenListener)
-                    onDispose {
-                        accessTokenManager.removeAccessTokenListener(accessTokenListener)
+                if (mainState == MainState.NotAuthorized) {
+                    navController.navigate(Destination.AuthScreen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
                     }
+                }
+
+                DisposableEffect(key1 = lifecycle) {
+                    accessTokenManager.addObserver(accessTokenObserver)
+                    onDispose {
+                        accessTokenManager.removeObserver(accessTokenObserver)
+                    }
+                }
+
+                LaunchedEffect(key1 = Unit) {
+                    mainViewModel.handleEvent(MainEvent.Start)
                 }
             }
         }

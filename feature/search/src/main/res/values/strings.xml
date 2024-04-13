@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="no_internet_error">There is no able to load friends list. Check your internet connectrion and try again</string>
-    <string name="no_access_token_error">To continue, you need to authorize</string>
+    <string name="error_no_able_to_load_data">There is no able to load friends list. Check your internet connectrion and try again</string>
+    <string name="error_no_access_token_error">To continue, you need to authorize</string>
     <string name="retry">Try again</string>
     <string name="authorize">Authorize</string>
     <string name="search">Search</string>
     <string name="search_screen_name">Search friends</string>
     <string name="data_not_loaded_yet">The data is not loaded yet. Please wait</string>
-    <string name="unknown_error">Unknown error: %s</string>
+    <string name="error_unknown">Unknown error: %s</string>
 </resources>

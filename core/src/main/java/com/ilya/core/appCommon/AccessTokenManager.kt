@@ -2,26 +2,33 @@ package com.ilya.core.appCommon
 
 import android.content.SharedPreferences
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vk.id.AccessToken
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.synchronized
 import javax.inject.Inject
 
+@OptIn(InternalCoroutinesApi::class)
 class AccessTokenManager @Inject constructor(
     private val shPrefs: SharedPreferences,
     private val jsonAdapter: JsonAdapter<AccessToken>,
-) {
+) : BaseObservable<AccessTokenOperationsListener>() {
 
-    private val accessTokenOperationsListeners = mutableListOf<AccessTokenOperationsListener>()
-
-    var accessToken: AccessToken? = getAccessTokenValue(notify = true)
-        get() = getAccessTokenValue(notify = true)
+    var accessToken: AccessToken? = getAccessTokenValueNotifying()
+        get() = getAccessTokenValueNotifying()
         private set
 
-    private fun getAccessTokenValue(notify: Boolean): AccessToken? {
+    private fun getAccessTokenValueNotifying(): AccessToken? {
+        notifyObservers()
+        return getToken()
+    }
+
+    private fun getAccessTokenValue(): AccessToken? {
+        return getToken()
+    }
+
+    private fun getToken(): AccessToken? {
         val accessTokenJsonString = shPrefs.getString(ACCESS_TOKEN_KEY, "") ?: ""
-        if (notify) notifyListeners()
+
         return when {
             accessTokenJsonString.isEmpty() -> null
             else -> jsonAdapter.fromJson(accessTokenJsonString)
@@ -36,7 +43,7 @@ class AccessTokenManager @Inject constructor(
             apply()
         }
 
-        notifyListeners()
+        notifyObservers()
     }
 
     fun clearToken() {
@@ -44,21 +51,14 @@ class AccessTokenManager @Inject constructor(
             remove(ACCESS_TOKEN_KEY)
             apply()
         }
-        notifyListeners()
+        notifyObservers()
     }
 
-    private fun notifyListeners() {
-        accessTokenOperationsListeners.forEach { listener ->
-            listener.onOperation(getAccessTokenValue(notify = false))
+    override fun notifyObservers() {
+        val accessToken = getAccessTokenValue()
+        synchronized(mutex) {
+            observers.forEach { it.onOperation(accessToken) }
         }
-    }
-
-    fun addAccessTokenListener(accessTokenOperationsListener: AccessTokenOperationsListener) {
-        accessTokenOperationsListeners += accessTokenOperationsListener
-    }
-
-    fun removeAccessTokenListener(accessTokenOperationsListener: AccessTokenOperationsListener) {
-        accessTokenOperationsListeners -= accessTokenOperationsListener
     }
 
     companion object {
@@ -66,3 +66,4 @@ class AccessTokenManager @Inject constructor(
     }
 
 }
+

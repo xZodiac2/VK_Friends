@@ -12,13 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.example.search.R
 import com.example.search.screen.ErrorType
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
-import com.ilya.core.basicComposables.UserCard
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 
@@ -28,19 +25,12 @@ fun LazyGridScope.usersList(
     onEmptyAccessToken: () -> Unit,
     onTryAgainClick: () -> Unit
 ) {
-    items(
-        pagingItems.itemCount,
-        contentType = pagingItems.itemContentType(),
-        key = pagingItems.itemKey()
-    ) { index ->
+    items(count = pagingItems.itemCount) { index ->
         val user = pagingItems[index]
         if (user != null) {
             UserCard(
                 onCardClick = onCardClick,
-                id = user.id,
-                photoUrl = user.photoUrl,
-                firstName = user.firstName,
-                lastName = user.lastName
+                user = user
             )
         }
     }
@@ -82,7 +72,7 @@ private fun OnAppendError(
         ErrorType.NoInternet -> OnError(
             modifier = Modifier.height(140.dp),
             onTryAgainClick = onTryAgainClick,
-            message = StringResource.Resource(R.string.no_internet_error),
+            message = StringResource.Resource(R.string.error_no_able_to_load_data),
             buttonText = StringResource.Resource(R.string.retry)
         )
 
@@ -90,7 +80,7 @@ private fun OnAppendError(
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.height(140.dp),
             message = StringResource.Resource(
-                id = R.string.unknown_error,
+                id = R.string.error_unknown,
                 arguments = listOf(error.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),

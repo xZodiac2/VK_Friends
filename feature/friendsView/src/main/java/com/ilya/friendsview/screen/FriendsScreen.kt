@@ -117,7 +117,7 @@ private fun TopBar(
     TopAppBar(
         title = {
             Text(
-                text = stringResource(id = R.string.screen_name),
+                text = stringResource(id = R.string.friends_screen_name),
                 color = LocalColorScheme.current.primaryTextColor,
                 fontSize = LocalTypography.current.large,
                 fontWeight = FontWeight.W500,
@@ -242,7 +242,7 @@ private fun OnErrorState(
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.fillMaxHeight(),
             message = StringResource.Resource(
-                id = R.string.unknown_error,
+                id = R.string.error_unknown,
                 arguments = listOf(error.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),

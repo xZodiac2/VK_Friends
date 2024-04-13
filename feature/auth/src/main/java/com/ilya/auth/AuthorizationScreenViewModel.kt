@@ -14,29 +14,21 @@ import javax.inject.Inject
 class AuthorizationScreenViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
-    
-    private val _authorizationScreenState = MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.Idle)
+
+    private val _authorizationScreenState =
+        MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.NotAuthorized)
     val authorizationScreenState = _authorizationScreenState.asStateFlow()
-    
+
     fun handleEvent(event: AuthorizationScreenEvent) {
         when (event) {
-            AuthorizationScreenEvent.Start -> onStart()
             is AuthorizationScreenEvent.Authorize -> onAuthorize(event.accessToken)
         }
     }
-    
-    private fun onStart() {
-        if (accessTokenManager.accessToken == null) {
-            _authorizationScreenState.value = AuthorizationScreenState.NotAuthorized
-        } else {
-            _authorizationScreenState.value = AuthorizationScreenState.Authorized
-        }
-    }
-    
+
     private fun onAuthorize(token: AccessToken) {
         accessTokenManager.saveAccessToken(token)
         _authorizationScreenState.value = AuthorizationScreenState.Authorized
     }
-    
+
 }
 

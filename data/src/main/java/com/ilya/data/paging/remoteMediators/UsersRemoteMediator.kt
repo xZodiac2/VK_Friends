@@ -6,12 +6,14 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.BaseFactory
+import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.UserEntity
 import com.ilya.data.network.RemoteRepository
 import com.ilya.data.network.retrofit.UserDto
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toUserEntity
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
@@ -34,7 +36,6 @@ class UsersRemoteMediator private constructor(
                 LoadType.APPEND -> state.lastItemOrNull()?.databaseId ?: 0
             }
 
-            @Suppress("")
             val loadSize = when (loadType) {
                 LoadType.REFRESH -> state.config.initialLoadSize
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -62,8 +63,13 @@ class UsersRemoteMediator private constructor(
 
             return MediatorResult.Success(endOfPaginationReached = users.isEmpty() && query.isNotEmpty())
         } catch (e: UnknownHostException) {
+            logThrowable(e)
+            return MediatorResult.Error(PaginationError.NoInternet)
+        } catch (e: SocketTimeoutException) {
+            logThrowable(e)
             return MediatorResult.Error(PaginationError.NoInternet)
         } catch (e: Exception) {
+            logThrowable(e)
             return MediatorResult.Error(e)
         }
     }

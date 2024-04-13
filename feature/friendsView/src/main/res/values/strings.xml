@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_no_internet">Have not able to get friends list. Check your internet connection and try again</string>
+    <string name="error_no_able_to_get_data">Have not able to get friends list. Check your internet connection and try again</string>
     <string name="error_no_access_token">Something went wrong. Authorize again</string>
     <string name="ok">OK</string>
     <string name="retry">Try again</string>
-    <string name="search">Search</string>
     <string name="view_profile">View profile</string>
-    <string name="screen_name">Friends</string>
+    <string name="friends_screen_name">Friends</string>
     <string name="app_exit_warning">Are you sure you want to quit?</string>
     <string name="data_not_loaded_yet">The data is not loaded yet. Please wait</string>
-    <string name="unknown_error">Unknown error: %s</string>
+    <string name="error_unknown">Unknown error: %s</string>
 </resources>

@@ -47,7 +47,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.search.R
 import com.example.search.SearchViewModel
-import com.example.search.screen.elements.Search
+import com.example.search.screen.elements.SearchBar
 import com.example.search.screen.elements.usersList
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
@@ -82,7 +82,7 @@ fun SearchScreen(
                     onPlaceholderAvatarClick = { viewModel.handleEvent(SearchScreenEvent.PlugAvatarClick) },
                     scrollBehavior = scrollBehavior
                 )
-                Search(
+                SearchBar(
                     onSearch = { viewModel.handleEvent(SearchScreenEvent.Search(it)) },
                     heightOffset = scrollBehavior.state.heightOffset,
                     heightOffsetLimit = scrollBehavior.state.heightOffsetLimit
@@ -232,7 +232,7 @@ private fun OnErrorState(
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.fillMaxHeight(),
             message = StringResource.Resource(
-                id = R.string.unknown_error,
+                id = R.string.error_unknown,
                 arguments = listOf(errorType.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),

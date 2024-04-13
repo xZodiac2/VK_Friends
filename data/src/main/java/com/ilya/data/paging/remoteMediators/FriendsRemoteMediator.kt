@@ -1,16 +1,19 @@
 package com.ilya.data.paging.remoteMediators
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.BaseFactory
+import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.FriendEntity
 import com.ilya.data.network.RemoteRepository
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toFriendEntity
+import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
@@ -60,10 +63,17 @@ class FriendsRemoteMediator private constructor(
             return MediatorResult.Success(endOfPaginationReached = friends.isEmpty())
 
         } catch (e: UnknownHostException) {
+            logThrowable(e)
+            return MediatorResult.Error(PaginationError.NoInternet)
+        } catch (e: SocketTimeoutException) {
+            Log.d("throwable", "Yeeeeeah")
+            logThrowable(e)
             return MediatorResult.Error(PaginationError.NoInternet)
         } catch (e: Exception) {
+            logThrowable(e)
             return MediatorResult.Error(e)
         }
+
     }
 
     class Factory @Inject internal constructor(

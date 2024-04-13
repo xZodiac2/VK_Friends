@@ -101,10 +101,6 @@ class UsersRemoteMediator private constructor(
         )
     }
 
-    companion object {
-        private val FIELDS = listOf("photo_200_orig")
-    }
-
     class Factory @Inject constructor(
         private val remoteRepo: RemoteRepository,
         private val localRepo: LocalRepository<UserEntity>,
@@ -119,5 +115,10 @@ class UsersRemoteMediator private constructor(
             )
         }
     }
+
+    companion object {
+        private val FIELDS = listOf("photo_200_orig")
+    }
+
 }
 

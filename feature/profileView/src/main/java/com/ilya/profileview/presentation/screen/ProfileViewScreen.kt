@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.ilya.theme.LocalColorScheme
 
+// TODO: Finish this feature
 @Composable
 fun ProfileViewScreen(
     userId: String,

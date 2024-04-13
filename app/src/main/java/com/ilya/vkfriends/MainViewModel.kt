@@ -18,7 +18,12 @@ class MainViewModel @Inject constructor(
     fun handleEvent(mainEvent: MainEvent) {
         when (mainEvent) {
             MainEvent.Start -> onStart()
+            MainEvent.EmptyAccessToken -> onEmptyAccessToken()
         }
+    }
+
+    private fun onEmptyAccessToken() {
+        _mainState.value = MainState.NotAuthorized
     }
 
     private fun onStart() {

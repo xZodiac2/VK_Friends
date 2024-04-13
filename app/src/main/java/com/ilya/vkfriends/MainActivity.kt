@@ -69,7 +69,11 @@ class MainActivity : ComponentActivity() {
                     bottomBar = { BottomBar(navController = navController) },
                     containerColor = LocalColorScheme.current.primary
                 ) { paddingValues ->
-                    Navigation(navController = navController, paddingValues = paddingValues)
+                    Navigation(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                        viewModel = mainViewModel
+                    )
                 }
 
                 if (mainState == MainState.NotAuthorized) {
@@ -131,7 +135,11 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun Navigation(navController: NavHostController, paddingValues: PaddingValues) {
+    private fun Navigation(
+        navController: NavHostController,
+        paddingValues: PaddingValues,
+        viewModel: MainViewModel
+    ) {
         NavHost(
             navController = navController,
             startDestination = Destination.FriendsViewScreen.route,
@@ -156,11 +164,7 @@ class MainActivity : ComponentActivity() {
                 exitTransition = Destination.FriendsViewScreen.transition?.exitTransition
             ) {
                 FriendsScreen(onEmptyAccessToken = {
-                    navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(Destination.FriendsViewScreen.route) {
-                            inclusive = true
-                        }
-                    }
+                    viewModel.handleEvent(MainEvent.EmptyAccessToken)
                 }, onProfileViewButtonClick = { userId ->
                     navController.navigate(
                         Destination.ProfileViewScreen.withArguments(userId.toString())
@@ -188,11 +192,7 @@ class MainActivity : ComponentActivity() {
                         Destination.ProfileViewScreen.withArguments(it.toString())
                     )
                 }, onEmptyAccessToken = {
-                    navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(Destination.FriendsViewScreen.route) {
-                            inclusive = true
-                        }
-                    }
+                    viewModel.handleEvent(MainEvent.EmptyAccessToken)
                 })
             }
         }

@@ -76,7 +76,7 @@ class FriendsRemoteMediator private constructor(
 
     }
 
-    class Factory @Inject internal constructor(
+    class Factory @Inject constructor(
         private val localRepository: LocalRepository<FriendEntity>,
         private val remoteRepository: RemoteRepository,
         private val accessTokenManager: AccessTokenManager

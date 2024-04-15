@@ -12,14 +12,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -33,7 +28,6 @@ import androidx.navigation.navArgument
 import com.example.search.screen.SearchScreen
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
-import com.ilya.core.appCommon.AccessTokenOperationsListener
 import com.ilya.friendsview.screen.FriendsScreen
 import com.ilya.profileview.presentation.screen.ProfileViewScreen
 import com.ilya.theme.LocalColorScheme
@@ -54,16 +48,7 @@ class MainActivity : ComponentActivity() {
         Log.d("token", accessTokenManager.accessToken?.token ?: "no token")
         setContent {
             VkFriendsAppTheme {
-                val mainViewModel = hiltViewModel<MainViewModel>()
-                val mainState by mainViewModel.mainState.collectAsState()
-
                 val navController = rememberNavController()
-
-                val accessTokenObserver = remember {
-                    AccessTokenOperationsListener { token ->
-                        Log.d("token", token?.token ?: "")
-                    }
-                }
 
                 Scaffold(
                     bottomBar = { BottomBar(navController = navController) },
@@ -71,26 +56,8 @@ class MainActivity : ComponentActivity() {
                 ) { paddingValues ->
                     Navigation(
                         navController = navController,
-                        paddingValues = paddingValues,
-                        viewModel = mainViewModel
+                        paddingValues = paddingValues
                     )
-                }
-
-                DisposableEffect(key1 = lifecycle) {
-                    accessTokenManager.addObserver(accessTokenObserver)
-                    onDispose {
-                        accessTokenManager.removeObserver(accessTokenObserver)
-                    }
-                }
-
-                LaunchedEffect(key1 = Unit) {
-                    if (mainState == MainState.NotAuthorized) {
-                        navController.navigate(Destination.AuthScreen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    }
                 }
 
             }
@@ -137,11 +104,14 @@ class MainActivity : ComponentActivity() {
     private fun Navigation(
         navController: NavHostController,
         paddingValues: PaddingValues,
-        viewModel: MainViewModel
     ) {
         NavHost(
             navController = navController,
-            startDestination = Destination.FriendsViewScreen.route,
+            startDestination = if (accessTokenManager.accessToken == null) {
+                Destination.AuthScreen.route
+            } else {
+                Destination.FriendsViewScreen.route
+            },
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(
@@ -163,7 +133,11 @@ class MainActivity : ComponentActivity() {
                 exitTransition = Destination.FriendsViewScreen.transition?.exitTransition
             ) {
                 FriendsScreen(onEmptyAccessToken = {
-                    viewModel.handleEvent(MainEvent.EmptyAccessToken)
+                    navController.navigate(Destination.AuthScreen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
                 }, onProfileViewButtonClick = { userId ->
                     navController.navigate(
                         Destination.ProfileViewScreen.withArguments(userId.toString())
@@ -191,7 +165,11 @@ class MainActivity : ComponentActivity() {
                         Destination.ProfileViewScreen.withArguments(it.toString())
                     )
                 }, onEmptyAccessToken = {
-                    viewModel.handleEvent(MainEvent.EmptyAccessToken)
+                    navController.navigate(Destination.AuthScreen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
+                    }
                 })
             }
         }

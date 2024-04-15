@@ -5,45 +5,36 @@ import com.squareup.moshi.JsonAdapter
 import com.vk.id.AccessToken
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.synchronized
+import okio.IOException
 import javax.inject.Inject
 
 @OptIn(InternalCoroutinesApi::class)
 class AccessTokenManager @Inject constructor(
     private val shPrefs: SharedPreferences,
     private val jsonAdapter: JsonAdapter<AccessToken>,
-) : BaseObservable<AccessTokenOperationsListener>() {
+) : BaseObservable<AccessTokenListener>() {
 
-    var accessToken: AccessToken? = getAccessTokenValueNotifying()
-        get() = getAccessTokenValueNotifying()
+    var accessToken: AccessToken? = getToken()
+        get() = getToken()
         private set
-
-    private fun getAccessTokenValueNotifying(): AccessToken? {
-        notifyObservers()
-        return getToken()
-    }
-
-    private fun getAccessTokenValue(): AccessToken? {
-        return getToken()
-    }
 
     private fun getToken(): AccessToken? {
         val accessTokenJsonString = shPrefs.getString(ACCESS_TOKEN_KEY, "") ?: ""
 
-        return when {
-            accessTokenJsonString.isEmpty() -> null
-            else -> jsonAdapter.fromJson(accessTokenJsonString)
+        return try {
+            when {
+                accessTokenJsonString.isEmpty() -> null
+                else -> jsonAdapter.fromJson(accessTokenJsonString)
+            }
+        } catch (e: IOException) {
+            null
         }
     }
 
     fun saveAccessToken(accessToken: AccessToken) {
-        val jsonString = jsonAdapter.toJson(accessToken)
-
-        with(shPrefs.edit()) {
-            putString(ACCESS_TOKEN_KEY, jsonString)
-            apply()
-        }
-
-        notifyObservers()
+        this.accessToken = accessToken
+        notifyListeners()
+        saveTokenInPrefs(accessToken)
     }
 
     fun clearToken() {
@@ -51,13 +42,23 @@ class AccessTokenManager @Inject constructor(
             remove(ACCESS_TOKEN_KEY)
             apply()
         }
-        notifyObservers()
+        notifyListeners()
     }
 
-    override fun notifyObservers() {
-        val accessToken = getAccessTokenValue()
+    private fun saveTokenInPrefs(accessToken: AccessToken) {
+        val jsonString = jsonAdapter.toJson(accessToken)
+
+        with(shPrefs.edit()) {
+            putString(ACCESS_TOKEN_KEY, jsonString)
+            apply()
+        }
+    }
+
+
+    override fun notifyListeners() {
+        val accessToken = getToken()
         synchronized(mutex) {
-            observers.forEach { it.onOperation(accessToken) }
+            listeners.forEach { it.onChange(accessToken) }
         }
     }
 

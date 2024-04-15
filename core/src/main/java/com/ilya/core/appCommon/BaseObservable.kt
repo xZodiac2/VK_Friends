@@ -6,21 +6,21 @@ import kotlinx.coroutines.internal.synchronized
 @OptIn(InternalCoroutinesApi::class)
 abstract class BaseObservable<T> {
 
-    protected val observers = mutableListOf<T>()
+    protected val listeners = mutableListOf<T>()
     protected val mutex = Any()
 
-    fun addObserver(observer: T) {
+    fun addListener(observer: T) {
         synchronized(mutex) {
-            observers += observer
+            listeners += observer
         }
     }
 
-    fun removeObserver(observer: T) {
+    fun removeListener(listener: T) {
         synchronized(mutex) {
-            observers -= observer
+            listeners -= listener
         }
     }
 
-    protected abstract fun notifyObservers()
+    protected abstract fun notifyListeners()
 
 }

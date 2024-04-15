@@ -185,7 +185,7 @@ private fun Content(
             LoadState.Loading -> item(span = { GridItemSpan(2) }) { OnLoadingState() }
             is LoadState.Error -> {
                 /**
-                 * If refreshLoadState is [LoadState.NotLoading], [LazyPagingItems] will be
+                 * If [LoadState.Error] is [PaginationError.NoInternet], [LazyPagingItems] will be
                  * receive from local database
                  */
                 if (refreshLoadState.error == PaginationError.NoInternet) {

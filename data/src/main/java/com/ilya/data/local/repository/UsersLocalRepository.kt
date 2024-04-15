@@ -29,7 +29,7 @@ internal class UsersLocalRepository @Inject constructor(
     }
 
     override suspend fun withTransaction(block: suspend () -> Unit) {
-        database.withTransaction { block() }
+        database.withTransaction(block)
     }
 
 }

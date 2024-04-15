@@ -76,14 +76,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                if (mainState == MainState.NotAuthorized) {
-                    navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
-                        }
-                    }
-                }
-
                 DisposableEffect(key1 = lifecycle) {
                     accessTokenManager.addObserver(accessTokenObserver)
                     onDispose {
@@ -92,8 +84,15 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(key1 = Unit) {
-                    mainViewModel.handleEvent(MainEvent.Start)
+                    if (mainState == MainState.NotAuthorized) {
+                        navController.navigate(Destination.AuthScreen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 }
+
             }
         }
     }

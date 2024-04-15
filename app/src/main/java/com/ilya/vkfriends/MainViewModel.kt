@@ -9,27 +9,26 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val accessTokenManager: AccessTokenManager
+    accessTokenManager: AccessTokenManager
 ) : ViewModel() {
 
-    private val _mainState = MutableStateFlow<MainState>(MainState.Authorized)
+    private val _mainState = MutableStateFlow<MainState>(MainState.NotAuthorized)
     val mainState = _mainState.asStateFlow()
+
+    init {
+        if (accessTokenManager.accessToken != null) {
+            _mainState.value = MainState.Authorized
+        }
+    }
 
     fun handleEvent(mainEvent: MainEvent) {
         when (mainEvent) {
-            MainEvent.Start -> onStart()
             MainEvent.EmptyAccessToken -> onEmptyAccessToken()
         }
     }
 
     private fun onEmptyAccessToken() {
         _mainState.value = MainState.NotAuthorized
-    }
-
-    private fun onStart() {
-        if (accessTokenManager.accessToken == null) {
-            _mainState.value = MainState.NotAuthorized
-        }
     }
 
 }

@@ -1,24 +1,29 @@
 package com.ilya.core.appCommon
 
 import android.content.SharedPreferences
-import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vk.id.AccessToken
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.synchronized
 import okio.IOException
 import javax.inject.Inject
 
-@OptIn(InternalCoroutinesApi::class)
 class AccessTokenManager @Inject constructor(
-    private val shPrefs: SharedPreferences,
-    private val jsonAdapter: JsonAdapter<AccessToken>,
+    private val shPrefs: SharedPreferences
 ) : BaseObservable<AccessTokenListener>() {
 
-    var accessToken: AccessToken? = getToken()
-        get() = getToken()
-        private set
+    private val jsonAdapter = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+        .adapter(AccessToken::class.java)
 
-    private fun getToken(): AccessToken? {
+    var accessToken: AccessToken? = restoreToken()
+        set(value) {
+            field = value
+            notifyListeners()
+            updateToken(value)
+        }
+
+    private fun restoreToken(): AccessToken? {
         val accessTokenJsonString = shPrefs.getString(ACCESS_TOKEN_KEY, "") ?: ""
 
         return try {
@@ -31,32 +36,22 @@ class AccessTokenManager @Inject constructor(
         }
     }
 
-    fun saveAccessToken(accessToken: AccessToken) {
-        this.accessToken = accessToken
-        notifyListeners()
-        saveTokenInPrefs(accessToken)
-    }
-
-    fun clearToken() {
-        with(shPrefs.edit()) {
-            remove(ACCESS_TOKEN_KEY)
-            apply()
-        }
-        notifyListeners()
-    }
-
-    private fun saveTokenInPrefs(accessToken: AccessToken) {
-        val jsonString = jsonAdapter.toJson(accessToken)
-
-        with(shPrefs.edit()) {
-            putString(ACCESS_TOKEN_KEY, jsonString)
-            apply()
+    private fun updateToken(accessToken: AccessToken?) {
+        if (accessToken == null) {
+            with(shPrefs.edit()) {
+                remove(ACCESS_TOKEN_KEY)
+                apply()
+            }
+        } else {
+            val accessTokenJsonString = jsonAdapter.toJson(accessToken)
+            with(shPrefs.edit()) {
+                putString(ACCESS_TOKEN_KEY, accessTokenJsonString)
+                apply()
+            }
         }
     }
-
 
     override fun notifyListeners() {
-        val accessToken = getToken()
         synchronized(mutex) {
             listeners.forEach { it.onChange(accessToken) }
         }
@@ -67,4 +62,3 @@ class AccessTokenManager @Inject constructor(
     }
 
 }
-

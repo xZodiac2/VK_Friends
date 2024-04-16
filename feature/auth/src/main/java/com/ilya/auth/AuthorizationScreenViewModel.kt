@@ -26,7 +26,7 @@ class AuthorizationScreenViewModel @Inject constructor(
     }
 
     private fun onAuthorize(token: AccessToken) {
-        accessTokenManager.saveAccessToken(token)
+        accessTokenManager.accessToken = token
         _authorizationScreenState.value = AuthorizationScreenState.Authorized
     }
 

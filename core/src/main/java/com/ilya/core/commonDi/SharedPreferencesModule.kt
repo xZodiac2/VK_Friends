@@ -19,6 +19,6 @@ object SharedPreferencesModule {
         return context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
     }
 
-    private const val SHARED_PREFERENCES_NAME = "com.ilya.vkfriends.accessToken"
+    private const val SHARED_PREFERENCES_NAME = "com.ilya.vkfriends.sharedPrefs"
 
 }

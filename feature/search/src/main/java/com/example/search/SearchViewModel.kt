@@ -59,7 +59,10 @@ class SearchViewModel @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     private fun newPager(query: String): Pager<Int, UserEntity> {
         return Pager(
-            config = PagingConfig(pageSize = PAGE_SIZE, initialLoadSize = PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE
+            ),
             remoteMediator = usersRemoteMediatorFactory.newInstance(query),
             pagingSourceFactory = { pagingSourceFactory.newInstance(Unit) }
         )

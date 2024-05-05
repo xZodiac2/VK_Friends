@@ -1,29 +1,5 @@
 import java.net.URI
 
-
-include(":feature:search")
-
-
-include(":feature:profileView")
-
-
-include(":core")
-
-
-include(":feature:auth")
-
-
-include(":feature:friendsView")
-
-
-
-include(":theme")
-
-
-include(":data")
-
-
-
 pluginManagement {
     repositories {
         google()
@@ -43,4 +19,12 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "VK Friends"
+
 include(":app")
+include(":feature:search")
+include(":feature:profileView")
+include(":core")
+include(":feature:auth")
+include(":feature:friendsView")
+include(":theme")
+include(":data")

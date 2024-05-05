@@ -1,6 +1,5 @@
 package com.ilya.data.paging.remoteMediators
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -66,7 +65,6 @@ class FriendsRemoteMediator private constructor(
             logThrowable(e)
             return MediatorResult.Error(PaginationError.NoInternet)
         } catch (e: SocketTimeoutException) {
-            Log.d("throwable", "Yeeeeeah")
             logThrowable(e)
             return MediatorResult.Error(PaginationError.NoInternet)
         } catch (e: Exception) {

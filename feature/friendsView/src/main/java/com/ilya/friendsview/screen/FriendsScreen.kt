@@ -57,7 +57,7 @@ import com.ilya.theme.LocalTypography
 @Composable
 fun FriendsScreen(
     onEmptyAccessToken: () -> Unit,
-    onProfileViewButtonClick: (Long) -> Unit,
+    profileOpenRequest: (Long) -> Unit,
     onExitConfirm: () -> Unit,
     viewModel: FriendsScreenViewModel = hiltViewModel(),
 ) {
@@ -79,7 +79,7 @@ fun FriendsScreen(
         topBar = {
             TopBar(
                 accountOwner = accountOwner,
-                onProfileViewButtonClick = onProfileViewButtonClick,
+                onProfileViewButtonClick = profileOpenRequest,
                 onPlaceholderAvatarClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
                 scrollBehavior = scrollBehavior
             )
@@ -90,7 +90,7 @@ fun FriendsScreen(
             pagingState = pagingState,
             paddingValues = paddingValues,
             onEmptyAccessToken = onEmptyAccessToken,
-            onProfileViewButtonClick = onProfileViewButtonClick,
+            onProfileViewButtonClick = profileOpenRequest,
         )
     }
 
@@ -227,7 +227,7 @@ private fun OnLoadingState() {
             .fillMaxSize()
             .background(LocalColorScheme.current.primary),
         contentAlignment = Alignment.Center
-    ) { CircularProgressIndicator() }
+    ) { CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor) }
 }
 
 
@@ -243,10 +243,10 @@ private fun OnErrorState(
             modifier = Modifier.fillMaxHeight(),
             message = StringResource.Resource(
                 id = R.string.error_unknown,
-                arguments = listOf(error.error.message ?: "")
+                formatArgs = listOf(error.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),
-            onTryAgainClick = onRetry
+            onButtonClick = onRetry
         )
 
         ErrorType.NoInternet -> Unit

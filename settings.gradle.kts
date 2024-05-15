@@ -1,5 +1,9 @@
 import java.net.URI
 
+include(":domain:profileViewDomain")
+
+
+
 pluginManagement {
     repositories {
         google()

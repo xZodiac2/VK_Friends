@@ -9,7 +9,7 @@ sealed interface StringResource {
     data class Str(val value: String) : StringResource
     data class Resource(
         @StringRes val id: Int,
-        val arguments: List<Any> = emptyList()
+        val formatArgs: List<Any> = emptyList()
     ) : StringResource
 }
 
@@ -19,7 +19,7 @@ fun StringResource.resolve(): String {
     return when (this) {
         is StringResource.Str -> value
         is StringResource.Resource -> stringResource(
-            id = id, formatArgs = arguments.toTypedArray()
+            id = id, formatArgs = formatArgs.toTypedArray()
         )
     }
 }

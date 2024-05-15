@@ -9,8 +9,8 @@ import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.UserEntity
-import com.ilya.data.network.RemoteRepository
-import com.ilya.data.network.retrofit.UserDto
+import com.ilya.data.network.UsersRemoteRepository
+import com.ilya.data.network.retrofit.api.UserDto
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toUserEntity
 import java.net.SocketTimeoutException
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class UsersRemoteMediator private constructor(
-    private val remoteRepo: RemoteRepository,
+    private val remoteRepo: UsersRemoteRepository,
     private val localRepo: LocalRepository<UserEntity>,
     private val accessTokenManager: AccessTokenManager,
     private val query: String = ""
@@ -102,7 +102,7 @@ class UsersRemoteMediator private constructor(
     }
 
     class Factory @Inject constructor(
-        private val remoteRepo: RemoteRepository,
+        private val remoteRepo: UsersRemoteRepository,
         private val localRepo: LocalRepository<UserEntity>,
         private val accessTokenManager: AccessTokenManager
     ) : BaseFactory<String, UsersRemoteMediator> {

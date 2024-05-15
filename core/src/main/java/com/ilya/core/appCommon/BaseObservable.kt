@@ -9,9 +9,9 @@ abstract class BaseObservable<T> {
     protected val listeners = mutableListOf<T>()
     protected val mutex = Any()
 
-    fun addListener(observer: T) {
+    fun addListener(listener: T) {
         synchronized(mutex) {
-            listeners += observer
+            listeners += listener
         }
     }
 

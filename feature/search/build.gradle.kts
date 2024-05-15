@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.search"
+    namespace = "com.ilya.search"
     compileSdk = 34
 
     defaultConfig {
@@ -50,9 +50,6 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":core"))
     implementation(project(":theme"))
-
-    // Accompanist
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.44")

@@ -1,6 +1,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -12,6 +14,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDRedirectHost" to "vk.com",
+                "VKIDRedirectScheme" to "vk51848121",
+                "VKIDClientID" to "51848121",
+                "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
+            )
+        )
     }
 
     buildTypes {
@@ -48,7 +59,22 @@ dependencies {
     // Project
     implementation(project(":core"))
     implementation(project(":theme"))
-    implementation(project(":data"))
+    implementation(project(":domain:profileViewDomain"))
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+
+    // Coil Compose
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // Paging
+    implementation("androidx.paging:paging-runtime:3.2.1")
+    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
+
+    // OneTap
+    implementation("com.vk.id:onetap-compose:1.0.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

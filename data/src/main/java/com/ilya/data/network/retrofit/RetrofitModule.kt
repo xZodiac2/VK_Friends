@@ -1,6 +1,9 @@
 package com.ilya.data.network.retrofit
 
 import android.util.Log
+import com.ilya.data.network.retrofit.api.FriendsManageVkApi
+import com.ilya.data.network.retrofit.api.UserDataVkApi
+import com.ilya.data.network.retrofit.api.UsersVkApi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -19,7 +22,7 @@ import retrofit2.create
 internal object RetrofitModule {
 
     @Provides
-    fun provideApi(): VkApi {
+    fun provideRetrofit(): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor { Log.d("okhttptag", it) }
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
@@ -28,7 +31,7 @@ internal object RetrofitModule {
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(VkApi.BASE_URL)
+            .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(
                 MoshiConverterFactory.create(
@@ -39,6 +42,18 @@ internal object RetrofitModule {
             )
             .build()
 
-        return retrofit.create()
+        return retrofit
     }
+
+    @Provides
+    fun provideUsersApi(retrofit: Retrofit): UsersVkApi = retrofit.create()
+
+
+    @Provides
+    fun provideUserDataApi(retrofit: Retrofit): UserDataVkApi = retrofit.create()
+
+
+    @Provides
+    fun provideFriendsManageApi(retrofit: Retrofit): FriendsManageVkApi = retrofit.create()
+
 }

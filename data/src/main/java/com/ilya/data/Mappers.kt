@@ -2,7 +2,7 @@ package com.ilya.data
 
 import com.ilya.data.local.database.FriendEntity
 import com.ilya.data.local.database.UserEntity
-import com.ilya.data.network.retrofit.UserDto
+import com.ilya.data.network.retrofit.api.UserDto
 import com.ilya.data.paging.User
 import com.vk.id.AccessToken
 import com.vk.id.VKIDUser
@@ -34,7 +34,6 @@ fun UserDto.toUserEntity(): UserEntity {
     )
 }
 
-
 fun UserEntity.toUser(): User {
     return User(
         id = id,
@@ -52,3 +51,4 @@ fun FriendEntity.toUser(): User {
         photoUrl = photoUrl
     )
 }
+

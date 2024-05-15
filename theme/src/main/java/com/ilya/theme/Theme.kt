@@ -26,7 +26,9 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
             buttonColor = DarkColorScheme.buttonColor,
             selectedIconColor = DarkColorScheme.selectedIconColor,
             unselectedIconColor = DarkColorScheme.unselectedIconColor,
-            bottomNavSelectedIndicatorColor = DarkColorScheme.bottomNavSelectedIndicatorColor
+            bottomNavSelectedIndicatorColor = DarkColorScheme.bottomNavSelectedIndicatorColor,
+            iconTintColor = DarkColorScheme.iconTintColor,
+            primaryIconTintColor = DarkColorScheme.primaryIconTintColor
         )
     } else {
         ColorScheme()

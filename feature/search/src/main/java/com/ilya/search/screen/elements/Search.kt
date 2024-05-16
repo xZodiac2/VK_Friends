@@ -1,4 +1,4 @@
-package com.example.search.screen.elements
+package com.ilya.search.screen.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.example.search.R
+import com.ilya.search.R
 import com.ilya.theme.LocalColorScheme
 
 @Composable

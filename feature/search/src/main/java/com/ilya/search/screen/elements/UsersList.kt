@@ -1,4 +1,4 @@
-package com.example.search.screen.elements
+package com.ilya.search.screen.elements
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import com.example.search.R
-import com.example.search.screen.ErrorType
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
+import com.ilya.search.R
+import com.ilya.search.screen.ErrorType
 
 fun LazyGridScope.usersList(
     pagingItems: LazyPagingItems<User>,

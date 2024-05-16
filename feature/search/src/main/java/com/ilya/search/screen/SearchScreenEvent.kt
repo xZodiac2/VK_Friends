@@ -1,4 +1,4 @@
-package com.example.search.screen
+package com.ilya.search.screen
 
 sealed interface SearchScreenEvent {
     object PlugAvatarClick : SearchScreenEvent

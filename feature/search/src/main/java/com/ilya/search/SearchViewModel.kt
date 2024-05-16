@@ -1,4 +1,4 @@
-package com.example.search
+package com.ilya.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +7,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.example.search.screen.SearchScreenEvent
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
@@ -16,6 +15,7 @@ import com.ilya.data.paging.User
 import com.ilya.data.paging.pagingSources.UsersPagingSourceFactory
 import com.ilya.data.paging.remoteMediators.UsersRemoteMediator
 import com.ilya.data.toUser
+import com.ilya.search.screen.SearchScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -59,7 +59,10 @@ class SearchViewModel @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     private fun newPager(query: String): Pager<Int, UserEntity> {
         return Pager(
-            config = PagingConfig(pageSize = PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE
+            ),
             remoteMediator = usersRemoteMediatorFactory.newInstance(query),
             pagingSourceFactory = { pagingSourceFactory.newInstance(Unit) }
         )

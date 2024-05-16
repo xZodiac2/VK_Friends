@@ -1,4 +1,4 @@
-package com.example.search.screen
+package com.ilya.search.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,15 +45,15 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.search.R
-import com.example.search.SearchViewModel
-import com.example.search.screen.elements.SearchBar
-import com.example.search.screen.elements.usersList
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
+import com.ilya.search.R
+import com.ilya.search.SearchViewModel
+import com.ilya.search.screen.elements.SearchBar
+import com.ilya.search.screen.elements.usersList
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

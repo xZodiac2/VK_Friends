@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.search"
+    namespace = "com.ilya.search"
     compileSdk = 34
 
     defaultConfig {

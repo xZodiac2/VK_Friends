@@ -25,11 +25,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.search.screen.SearchScreen
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.friendsview.screen.FriendsScreen
 import com.ilya.profileview.presentation.screen.ProfileViewScreen
+import com.ilya.search.screen.SearchScreen
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
 import com.ilya.vkfriends.navigation.Destination

@@ -53,13 +53,11 @@ class UsersRemoteMediator private constructor(
                 searchUsers(accessToken.token, loadSize, offset)
             }
 
-            localRepo.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    localRepo.deleteAllWithPrimaryKeys()
-                }
-                val userEntities = users.map { it.toUserEntity() }
-                localRepo.upsertAll(*userEntities.toTypedArray())
+            if (loadType == LoadType.REFRESH) {
+                localRepo.deleteAllWithPrimaryKeys()
             }
+            val userEntities = users.map { it.toUserEntity() }
+            localRepo.upsertAll(*userEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = users.isEmpty() && query.isNotEmpty())
         } catch (e: UnknownHostException) {

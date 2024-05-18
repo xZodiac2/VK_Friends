@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,7 @@ fun FriendsList(
     pagingState: LazyPagingItems<User>,
     onProfileViewButtonClick: (Long) -> Unit,
     onEmptyAccessToken: () -> Unit,
+    onDataLoaded: () -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -42,6 +44,9 @@ fun FriendsList(
                     user = user,
                     onCardClick = onProfileViewButtonClick
                 )
+                LaunchedEffect(key1 = Unit) {
+                    onDataLoaded()
+                }
             }
         }
         item(span = { GridItemSpan(2) }) {

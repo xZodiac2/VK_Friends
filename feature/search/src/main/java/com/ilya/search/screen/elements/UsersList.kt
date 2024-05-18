@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,8 @@ fun LazyGridScope.usersList(
     pagingItems: LazyPagingItems<User>,
     onCardClick: (Long) -> Unit,
     onEmptyAccessToken: () -> Unit,
-    onTryAgainClick: () -> Unit
+    onTryAgainClick: () -> Unit,
+    onDataLoaded: () -> Unit
 ) {
     items(count = pagingItems.itemCount) { index ->
         val user = pagingItems[index]
@@ -33,6 +35,9 @@ fun LazyGridScope.usersList(
                 onCardClick = onCardClick,
                 user = user
             )
+            LaunchedEffect(key1 = Unit) {
+                onDataLoaded()
+            }
         }
     }
     item(span = { GridItemSpan(2) }) {

@@ -12,6 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -25,7 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +60,7 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun FriendsScreen(
     onEmptyAccessToken: () -> Unit,
@@ -61,17 +68,24 @@ fun FriendsScreen(
     onExitConfirm: () -> Unit,
     viewModel: FriendsScreenViewModel = hiltViewModel(),
 ) {
-    val pagingState = viewModel.pagingFlow.collectAsLazyPagingItems()
+    val pagingItems = viewModel.pagingFlow.collectAsLazyPagingItems()
     val alertDialogState = viewModel.alertDialogState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val accountOwner by viewModel.accountOwnerState.collectAsState()
 
+    var initialDataLoaded by remember { mutableStateOf(false) }
+    val isRefreshing = pagingItems.loadState.refresh == LoadState.Loading && initialDataLoaded
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { pagingItems.refresh() }
+    )
+
     val snackbarHostState = remember { SnackbarHostState() }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     BackHandler { viewModel.handleEvent(FriendsScreenEvent.BackPress(onExitConfirm)) }
     AlertDialogStateHandler(state = alertDialogState.value)
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -87,10 +101,13 @@ fun FriendsScreen(
         containerColor = LocalColorScheme.current.primary
     ) { paddingValues ->
         Content(
-            pagingState = pagingState,
+            pagingState = pagingItems,
             paddingValues = paddingValues,
             onEmptyAccessToken = onEmptyAccessToken,
             onProfileViewButtonClick = profileOpenRequest,
+            pullRefreshState = pullRefreshState,
+            isRefreshing = isRefreshing,
+            onDataLoaded = { initialDataLoaded = true }
         )
     }
 
@@ -160,30 +177,48 @@ private fun TopBar(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
     pagingState: LazyPagingItems<User>,
     paddingValues: PaddingValues,
     onEmptyAccessToken: () -> Unit,
     onProfileViewButtonClick: (Long) -> Unit,
+    pullRefreshState: PullRefreshState,
+    isRefreshing: Boolean,
+    onDataLoaded: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .pullRefresh(pullRefreshState)
     ) {
         when (val refreshState = pagingState.loadState.refresh) {
-            is LoadState.Loading -> OnLoadingState()
+            is LoadState.Loading -> {
+                if (isRefreshing) {
+                    FriendsList(
+                        pagingState = pagingState,
+                        onProfileViewButtonClick = onProfileViewButtonClick,
+                        onEmptyAccessToken = onEmptyAccessToken,
+                        onDataLoaded = onDataLoaded
+                    )
+                } else {
+                    OnLoadingState()
+                }
+            }
+
             is LoadState.Error -> {
                 /**
                  *  If error is [PaginationError.NoInternet], [LazyPagingItems] will be receive
                  *  from local database
                  */
                 if (refreshState.error == PaginationError.NoInternet) {
-                    OnSuccessState(
+                    FriendsList(
                         pagingState = pagingState,
                         onProfileViewButtonClick = onProfileViewButtonClick,
-                        onEmptyAccessToken = onEmptyAccessToken
+                        onEmptyAccessToken = onEmptyAccessToken,
+                        onDataLoaded = onDataLoaded
                     )
                 }
                 OnErrorState(
@@ -195,30 +230,29 @@ private fun Content(
                     onEmptyAccessToken = onEmptyAccessToken,
                     onRetry = { pagingState.retry() }
                 )
+
+                LaunchedEffect(key1 = Unit) {
+                    onDataLoaded()
+                }
             }
 
-            is LoadState.NotLoading -> OnSuccessState(
+            is LoadState.NotLoading -> FriendsList(
                 pagingState = pagingState,
                 onProfileViewButtonClick = onProfileViewButtonClick,
-                onEmptyAccessToken = onEmptyAccessToken
+                onEmptyAccessToken = onEmptyAccessToken,
+                onDataLoaded = onDataLoaded
             )
         }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            contentColor = LocalColorScheme.current.primaryIconTintColor,
+            backgroundColor = LocalColorScheme.current.cardContainerColor
+        )
     }
 }
-
-@Composable
-private fun OnSuccessState(
-    pagingState: LazyPagingItems<User>,
-    onProfileViewButtonClick: (Long) -> Unit,
-    onEmptyAccessToken: () -> Unit
-) {
-    FriendsList(
-        pagingState = pagingState,
-        onProfileViewButtonClick = onProfileViewButtonClick,
-        onEmptyAccessToken = onEmptyAccessToken,
-    )
-}
-
 
 @Composable
 private fun OnLoadingState() {

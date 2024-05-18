@@ -17,6 +17,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -30,7 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +64,7 @@ import com.ilya.search.screen.elements.usersList
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(
     openProfileRequest: (Long) -> Unit,
@@ -70,6 +77,14 @@ fun SearchScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var initialDataLoaded by remember { mutableStateOf(false) }
+
+    val isRefreshing = pagingItems.loadState.refresh == LoadState.Loading && initialDataLoaded
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { pagingItems.refresh() }
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -83,7 +98,10 @@ fun SearchScreen(
                     scrollBehavior = scrollBehavior
                 )
                 SearchBar(
-                    onSearch = { viewModel.handleEvent(SearchScreenEvent.Search(it)) },
+                    onSearch = {
+                        initialDataLoaded = false
+                        viewModel.handleEvent(SearchScreenEvent.Search(it))
+                    },
                     heightOffset = scrollBehavior.state.heightOffset,
                     heightOffsetLimit = scrollBehavior.state.heightOffsetLimit
                 )
@@ -96,7 +114,12 @@ fun SearchScreen(
             onTryAgainClick = { pagingItems.refresh() },
             onEmptyAccessToken = onEmptyAccessToken,
             onCardClick = openProfileRequest,
-            paddingValues = padding
+            paddingValues = padding,
+            isRefreshing = isRefreshing,
+            onDataLoaded = {
+                initialDataLoaded = true
+            },
+            pullRefreshState = pullRefreshState
         )
     }
 
@@ -166,57 +189,94 @@ private fun TopBar(
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
     pagingItems: LazyPagingItems<User>,
     onTryAgainClick: () -> Unit,
     onEmptyAccessToken: () -> Unit,
     onCardClick: (Long) -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    isRefreshing: Boolean,
+    onDataLoaded: () -> Unit,
+    pullRefreshState: PullRefreshState
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.padding(paddingValues)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .pullRefresh(pullRefreshState)
     ) {
-        when (val refreshLoadState = pagingItems.loadState.refresh) {
-            LoadState.Loading -> item(span = { GridItemSpan(2) }) { OnLoadingState() }
-            is LoadState.Error -> {
-                /**
-                 * If [LoadState.Error] is [PaginationError.NoInternet], [LazyPagingItems] will be
-                 * receive from local database
-                 */
-                if (refreshLoadState.error == PaginationError.NoInternet) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            when (val refreshLoadState = pagingItems.loadState.refresh) {
+                LoadState.Loading -> {
+                    if (isRefreshing) {
+                        usersList(
+                            pagingItems = pagingItems,
+                            onCardClick = onCardClick,
+                            onEmptyAccessToken = onEmptyAccessToken,
+                            onTryAgainClick = { pagingItems.retry() },
+                            onDataLoaded = onDataLoaded
+                        )
+                    } else {
+                        item(span = { GridItemSpan(2) }) { OnLoadingState() }
+                    }
+                }
+
+                is LoadState.Error -> {
+                    /**
+                     * If [LoadState.Error] is [PaginationError.NoInternet], [LazyPagingItems] will be
+                     * receive from local database
+                     */
+                    if (refreshLoadState.error == PaginationError.NoInternet) {
+                        usersList(
+                            pagingItems = pagingItems,
+                            onCardClick = onCardClick,
+                            onEmptyAccessToken = onEmptyAccessToken,
+                            onTryAgainClick = { pagingItems.retry() },
+                            onDataLoaded = onDataLoaded
+                        )
+                    } else {
+                        item {
+                            OnErrorState(
+                                errorType = when (refreshLoadState.error) {
+                                    is PaginationError.NoInternet -> ErrorType.NoInternet
+                                    is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
+                                    else -> ErrorType.Unknown(refreshLoadState.error)
+                                },
+                                onTryAgainClick = onTryAgainClick,
+                                onEmptyAccessToken = onEmptyAccessToken
+                            )
+                        }
+                    }
+
+                    onDataLoaded()
+                }
+
+                is LoadState.NotLoading -> {
                     usersList(
                         pagingItems = pagingItems,
                         onCardClick = onCardClick,
                         onEmptyAccessToken = onEmptyAccessToken,
-                        onTryAgainClick = { pagingItems.retry() }
+                        onTryAgainClick = { pagingItems.retry() },
+                        onDataLoaded = onDataLoaded
                     )
-                } else {
-                    item {
-                        OnErrorState(
-                            errorType = when (refreshLoadState.error) {
-                                is PaginationError.NoInternet -> ErrorType.NoInternet
-                                is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
-                                else -> ErrorType.Unknown(refreshLoadState.error)
-                            },
-                            onTryAgainClick = onTryAgainClick,
-                            onEmptyAccessToken = onEmptyAccessToken
-                        )
-                    }
                 }
             }
-
-            is LoadState.NotLoading -> usersList(
-                pagingItems = pagingItems,
-                onCardClick = onCardClick,
-                onEmptyAccessToken = onEmptyAccessToken,
-                onTryAgainClick = { pagingItems.retry() }
-            )
         }
+
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+            contentColor = LocalColorScheme.current.primaryIconTintColor,
+            backgroundColor = LocalColorScheme.current.cardContainerColor
+        )
     }
 }
 

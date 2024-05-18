@@ -51,13 +51,11 @@ class FriendsRemoteMediator private constructor(
                 fields = FIELDS
             )
 
-            localRepository.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    localRepository.deleteAllWithPrimaryKeys()
-                }
-                val friendsEntities = friends.map { it.toFriendEntity() }
-                localRepository.upsertAll(*friendsEntities.toTypedArray())
+            if (loadType == LoadType.REFRESH) {
+                localRepository.deleteAllWithPrimaryKeys()
             }
+            val friendsEntities = friends.map { it.toFriendEntity() }
+            localRepository.upsertAll(*friendsEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = friends.isEmpty())
 

@@ -1,14 +1,16 @@
 package com.ilya.data.network.repository
 
-import com.ilya.data.network.RemoteRepository
-import com.ilya.data.network.retrofit.UserDto
-import com.ilya.data.network.retrofit.VkApi
+import com.ilya.data.network.UsersRemoteRepository
+import com.ilya.data.network.retrofit.api.UserDto
+import com.ilya.data.network.retrofit.api.UsersVkApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-internal class VkRepository @Inject constructor(private val vkApi: VkApi) : RemoteRepository {
+internal class UsersVkRepository @Inject constructor(
+    private val usersVkApi: UsersVkApi
+) : UsersRemoteRepository {
 
     override suspend fun getFriends(
         accessToken: String,
@@ -17,7 +19,7 @@ internal class VkRepository @Inject constructor(private val vkApi: VkApi) : Remo
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            vkApi.getFriends(
+            usersVkApi.getFriends(
                 accessToken = accessToken,
                 fields = fields,
                 count = count,
@@ -34,7 +36,7 @@ internal class VkRepository @Inject constructor(private val vkApi: VkApi) : Remo
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            vkApi.searchUsers(
+            usersVkApi.searchUsers(
                 accessToken = accessToken,
                 query = query,
                 fields = fields,
@@ -51,7 +53,7 @@ internal class VkRepository @Inject constructor(private val vkApi: VkApi) : Remo
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            vkApi.getSuggestions(
+            usersVkApi.getSuggestions(
                 accessToken = accessToken,
                 fields = fields,
                 count = count,
@@ -59,4 +61,5 @@ internal class VkRepository @Inject constructor(private val vkApi: VkApi) : Remo
             )
         }.responseData.items
     }
+
 }

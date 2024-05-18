@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,12 +22,14 @@ import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.friendsview.R
 import com.ilya.friendsview.screen.ErrorType
+import com.ilya.theme.LocalColorScheme
 
 @Composable
 fun FriendsList(
     pagingState: LazyPagingItems<User>,
     onProfileViewButtonClick: (Long) -> Unit,
     onEmptyAccessToken: () -> Unit,
+    onDataLoaded: () -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -41,6 +44,9 @@ fun FriendsList(
                     user = user,
                     onCardClick = onProfileViewButtonClick
                 )
+                LaunchedEffect(key1 = Unit) {
+                    onDataLoaded()
+                }
             }
         }
         item(span = { GridItemSpan(2) }) {
@@ -73,7 +79,7 @@ private fun OnAppendError(
             modifier = Modifier.height(140.dp),
             message = StringResource.Resource(R.string.error_no_able_to_get_data),
             buttonText = StringResource.Resource(R.string.retry),
-            onTryAgainClick = onAppendRetry
+            onButtonClick = onAppendRetry
         )
 
         is ErrorType.NoAccessToken -> onEmptyAccessToken()
@@ -81,10 +87,10 @@ private fun OnAppendError(
             modifier = Modifier.height(140.dp),
             message = StringResource.Resource(
                 id = R.string.error_unknown,
-                arguments = listOf(error.error.message ?: "")
+                formatArgs = listOf(error.error.message ?: "")
             ),
             buttonText = StringResource.Resource(id = R.string.retry),
-            onTryAgainClick = onAppendRetry
+            onButtonClick = onAppendRetry
         )
     }
 }
@@ -98,6 +104,6 @@ private fun OnLoadingAppend() {
             .height(140.dp),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor)
     }
 }

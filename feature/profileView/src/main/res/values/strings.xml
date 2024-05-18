@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_able_to_get_data">It is Inpossible to get data. Please check your Internet connection and try again</string>
+    <string name="try_again">Try again</string>
+    <string name="unknown_error">Unknown error: %s</string>
+    <string name="details">Details</string>
+    <string name="birthday_date">Birthday: %s</string>
+    <string name="not_married">Not married</string>
+    <string name="not_married_woman">Not married</string>
+    <string name="have_friend">Have friend</string>
+    <string name="engaged">Engaged</string>
+    <string name="engaged_woman">Engaged on</string>
+    <string name="married">Married</string>
+    <string name="married_woman">Married</string>
+    <string name="all_is_tough">All is tough</string>
+    <string name="looking_for_seomeone">Actively look for</string>
+    <string name="in_love">In love</string>
+    <string name="in_love_women">In love</string>
+    <string name="civil_marriage">In a civil marriage</string>
+    <string name="engaged_extended">Engaged on %s</string>
+    <string name="engaged_woman_extended">Engaged on %s</string>
+    <string name="married_extended">Married on %s</string>
+    <string name="married_woman_extended">Married on %s</string>
+    <string name="civil_marriage_extended">In a civil marriadge with %s</string>
+    <string name="in_love_extended">In love with %s</string>
+    <string name="in_love_woman_extended">In love with %s</string>
+    <string name="firends">Friends</string>
+    <string name="subscriptions">Subscriptions</string>
+    <string name="hometown">Hometown</string>
+    <plurals name="subscribers">
+        <item quantity="one">%d subscriber</item>
+        <item quantity="other">%d subscribers</item>
+    </plurals>
+    <string name="status_not_friend">Subscribe</string>
+    <string name="status_waiting_for_response">Request sended</string>
+    <string name="status_friend_request">Accept request</string>
+    <string name="status_friends">Delete friend</string>
+    <string name="operation_not_completed">Operation failed. Check Internet connection</string>
+    <string name="operation_not_completed_try_later">Operation failed. Try again later</string>
+</resources>

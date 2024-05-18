@@ -1,7 +1,6 @@
 package com.ilya.data.local.repository
 
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.FriendEntity
 import com.ilya.data.local.database.VkFriendsApplicationDatabase
@@ -26,10 +25,6 @@ internal class FriendsLocalRepository @Inject constructor(
     override suspend fun deleteAllWithPrimaryKeys() {
         database.dao.deleteAllFromFriends()
         database.dao.deleteFriendsPrimaryKeyIndex()
-    }
-
-    override suspend fun withTransaction(block: suspend () -> Unit) {
-        database.withTransaction { block() }
     }
 
 }

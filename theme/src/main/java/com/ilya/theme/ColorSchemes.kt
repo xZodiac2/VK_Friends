@@ -18,11 +18,13 @@ data class ColorScheme(
     val buttonColor: Color = LightColorScheme.buttonColor,
     val selectedIconColor: Color = LightColorScheme.primaryIconColor,
     val unselectedIconColor: Color = LightColorScheme.secondaryIconColor,
-    val bottomNavSelectedIndicatorColor: Color = LightColorScheme.bottomNavSelectedIndicatorColor
+    val bottomNavSelectedIndicatorColor: Color = LightColorScheme.bottomNavSelectedIndicatorColor,
+    val iconTintColor: Color = LightColorScheme.iconTintColor,
+    val primaryIconTintColor: Color = LightColorScheme.primaryIconTintColor
 )
 
 object LightColorScheme {
-    val primary = Color.White
+    val primary = Color(243, 243, 243, 255)
     val secondary = Color(245, 245, 245, 255)
 
     val cardContainerColor = Color.White
@@ -43,6 +45,9 @@ object LightColorScheme {
     val secondaryIconColor = Color(61, 61, 61, 255)
 
     val bottomNavSelectedIndicatorColor = Color(235, 235, 235, 255)
+
+    val primaryIconTintColor = Color(31, 127, 245, 255)
+    val iconTintColor = Color.Black
 }
 
 object DarkColorScheme {
@@ -67,6 +72,9 @@ object DarkColorScheme {
     val unselectedIconColor = Color(226, 226, 226, 255)
 
     val bottomNavSelectedIndicatorColor = Color(70, 70, 70, 255)
+
+    val primaryIconTintColor = Color(77, 157, 255, 255)
+    val iconTintColor = Color.White
 }
 
 

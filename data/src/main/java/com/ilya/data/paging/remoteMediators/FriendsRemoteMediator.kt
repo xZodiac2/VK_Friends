@@ -9,7 +9,7 @@ import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.FriendEntity
-import com.ilya.data.network.RemoteRepository
+import com.ilya.data.network.UsersRemoteRepository
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toFriendEntity
 import java.net.SocketTimeoutException
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class FriendsRemoteMediator private constructor(
-    private val remoteRepository: RemoteRepository,
+    private val remoteRepository: UsersRemoteRepository,
     private val localRepository: LocalRepository<FriendEntity>,
     private val accessTokenManager: AccessTokenManager
 ) : RemoteMediator<Int, FriendEntity>() {
@@ -51,13 +51,11 @@ class FriendsRemoteMediator private constructor(
                 fields = FIELDS
             )
 
-            localRepository.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    localRepository.deleteAllWithPrimaryKeys()
-                }
-                val friendsEntities = friends.map { it.toFriendEntity() }
-                localRepository.upsertAll(*friendsEntities.toTypedArray())
+            if (loadType == LoadType.REFRESH) {
+                localRepository.deleteAllWithPrimaryKeys()
             }
+            val friendsEntities = friends.map { it.toFriendEntity() }
+            localRepository.upsertAll(*friendsEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = friends.isEmpty())
 
@@ -76,7 +74,7 @@ class FriendsRemoteMediator private constructor(
 
     class Factory @Inject constructor(
         private val localRepository: LocalRepository<FriendEntity>,
-        private val remoteRepository: RemoteRepository,
+        private val remoteRepository: UsersRemoteRepository,
         private val accessTokenManager: AccessTokenManager
     ) : BaseFactory<Unit, FriendsRemoteMediator> {
         override fun newInstance(initializationData: Unit): FriendsRemoteMediator {

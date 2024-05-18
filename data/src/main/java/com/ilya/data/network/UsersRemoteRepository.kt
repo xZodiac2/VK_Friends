@@ -1,8 +1,8 @@
 package com.ilya.data.network
 
-import com.ilya.data.network.retrofit.UserDto
+import com.ilya.data.network.retrofit.api.UserDto
 
-interface RemoteRepository {
+interface UsersRemoteRepository {
 
     suspend fun getFriends(
         accessToken: String,

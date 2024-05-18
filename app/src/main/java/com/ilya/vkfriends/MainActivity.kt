@@ -28,7 +28,7 @@ import androidx.navigation.navArgument
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.friendsview.screen.FriendsScreen
-import com.ilya.profileview.presentation.screen.ProfileViewScreen
+import com.ilya.profileview.presentation.screen.ProfileScreen
 import com.ilya.search.screen.SearchScreen
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
@@ -138,7 +138,7 @@ class MainActivity : ComponentActivity() {
                             inclusive = true
                         }
                     }
-                }, onProfileViewButtonClick = { userId ->
+                }, profileOpenRequest = { userId ->
                     navController.navigate(
                         Destination.ProfileViewScreen.withArguments(userId.toString())
                     )
@@ -150,9 +150,19 @@ class MainActivity : ComponentActivity() {
                 enterTransition = Destination.ProfileViewScreen.transition?.enterTransition,
                 exitTransition = Destination.ProfileViewScreen.transition?.exitTransition
             ) { backStackEntry ->
-                ProfileViewScreen(
+                ProfileScreen(
                     userId = backStackEntry.arguments?.getString("userId") ?: "",
-                    onClick = { navController.popBackStack() }
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onEmptyAccessToken = {
+                        navController.navigate(Destination.AuthScreen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+
+                        }
+                    }
                 )
             }
             composable(

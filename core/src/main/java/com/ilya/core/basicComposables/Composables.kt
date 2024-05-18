@@ -80,7 +80,7 @@ fun OnError(
     modifier: Modifier = Modifier,
     message: StringResource,
     buttonText: StringResource,
-    onTryAgainClick: () -> Unit
+    onButtonClick: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -92,7 +92,7 @@ fun OnError(
             textAlign = TextAlign.Center,
             color = LocalColorScheme.current.primaryTextColor
         )
-        BaseButton(onClick = onTryAgainClick) {
+        BaseButton(onClick = onButtonClick) {
             Text(text = buttonText.resolve())
         }
     }

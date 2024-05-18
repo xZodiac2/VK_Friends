@@ -51,9 +51,6 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":theme"))
 
-    // Accompanist
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.34.0")
-
     // Hilt
     implementation("com.google.dagger:hilt-android:2.44")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
@@ -62,12 +59,12 @@ dependencies {
     // Coil Compose
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // OneTap
-    implementation("com.vk.id:onetap-compose:1.0.0")
-
     // Paging
     implementation("androidx.paging:paging-runtime:3.2.1")
     implementation("androidx.paging:paging-compose:3.3.0-alpha05")
+
+    // OneTap
+    implementation("com.vk.id:onetap-compose:1.0.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -77,6 +74,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material:1.6.7")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

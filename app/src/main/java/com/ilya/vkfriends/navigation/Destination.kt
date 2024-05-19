@@ -1,46 +1,46 @@
 package com.ilya.vkfriends.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 
-sealed class Destination(
-    val route: String,
-    val transition: NavigationTransition? = null
-) {
-    object AuthScreen : Destination(route = "auth")
 
-    object FriendsViewScreen : Destination(
-        route = "friends",
-        transition = NavigationTransition(
-            enterTransition = { fadeIn(animationSpec = tween(0)) },
-            exitTransition = { fadeOut(animationSpec = tween(0)) }
-        )
-    )
+@Serializable
+sealed interface Destination {
 
-    object ProfileViewScreen : Destination(
-        route = "profileView",
-        transition = NavigationTransition(
-            enterTransition = { fadeIn(animationSpec = tween(0)) },
-            exitTransition = { fadeOut(animationSpec = tween(0)) }
-        )
-    )
+    @Serializable
+    data object AuthScreen : Destination
 
-    object SearchScreen : Destination(
-        route = "search",
-        transition = NavigationTransition(
-            enterTransition = { fadeIn(animationSpec = tween(0)) },
-            exitTransition = { fadeOut(animationSpec = tween(0)) },
-        )
-    )
+    @Serializable
+    data class ProfileScreen(val userId: Long) : Destination
 
-    fun withArgumentNames(vararg names: String): String {
-        return route + names.joinToString(prefix = "/{", separator = "}/{", postfix = "}")
-    }
+    @Serializable
+    data object SearchScreen : Destination
 
-    fun withArguments(vararg args: String): String {
-        return route + args.joinToString(prefix = "/", separator = "/")
-    }
+    @Serializable
+    data object FriendsScreen : Destination
 
 }
 
+val NavBackStackEntry.lastDestinationName: String
+    get() {
+        return destination.route
+            ?.substringBefore("/")
+            ?.substringBefore("?")
+            ?.substringAfterLast(".") ?: ""
+    }
+
+val NavBackStackEntry.lastDestination: Destination
+    get() {
+        return when (lastDestinationName) {
+            Destination.AuthScreen::class.simpleName -> Destination.AuthScreen
+            Destination.FriendsScreen::class.simpleName -> Destination.FriendsScreen
+            Destination.ProfileScreen::class.simpleName -> Destination.ProfileScreen(
+                toRoute<Destination.ProfileScreen>().userId
+            )
+
+            Destination.SearchScreen::class.simpleName -> Destination.SearchScreen
+            else -> Destination.AuthScreen
+        }
+
+    }

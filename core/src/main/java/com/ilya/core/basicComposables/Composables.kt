@@ -49,8 +49,8 @@ fun BaseButton(
 }
 
 sealed interface BaseButtonStyles {
-    object Attractive : BaseButtonStyles
-    object Unattractive : BaseButtonStyles
+    data object Attractive : BaseButtonStyles
+    data object Unattractive : BaseButtonStyles
 }
 
 @Composable

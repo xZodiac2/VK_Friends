@@ -14,14 +14,14 @@ fun UserDto.toUser(): User {
         firstName = firstName,
         lastName = lastName,
         photoUrl = photoUrl,
-        friendStatus = FriendStatus.values().find { it.value == friendStatus }
+        friendStatus = FriendStatus.entries.find { it.value == friendStatus }
             ?: FriendStatus.NOT_FRIENDS,
         birthday = birthday,
         status = status,
         city = city?.toCity(),
-        relation = Relation.values().find { it.value == relation } ?: Relation.NOT_STATED,
+        relation = Relation.entries.find { it.value == relation } ?: Relation.NOT_STATED,
         partner = partner?.toPartner(),
-        sex = Sex.values().find { it.value == sex } ?: Sex.NOT_STATED,
+        sex = Sex.entries.find { it.value == sex } ?: Sex.NOT_STATED,
         counters = counters?.toCounters()
     )
 }

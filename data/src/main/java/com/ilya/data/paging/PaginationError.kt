@@ -5,11 +5,11 @@ sealed class PaginationError(
     override val cause: Throwable? = null
 ) : Throwable(message, cause) {
 
-    object NoAccessToken : PaginationError() {
+    data object NoAccessToken : PaginationError() {
         private fun readResolve(): Any = NoAccessToken
     }
 
-    object NoInternet : PaginationError() {
+    data object NoInternet : PaginationError() {
         private fun readResolve(): Any = NoInternet
     }
 }

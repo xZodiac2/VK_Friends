@@ -11,8 +11,8 @@ sealed class NavigationBarItem(
     val icon: @Composable () -> Unit,
 ) {
 
-    object FriendsView : NavigationBarItem(
-        destination = Destination.FriendsViewScreen,
+    data object FriendsView : NavigationBarItem(
+        destination = Destination.FriendsScreen,
         icon = {
             Icon(
                 imageVector = Icons.Outlined.Person,
@@ -21,7 +21,7 @@ sealed class NavigationBarItem(
         }
     )
 
-    object Search : NavigationBarItem(
+    data object Search : NavigationBarItem(
         destination = Destination.SearchScreen,
         icon = {
             Icon(

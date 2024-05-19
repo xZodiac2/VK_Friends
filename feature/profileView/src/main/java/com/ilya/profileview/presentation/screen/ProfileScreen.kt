@@ -23,7 +23,7 @@ import com.ilya.theme.LocalColorScheme
 
 @Composable
 fun ProfileScreen(
-    userId: String,
+    userId: Long,
     onEmptyAccessToken: () -> Unit,
     onBackClick: () -> Unit,
     viewModel: ProfileScreenViewModel = hiltViewModel()
@@ -46,7 +46,7 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.handleEvent(ProfileScreenEvent.Start(userId.toLong()))
+        viewModel.handleEvent(ProfileScreenEvent.Start(userId))
     }
 
 }

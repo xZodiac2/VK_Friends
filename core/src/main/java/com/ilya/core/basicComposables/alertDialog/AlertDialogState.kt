@@ -3,9 +3,9 @@ package com.ilya.core.basicComposables.alertDialog
 import androidx.compose.runtime.Composable
 import com.ilya.core.appCommon.StringResource
 
-interface AlertDialogState {
+sealed interface AlertDialogState {
 
-    object Consumed : AlertDialogState
+    data object Consumed : AlertDialogState
 
     data class Triggered(
         val title: StringResource? = null,

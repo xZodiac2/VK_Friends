@@ -19,12 +19,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.friendsview.screen.FriendsScreen
@@ -34,6 +33,9 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
 import com.ilya.vkfriends.navigation.Destination
 import com.ilya.vkfriends.navigation.NavigationBarItem
+import com.ilya.vkfriends.navigation.ScreenTransition
+import com.ilya.vkfriends.navigation.lastDestination
+import com.ilya.vkfriends.navigation.lastDestinationName
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -67,8 +69,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun BottomBar(navController: NavController) {
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
+        if (currentBackStackEntry?.lastDestination == Destination.AuthScreen) return
+
         val currentDestination = currentBackStackEntry?.destination
-        if (currentDestination?.route == Destination.AuthScreen.route) return
 
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
         NavigationBar(
@@ -78,10 +81,10 @@ class MainActivity : ComponentActivity() {
             navigationBarItems.forEach { item ->
                 NavigationBarItem(
                     selected = currentDestination?.hierarchy?.any {
-                        it.route == item.destination.route
+                        currentBackStackEntry?.lastDestinationName == item.destination::class.simpleName
                     } == true,
                     onClick = {
-                        navController.navigate(item.destination.route) {
+                        navController.navigate(item.destination) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -108,55 +111,55 @@ class MainActivity : ComponentActivity() {
         NavHost(
             navController = navController,
             startDestination = if (accessTokenManager.accessToken == null) {
-                Destination.AuthScreen.route
+                Destination.AuthScreen
             } else {
-                Destination.FriendsViewScreen.route
+                Destination.FriendsScreen
             },
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(
-                Destination.AuthScreen.route,
-                enterTransition = Destination.AuthScreen.transition?.enterTransition,
-                exitTransition = Destination.AuthScreen.transition?.exitTransition
+            composable<Destination.AuthScreen>(
+                enterTransition = ScreenTransition.AuthScreen.transition.enterTransition,
+                exitTransition = ScreenTransition.AuthScreen.transition.exitTransition
             ) {
                 AuthorizationScreen(onAuthorize = {
-                    navController.navigate(Destination.FriendsViewScreen.route) {
-                        popUpTo(Destination.AuthScreen.route) {
+                    navController.navigate(Destination.FriendsScreen) {
+                        popUpTo(Destination.AuthScreen) {
                             inclusive = true
                         }
                     }
                 })
             }
-            composable(
-                Destination.FriendsViewScreen.route,
-                enterTransition = Destination.FriendsViewScreen.transition?.enterTransition,
-                exitTransition = Destination.FriendsViewScreen.transition?.exitTransition
+            composable<Destination.FriendsScreen>(
+                enterTransition = ScreenTransition.FriendsScreen.transition.enterTransition,
+                exitTransition = ScreenTransition.FriendsScreen.transition.exitTransition
             ) {
-                FriendsScreen(onEmptyAccessToken = {
-                    navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
+                FriendsScreen(
+                    onEmptyAccessToken = {
+                        navController.navigate(Destination.AuthScreen) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
                         }
-                    }
-                }, profileOpenRequest = { userId ->
-                    navController.navigate(
-                        Destination.ProfileViewScreen.withArguments(userId.toString())
-                    )
-                }, onExitConfirm = { finish() })
+                    },
+                    profileOpenRequest = { userId ->
+                        navController.navigate(
+                            Destination.ProfileScreen(userId)
+                        )
+                    },
+                    onExitConfirm = { finish() }
+                )
             }
-            composable(
-                Destination.ProfileViewScreen.withArgumentNames("userId"),
-                arguments = listOf(navArgument("userId") { type = NavType.StringType }),
-                enterTransition = Destination.ProfileViewScreen.transition?.enterTransition,
-                exitTransition = Destination.ProfileViewScreen.transition?.exitTransition
+            composable<Destination.ProfileScreen>(
+                enterTransition = ScreenTransition.ProfileScreen.transition.enterTransition,
+                exitTransition = ScreenTransition.ProfileScreen.transition.exitTransition
             ) { backStackEntry ->
                 ProfileScreen(
-                    userId = backStackEntry.arguments?.getString("userId") ?: "",
+                    userId = backStackEntry.toRoute<Destination.ProfileScreen>().userId,
                     onBackClick = {
                         navController.popBackStack()
                     },
                     onEmptyAccessToken = {
-                        navController.navigate(Destination.AuthScreen.route) {
+                        navController.navigate(Destination.AuthScreen) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 inclusive = true
                             }
@@ -165,22 +168,24 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
-            composable(
-                Destination.SearchScreen.route,
-                enterTransition = Destination.SearchScreen.transition?.enterTransition,
-                exitTransition = Destination.SearchScreen.transition?.exitTransition
+            composable<Destination.SearchScreen>(
+                enterTransition = ScreenTransition.SearchScreen.transition.enterTransition,
+                exitTransition = ScreenTransition.SearchScreen.transition.exitTransition
             ) {
-                SearchScreen(openProfileRequest = {
-                    navController.navigate(
-                        Destination.ProfileViewScreen.withArguments(it.toString())
-                    )
-                }, onEmptyAccessToken = {
-                    navController.navigate(Destination.AuthScreen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            inclusive = true
+                SearchScreen(
+                    openProfileRequest = {
+                        navController.navigate(
+                            Destination.ProfileScreen(it)
+                        )
+                    },
+                    onEmptyAccessToken = {
+                        navController.navigate(Destination.AuthScreen) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
                         }
                     }
-                })
+                )
             }
         }
     }

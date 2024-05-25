@@ -1,7 +1,6 @@
 package com.ilya.data.network.retrofit.api
 
 import com.ilya.data.network.retrofit.CURRENT_API_VERSION
-import com.squareup.moshi.Json
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -16,9 +15,20 @@ internal interface UserDataVkApi {
         @Query("name_case") nameCase: String
     ): UserDataResponse
 
-}
+    @GET("wall.get?v=$CURRENT_API_VERSION")
+    suspend fun getWall(
+        @Query("access_token") accessToken: String,
+        @Query("owner_id") ownerId: Long,
+        @Query("count") count: Int,
+        @Query("offset") offset: Int
+    ): WallResponse
 
-data class UserDataResponse(
-    @Json(name = "response") val response: List<UserDto>
-)
+    @GET("video.get?v=$CURRENT_API_VERSION")
+    suspend fun getVideoData(
+        @Query("access_token") accessToken: String,
+        @Query("owner_id") ownerId: Long,
+        @Query("videos") videoId: String,
+    ): VideoExtendedDto
+
+}
 

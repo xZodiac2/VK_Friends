@@ -11,20 +11,20 @@ internal class UsersLocalRepository @Inject constructor(
 ) : LocalRepository<UserEntity> {
 
     override suspend fun upsertAll(vararg upsertData: UserEntity) {
-        database.dao.upsertAllUsers(upsertData.toList())
+        database.usersDao.upsertAll(upsertData.toList())
     }
 
     override fun getAll(): PagingSource<Int, UserEntity> {
-        return database.dao.getUsersPagingSource()
+        return database.usersDao.getPagingSource()
     }
 
     override suspend fun deleteAll() {
-        database.dao.deleteAllFromUsers()
+        database.usersDao.deleteAll()
     }
 
     override suspend fun deleteAllWithPrimaryKeys() {
-        database.dao.deleteAllFromUsers()
-        database.dao.deleteUsersPrimaryKeyIndex()
+        database.usersDao.deleteAll()
+        database.usersDao.deletePrimaryKeys()
     }
 
 }

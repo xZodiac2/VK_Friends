@@ -11,20 +11,20 @@ internal class FriendsLocalRepository @Inject constructor(
 ) : LocalRepository<FriendEntity> {
 
     override suspend fun upsertAll(vararg upsertData: FriendEntity) {
-        database.dao.upsertAllFriends(upsertData.toList())
+        database.friendsDao.upsertAll(upsertData.toList())
     }
 
     override fun getAll(): PagingSource<Int, FriendEntity> {
-        return database.dao.getFriendsPagingSource()
+        return database.friendsDao.getPagingSource()
     }
 
     override suspend fun deleteAll() {
-        database.dao.deleteAllFromFriends()
+        database.friendsDao.deleteAll()
     }
 
     override suspend fun deleteAllWithPrimaryKeys() {
-        database.dao.deleteAllFromFriends()
-        database.dao.deleteFriendsPrimaryKeyIndex()
+        database.friendsDao.deleteAll()
+        database.friendsDao.deletePrimaryKeys()
     }
 
 }

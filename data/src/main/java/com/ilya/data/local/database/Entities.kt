@@ -23,3 +23,59 @@ data class UserEntity(
     val lastName: String,
     val photoUrl: String
 )
+
+
+@Entity(tableName = "wall_items_table")
+data class WallItemEntity(
+    @PrimaryKey(autoGenerate = true)
+    val databaseId: Int = 0,
+    val attachments: List<Attachment>,
+    val likes: Likes
+)
+
+data class Attachment(
+    val type: String,
+    val photo: Photo,
+    val video: Video,
+    val audio: Audio
+)
+
+data class Audio(
+    val artist: String,
+    val id: Long,
+    val ownerId: Long,
+    val title: String,
+    val duration: Int,
+    val url: String,
+    val dateUnixTime: Long
+)
+
+data class Photo(
+    val albumId: Int,
+    val dateUnixTime: Long,
+    val id: Long,
+    val ownerId: Long,
+    val sizes: List<Size>
+)
+
+data class Video(
+    val dateUnixTime: Long,
+    val duration: Int,
+    val firstFrame: List<Photo>,
+    val id: Long,
+    val ownerId: Long,
+    val title: String,
+    val accessKey: String
+)
+
+data class Likes(
+    val count: Int,
+    val userLikes: Int
+)
+
+data class Size(
+    val type: Char,
+    val height: Int,
+    val width: Int,
+    val url: String
+)

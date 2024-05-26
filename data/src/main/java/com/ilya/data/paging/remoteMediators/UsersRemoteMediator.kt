@@ -20,7 +20,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalPagingApi::class)
 class UsersRemoteMediator private constructor(
     private val remoteRepo: UsersRemoteRepository,
-    private val localRepo: LocalRepository<UserEntity>,
+    private val localRepository: LocalRepository<UserEntity>,
     private val accessTokenManager: AccessTokenManager,
     private val query: String = ""
 ) : RemoteMediator<Int, UserEntity>() {
@@ -33,7 +33,10 @@ class UsersRemoteMediator private constructor(
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> state.lastItemOrNull()?.databaseId ?: 0
+                LoadType.APPEND -> state.lastItemOrNull()?.databaseId
+                    ?: return MediatorResult.Success(
+                        endOfPaginationReached = false
+                    )
             }
 
             val loadSize = when (loadType) {
@@ -53,13 +56,16 @@ class UsersRemoteMediator private constructor(
                 searchUsers(accessToken.token, loadSize, offset)
             }
 
-            if (loadType == LoadType.REFRESH) {
-                localRepo.deleteAllWithPrimaryKeys()
+            localRepository.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    localRepository.deleteAllWithPrimaryKeys()
+                }
+                val entities = users.map { it.toUserEntity() }
+                localRepository.upsertAll(*entities.toTypedArray())
             }
-            val userEntities = users.map { it.toUserEntity() }
-            localRepo.upsertAll(*userEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = users.isEmpty() && query.isNotEmpty())
+
         } catch (e: UnknownHostException) {
             logThrowable(e)
             return MediatorResult.Error(PaginationError.NoInternet)

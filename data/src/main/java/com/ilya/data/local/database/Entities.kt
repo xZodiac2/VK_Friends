@@ -29,8 +29,12 @@ data class UserEntity(
 data class WallItemEntity(
     @PrimaryKey(autoGenerate = true)
     val databaseId: Int = 0,
-    val attachments: List<Attachment>,
+    val attachments: Attachments,
     val likes: Likes
+)
+
+data class Attachments(
+    val items: List<Attachment>
 )
 
 data class Attachment(

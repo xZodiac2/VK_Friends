@@ -31,7 +31,11 @@ class FriendsRemoteMediator private constructor(
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> state.lastItemOrNull()?.databaseId ?: 0
+                LoadType.APPEND -> {
+                    state.lastItemOrNull()?.databaseId ?: return MediatorResult.Success(
+                        endOfPaginationReached = false
+                    )
+                }
             }
 
             val loadSize = when (loadType) {
@@ -51,11 +55,13 @@ class FriendsRemoteMediator private constructor(
                 fields = FIELDS
             )
 
-            if (loadType == LoadType.REFRESH) {
-                localRepository.deleteAllWithPrimaryKeys()
+            localRepository.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    localRepository.deleteAllWithPrimaryKeys()
+                }
+                val friendsEntities = friends.map { it.toFriendEntity() }
+                localRepository.upsertAll(*friendsEntities.toTypedArray())
             }
-            val friendsEntities = friends.map { it.toFriendEntity() }
-            localRepository.upsertAll(*friendsEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = friends.isEmpty())
 

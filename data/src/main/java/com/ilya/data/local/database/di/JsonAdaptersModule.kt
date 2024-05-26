@@ -1,6 +1,6 @@
 package com.ilya.data.local.database.di
 
-import com.ilya.data.local.database.Attachment
+import com.ilya.data.local.database.Attachments
 import com.ilya.data.local.database.Likes
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -29,6 +29,6 @@ internal object JsonAdaptersModule {
     fun provideLikesJsonAdapter(moshi: Moshi): JsonAdapter<Likes> = moshi.adapter()
 
     @Provides
-    fun provideAttachmentsJsonAdapter(moshi: Moshi): JsonAdapter<List<Attachment>> = moshi.adapter()
+    fun provideAttachmentsJsonAdapter(moshi: Moshi): JsonAdapter<Attachments> = moshi.adapter()
 
 }

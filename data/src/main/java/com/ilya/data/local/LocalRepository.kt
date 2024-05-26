@@ -12,4 +12,6 @@ interface LocalRepository<T : Any> {
 
     suspend fun deleteAllWithPrimaryKeys()
 
+    suspend fun withTransaction(block: suspend () -> Unit)
+
 }

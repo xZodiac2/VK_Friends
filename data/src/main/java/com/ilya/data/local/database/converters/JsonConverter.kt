@@ -2,11 +2,10 @@ package com.ilya.data.local.database.converters
 
 import androidx.room.TypeConverter
 import com.squareup.moshi.JsonAdapter
-import okio.IOException
+import java.io.IOException
 
-internal abstract class BaseConverter<T> {
 
-    protected abstract val jsonAdapter: JsonAdapter<T>
+internal abstract class JsonConverter<T>(private val jsonAdapter: JsonAdapter<T>) {
 
     @TypeConverter
     fun toJson(data: T?): String {

@@ -40,4 +40,18 @@ internal interface UsersDao {
 }
 
 @Dao
-internal interface WallItemsDao
+internal interface WallItemsDao {
+
+    @Upsert
+    suspend fun upsertAll(users: List<WallItemEntity>)
+
+    @Query("SELECT * FROM wall_items_table")
+    fun getPagingSource(): PagingSource<Int, WallItemEntity>
+
+    @Query("DELETE FROM wall_items_table")
+    suspend fun deleteAll()
+
+    @Query("DELETE FROM sqlite_sequence WHERE name = 'wall_items_table'")
+    suspend fun deletePrimaryKeys()
+
+}

@@ -33,10 +33,11 @@ class UsersRemoteMediator private constructor(
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> state.lastItemOrNull()?.databaseId
-                    ?: return MediatorResult.Success(
+                LoadType.APPEND -> {
+                    state.lastItemOrNull()?.databaseId ?: return MediatorResult.Success(
                         endOfPaginationReached = false
                     )
+                }
             }
 
             val loadSize = when (loadType) {

@@ -56,67 +56,75 @@ data class WallResponse(
 
 data class WallResponseData(
     @Json(name = "count") val count: Int,
-    @Json(name = "items") val items: List<WallItemDto>
+    @Json(name = "items") val items: List<PostDto>
 )
 
-data class WallItemDto(
+data class PostDto(
+    @Json(name = "id") val id: Long,
     @Json(name = "attachments") val attachments: List<AttachmentDto>,
-    @Json(name = "likes") val likes: LikesDto
+    @Json(name = "likes") val likes: LikesDto,
+    @Json(name = "date") val dateUnixTime: Long,
+    @Json(name = "owner_id") val ownerId: Long
 )
 
 data class AttachmentDto(
     @Json(name = "type") val type: String,
-    @Json(name = "photo") val photo: PhotoDto,
-    @Json(name = "video") val video: VideoDto,
-    @Json(name = "audio") val audio: AudioDto
+    @Json(name = "photo") val photo: PhotoDto? = null,
+    @Json(name = "video") val video: VideoDto? = null,
+    @Json(name = "audio") val audio: AudioDto? = null
 )
 
 data class AudioDto(
-    @Json(name = "artist") val artist: String,
-    @Json(name = "id") val id: Long,
-    @Json(name = "owner_id") val ownerId: Long,
-    @Json(name = "title") val title: String,
-    @Json(name = "duration") val duration: Int,
-    @Json(name = "url") val url: String,
-    @Json(name = "date") val dateUnixTime: Long
+    @Json(name = "artist") val artist: String = "",
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "title") val title: String = "",
+    @Json(name = "duration") val duration: Int = 0,
+    @Json(name = "url") val url: String = "",
 )
 
 data class PhotoDto(
-    @Json(name = "album_id") val albumId: Int,
-    @Json(name = "date") val dateUnixTime: Long,
-    @Json(name = "id") val id: Long,
-    @Json(name = "owner_id") val ownerId: Long,
-    @Json(name = "sizes") val sizes: List<SizeDto>
+    @Json(name = "album_id") val albumId: Int = 0,
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "sizes") val sizes: List<SizeDto>? = null
 )
 
 data class VideoDto(
-    @Json(name = "date") val dateUnixTime: Long,
-    @Json(name = "duration") val duration: Int,
-    @Json(name = "first_frame") val firstFrame: List<PhotoDto>,
-    @Json(name = "id") val id: Long,
-    @Json(name = "owner_id") val ownerId: Long,
-    @Json(name = "title") val title: String,
-    @Json(name = "access_key") val accessKey: String
+    @Json(name = "duration") val duration: Int = 0,
+    @Json(name = "first_frame") val firstFrame: List<PhotoDto>? = null,
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "title") val title: String = "",
+    @Json(name = "access_key") val accessKey: String = ""
 )
 
-data class VideoExtendedDto(
-    @Json(name = "date") val dateUnixTime: Long,
-    @Json(name = "duration") val duration: Int,
-    @Json(name = "first_frame") val firstFrame: List<PhotoDto>,
-    @Json(name = "id") val id: Long,
-    @Json(name = "owner_id") val ownerId: Long,
-    @Json(name = "title") val title: String,
-    @Json(name = "player") val playerUrl: String
+data class VideoExtendedResponse(
+    @Json(name = "response") val response: VideoExtendedDtoResponse
+)
+
+data class VideoExtendedDtoResponse(
+    @Json(name = "count") val count: Int,
+    @Json(name = "items") val items: List<VideoExtendedDataDto>
+)
+
+data class VideoExtendedDataDto(
+    @Json(name = "duration") val duration: Int = 0,
+    @Json(name = "first_frame") val firstFrame: List<PhotoDto>? = null,
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "title") val title: String = "",
+    @Json(name = "player") val playerUrl: String = ""
 )
 
 data class LikesDto(
-    @Json(name = "count") val count: Int,
-    @Json(name = "user_likes") val userLikes: Int
+    @Json(name = "count") val count: Int = 0,
+    @Json(name = "user_likes") val userLikes: Int = 0
 )
 
 data class SizeDto(
-    @Json(name = "type") val type: Char,
-    @Json(name = "height") val height: Int,
-    @Json(name = "width") val width: Int,
-    @Json(name = "url") val url: String
+    @Json(name = "type") val type: String = "",
+    @Json(name = "height") val height: Int = 0,
+    @Json(name = "width") val width: Int = 0,
+    @Json(name = "url") val url: String = ""
 )

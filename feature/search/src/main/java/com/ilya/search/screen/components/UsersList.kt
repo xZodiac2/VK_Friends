@@ -1,4 +1,4 @@
-package com.ilya.search.screen.elements
+package com.ilya.search.screen.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth

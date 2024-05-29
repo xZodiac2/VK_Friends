@@ -1,9 +1,9 @@
 package com.ilya.data.network
 
 import com.ilya.core.appCommon.enums.NameCase
+import com.ilya.data.network.retrofit.api.PostDto
 import com.ilya.data.network.retrofit.api.UserDto
-import com.ilya.data.network.retrofit.api.VideoExtendedDto
-import com.ilya.data.network.retrofit.api.WallItemDto
+import com.ilya.data.network.retrofit.api.VideoExtendedDataDto
 
 interface UserDataRemoteRepository {
 
@@ -19,13 +19,12 @@ interface UserDataRemoteRepository {
         ownerId: Long,
         count: Int,
         offset: Int
-    ): List<WallItemDto>
+    ): List<PostDto>
 
     suspend fun getVideoData(
         accessToken: String,
         ownerId: Long,
-        videoId: Long,
-        accessKey: String
-    ): VideoExtendedDto
+        videoId: String,
+    ): VideoExtendedDataDto
 
 }

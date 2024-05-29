@@ -59,8 +59,8 @@ import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.search.R
 import com.ilya.search.SearchViewModel
-import com.ilya.search.screen.elements.SearchBar
-import com.ilya.search.screen.elements.usersList
+import com.ilya.search.screen.components.SearchBar
+import com.ilya.search.screen.components.usersList
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

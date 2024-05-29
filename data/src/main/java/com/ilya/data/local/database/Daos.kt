@@ -40,13 +40,13 @@ internal interface UsersDao {
 }
 
 @Dao
-internal interface WallItemsDao {
+internal interface PostsDao {
 
     @Upsert
-    suspend fun upsertAll(users: List<WallItemEntity>)
+    suspend fun upsertAll(posts: List<PostEntity>)
 
     @Query("SELECT * FROM wall_items_table")
-    fun getPagingSource(): PagingSource<Int, WallItemEntity>
+    fun getPagingSource(): PagingSource<Int, PostEntity>
 
     @Query("DELETE FROM wall_items_table")
     suspend fun deleteAll()

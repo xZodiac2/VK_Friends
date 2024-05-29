@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.ilya.data.local.database.VkFriendsApplicationDatabase
 import com.ilya.data.local.database.converters.AttachmentsConverter
 import com.ilya.data.local.database.converters.LikesConverter
+import com.ilya.data.local.database.converters.PostOwnerConverter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +23,8 @@ internal object DatabaseModule {
     fun provideDatabase(
         @ApplicationContext context: Context,
         likesConverter: LikesConverter,
-        attachmentsConverter: AttachmentsConverter
+        attachmentsConverter: AttachmentsConverter,
+        postOwnerConverter: PostOwnerConverter
     ): VkFriendsApplicationDatabase {
         return Room.databaseBuilder(
             context = context,
@@ -31,6 +33,7 @@ internal object DatabaseModule {
         )
             .addTypeConverter(likesConverter)
             .addTypeConverter(attachmentsConverter)
+            .addTypeConverter(postOwnerConverter)
             .build()
     }
 

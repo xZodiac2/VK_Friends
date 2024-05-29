@@ -2,10 +2,15 @@ package com.ilya.profileview.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
+import com.ilya.profileViewDomain.Post
 import com.ilya.profileViewDomain.User
+import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCase
+import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCaseInvokeData
 import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
 import com.ilya.profileViewDomain.useCase.GetUserUseCaseData
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
@@ -17,8 +22,12 @@ import com.ilya.profileview.presentation.screen.ProfileScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -28,8 +37,27 @@ import javax.inject.Inject
 class ProfileScreenViewModel @Inject constructor(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
-    private val accessTokenManager: AccessTokenManager
+    private val accessTokenManager: AccessTokenManager,
+    private val getPostsPagingFlowUseCase: GetPostsPagingFlowUseCase
 ) : ViewModel() {
+
+    private val userIdStateFlow = MutableStateFlow(DEFAULT_USER_ID)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagingFlow: Flow<PagingData<Post>> = userIdStateFlow.flatMapLatest { id ->
+        if (id == DEFAULT_USER_ID) {
+            return@flatMapLatest flow { emit(PagingData.empty()) }
+        }
+        getPostsPagingFlowUseCase(
+            GetPostsPagingFlowUseCaseInvokeData(
+                config = PagingConfig(
+                    pageSize = PAGE_SIZE,
+                    initialLoadSize = INITIAL_LOAD_SIZE
+                ),
+                userId = id
+            )
+        )
+    }
 
     private val _screenStateFlow = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
     val screenStateFlow = _screenStateFlow.asStateFlow()
@@ -61,19 +89,21 @@ class ProfileScreenViewModel @Inject constructor(
         }
     }
 
-    private var userId: Long = DEFAULT_USER_ID
-
     fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.Start -> {
-                userId = event.userId
+                userIdStateFlow.value = event.userId
                 onStart()
             }
 
             is ProfileScreenEvent.FriendRequest -> onFriendRequest(event.user)
-
             ProfileScreenEvent.Retry -> onRetry()
+            ProfileScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
         }
+    }
+
+    private fun onSnackbarConsumed() {
+        _snackbarState.value = SnackbarState.Consumed
     }
 
     private fun onFriendRequest(user: User) {
@@ -118,13 +148,13 @@ class ProfileScreenViewModel @Inject constructor(
             val userData = getUserDataUseCase(
                 GetUserUseCaseData(
                     accessToken = accessToken.token,
-                    userId = userId
+                    userId = userIdStateFlow.value
                 )
             )
 
             _screenStateFlow.value = ProfileScreenState.Success(
                 user = when {
-                    userId == accessToken.userID -> userData.copy(isAccountOwner = true)
+                    userIdStateFlow.value == accessToken.userID -> userData.copy(isAccountOwner = true)
                     else -> userData
                 }
             )
@@ -133,6 +163,8 @@ class ProfileScreenViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
+        private const val PAGE_SIZE = 2
+        private const val INITIAL_LOAD_SIZE = 1
     }
 
 }

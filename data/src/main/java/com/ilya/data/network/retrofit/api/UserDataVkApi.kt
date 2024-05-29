@@ -28,7 +28,7 @@ internal interface UserDataVkApi {
         @Query("access_token") accessToken: String,
         @Query("owner_id") ownerId: Long,
         @Query("videos") videoId: String,
-    ): VideoExtendedDto
+    ): VideoExtendedResponse
 
 }
 

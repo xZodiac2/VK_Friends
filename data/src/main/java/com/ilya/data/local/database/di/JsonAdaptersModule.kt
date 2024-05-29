@@ -1,7 +1,8 @@
 package com.ilya.data.local.database.di
 
-import com.ilya.data.local.database.Attachments
-import com.ilya.data.local.database.Likes
+import com.ilya.data.local.database.AttachmentsDatabaseDto
+import com.ilya.data.local.database.LikesDatabaseDto
+import com.ilya.data.local.database.PostOwnerDatabaseDto
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
@@ -26,9 +27,14 @@ internal object JsonAdaptersModule {
     }
 
     @Provides
-    fun provideLikesJsonAdapter(moshi: Moshi): JsonAdapter<Likes> = moshi.adapter()
+    fun provideLikesJsonAdapter(moshi: Moshi): JsonAdapter<LikesDatabaseDto> = moshi.adapter()
 
     @Provides
-    fun provideAttachmentsJsonAdapter(moshi: Moshi): JsonAdapter<Attachments> = moshi.adapter()
+    fun provideAttachmentsJsonAdapter(moshi: Moshi): JsonAdapter<AttachmentsDatabaseDto> =
+        moshi.adapter()
+
+    @Provides
+    fun providePostOwnerJsonAdapter(moshi: Moshi): JsonAdapter<PostOwnerDatabaseDto> =
+        moshi.adapter()
 
 }

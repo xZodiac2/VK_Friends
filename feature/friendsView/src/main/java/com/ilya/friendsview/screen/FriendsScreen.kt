@@ -55,7 +55,7 @@ import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.friendsview.FriendsScreenViewModel
 import com.ilya.friendsview.R
-import com.ilya.friendsview.screen.friendsList.FriendsList
+import com.ilya.friendsview.screen.components.FriendsList
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

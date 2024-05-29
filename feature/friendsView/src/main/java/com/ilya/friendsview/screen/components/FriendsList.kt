@@ -1,4 +1,4 @@
-package com.ilya.friendsview.screen.friendsList
+package com.ilya.friendsview.screen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

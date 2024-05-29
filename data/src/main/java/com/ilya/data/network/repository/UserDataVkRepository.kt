@@ -2,10 +2,10 @@ package com.ilya.data.network.repository
 
 import com.ilya.core.appCommon.enums.NameCase
 import com.ilya.data.network.UserDataRemoteRepository
+import com.ilya.data.network.retrofit.api.PostDto
 import com.ilya.data.network.retrofit.api.UserDataVkApi
 import com.ilya.data.network.retrofit.api.UserDto
-import com.ilya.data.network.retrofit.api.VideoExtendedDto
-import com.ilya.data.network.retrofit.api.WallItemDto
+import com.ilya.data.network.retrofit.api.VideoExtendedDataDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,7 +35,7 @@ internal class UserDataVkRepository @Inject constructor(
         ownerId: Long,
         count: Int,
         offset: Int
-    ): List<WallItemDto> {
+    ): List<PostDto> {
         return withContext(Dispatchers.IO) {
             userDataVkApi.getWall(
                 accessToken = accessToken,
@@ -49,16 +49,15 @@ internal class UserDataVkRepository @Inject constructor(
     override suspend fun getVideoData(
         accessToken: String,
         ownerId: Long,
-        videoId: Long,
-        accessKey: String
-    ): VideoExtendedDto {
+        videoId: String,
+    ): VideoExtendedDataDto {
         return withContext(Dispatchers.IO) {
             userDataVkApi.getVideoData(
                 accessToken = accessToken,
                 ownerId = ownerId,
-                videoId = "${ownerId}_${videoId}" + if (accessKey.isNotEmpty()) "_$accessKey" else ""
+                videoId = videoId
             )
-        }
+        }.response.items.first()
     }
 
 }

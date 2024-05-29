@@ -34,11 +34,9 @@ class FriendsScreenViewModel @Inject constructor(
         config = PagingConfig(pageSize = PAGE_SIZE),
         remoteMediator = friendsRemoteMediatorFactory.newInstance(Unit),
         pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
-    ).flow.map {
-        it.map { entity ->
-            entity.toUser()
-        }
-    }.cachedIn(viewModelScope)
+    ).flow
+        .map { it.map { entity -> entity.toUser() } }
+        .cachedIn(viewModelScope)
 
     private val _alertDialogState = MutableStateFlow<AlertDialogState>(AlertDialogState.Consumed)
     val alertDialogState = _alertDialogState.asStateFlow()

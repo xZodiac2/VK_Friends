@@ -26,59 +26,68 @@ data class UserEntity(
 
 
 @Entity(tableName = "wall_items_table")
-data class WallItemEntity(
+data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val databaseId: Int = 0,
-    val attachments: Attachments,
-    val likes: Likes
+    val id: Long,
+    val owner: PostOwnerDatabaseDto,
+    val attachments: AttachmentsDatabaseDto,
+    val likes: LikesDatabaseDto,
+    val dateUnixTime: Long
 )
 
-data class Attachments(
-    val items: List<Attachment>
+
+data class PostOwnerDatabaseDto(
+    val id: Long,
+    val firstName: String,
+    val lastName: String,
+    val photoUrl: String,
 )
 
-data class Attachment(
+
+data class AttachmentsDatabaseDto(
+    val items: List<AttachmentDatabaseDto>
+)
+
+data class AttachmentDatabaseDto(
     val type: String,
-    val photo: Photo,
-    val video: Video,
-    val audio: Audio
+    val photo: PhotoDatabaseDto? = null,
+    val video: VideoExtendedDatabaseDto? = null,
+    val audio: AudioDatabaseDto? = null
 )
 
-data class Audio(
+data class AudioDatabaseDto(
     val artist: String,
     val id: Long,
     val ownerId: Long,
     val title: String,
     val duration: Int,
     val url: String,
-    val dateUnixTime: Long
 )
 
-data class Photo(
+data class PhotoDatabaseDto(
     val albumId: Int,
-    val dateUnixTime: Long,
     val id: Long,
     val ownerId: Long,
-    val sizes: List<Size>
+    val sizes: List<SizeDatabaseDto>?
 )
 
-data class Video(
-    val dateUnixTime: Long,
-    val duration: Int,
-    val firstFrame: List<Photo>,
+data class VideoExtendedDatabaseDto(
+    val duration: Int = 0,
+    val firstFrame: List<PhotoDatabaseDto>?,
     val id: Long,
     val ownerId: Long,
     val title: String,
-    val accessKey: String
+    val playerUrl: String
 )
 
-data class Likes(
+data class LikesDatabaseDto(
     val count: Int,
-    val userLikes: Int
+    val userLikes: Boolean
 )
 
-data class Size(
-    val type: Char,
+data class SizeDatabaseDto(
+    val type: String,
     val height: Int,
     val width: Int,
     val url: String

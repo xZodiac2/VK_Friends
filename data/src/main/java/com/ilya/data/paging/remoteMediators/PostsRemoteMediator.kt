@@ -69,46 +69,7 @@ class PostsRemoteMediator(
                 offset = offset
             )
 
-            val postVideoIds = extractVideoIds(posts)
-
-            val postsAdditionalData = posts.associate { post ->
-                val vkScriptRequest = """ 
-                    ${
-                    if (postVideoIds[post.id] != null) {
-                        """
-                                var videoIds = [${postVideoIds[post.id]?.joinToString(",") ?: ""}];
-                                var videos = API.video.get({"videos": videoIds});
-                            """.trimIndent()
-                    } else {
-                        ""
-                    }
-                }
-                    var owner = API.users.get({"user_ids": [${post.ownerId}], "fields": ["photo_200_orig"]});
-                    
-                    return {
-                        ${
-                    if (postVideoIds[post.id] != null) {
-                        """
-                                    "videos": {
-                                        "post_id": ${post.id}
-                                        "items": videos.items
-                                    },
-                                """.trimIndent()
-                    } else {
-                        ""
-                    }
-                }
-                        "post_owner": {
-                            "post_id": ${post.id},
-                            "data": owner[0]
-                        }
-                    };
-                """.trimIndent()
-                post.id to vkApiExecutor.execute(
-                    accessToken = accessToken.token,
-                    code = vkScriptRequest
-                )
-            }
+            val postsAdditionalData = getPostsAdditionalData(posts, accessToken.token)
 
             localRepository.withTransaction {
                 if (loadType == LoadType.REFRESH) {
@@ -164,6 +125,52 @@ class PostsRemoteMediator(
             videoId += video.accessKey
         }
         return videoId.joinToString(separator = "_")
+    }
+
+    private suspend fun getPostsAdditionalData(
+        posts: List<PostDto>,
+        accessToken: String
+    ): Map<Long, AdditionalPostDataResponse> {
+        val postVideoIds = extractVideoIds(posts)
+
+        return posts.associate { post ->
+            val vkScriptRequest = """ 
+                ${
+                if (postVideoIds[post.id] != null) {
+                    """
+                            var videoIds = [${postVideoIds[post.id]?.joinToString(",") ?: ""}];
+                            var videos = API.video.get({"videos": videoIds});
+                        """.trimIndent()
+                } else {
+                    ""
+                }
+            }
+                var owner = API.users.get({"user_ids": [${post.ownerId}], "fields": ["photo_200_orig"]});
+                    
+                return {
+                    ${
+                if (postVideoIds[post.id] != null) {
+                    """
+                                    "videos": {
+                                        "post_id": ${post.id}
+                                        "items": videos.items
+                                    },
+                                """.trimIndent()
+                } else {
+                    ""
+                }
+            }
+                    "post_owner": {
+                        "post_id": ${post.id},
+                        "data": owner[0]
+                    }
+                };
+            """.trimIndent()
+            post.id to vkApiExecutor.execute(
+                accessToken = accessToken,
+                code = vkScriptRequest
+            )
+        }
     }
 
     class Factory @Inject constructor(

@@ -10,12 +10,18 @@ import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.PostEntity
 import com.ilya.data.network.UserDataRemoteRepository
+import com.ilya.data.network.retrofit.CURRENT_API_VERSION
 import com.ilya.data.network.retrofit.api.PostDto
 import com.ilya.data.network.retrofit.api.UserDto
 import com.ilya.data.network.retrofit.api.VideoDto
 import com.ilya.data.network.retrofit.api.VideoExtendedDataDto
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toPostEntity
+import com.squareup.moshi.Json
+import retrofit2.Retrofit
+import retrofit2.create
+import retrofit2.http.POST
+import retrofit2.http.Query
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -25,8 +31,11 @@ class PostsRemoteMediator(
     private val localRepository: LocalRepository<PostEntity>,
     private val remoteRepository: UserDataRemoteRepository,
     private val accessTokenManager: AccessTokenManager,
-    private val userId: Long
+    private val userId: Long,
+    retrofit: Retrofit
 ) : RemoteMediator<Int, PostEntity>() {
+
+    private val vkApiExecutor = retrofit.create<VkApiExecutor>()
 
     override suspend fun load(
         loadType: LoadType,
@@ -60,16 +69,60 @@ class PostsRemoteMediator(
                 offset = offset
             )
 
-            val postVideoAttachments = extractVideos(posts, accessToken.token)
-            val postsOwners = extractPostOwners(posts, accessToken.token)
+            val postVideoIds = extractVideoIds(posts)
+
+            val postsAdditionalData = posts.associate { post ->
+                val vkScriptRequest = """ 
+                    ${
+                    if (postVideoIds[post.id] != null) {
+                        """
+                                var videoIds = [${postVideoIds[post.id]?.joinToString(",") ?: ""}];
+                                var videos = API.video.get({"videos": videoIds});
+                            """.trimIndent()
+                    } else {
+                        ""
+                    }
+                }
+                    var owner = API.users.get({"user_ids": [${post.ownerId}], "fields": ["photo_200_orig"]});
+                    
+                    return {
+                        ${
+                    if (postVideoIds[post.id] != null) {
+                        """
+                                    "videos": {
+                                        "post_id": ${post.id}
+                                        "items": videos.items
+                                    },
+                                """.trimIndent()
+                    } else {
+                        ""
+                    }
+                }
+                        "post_owner": {
+                            "post_id": ${post.id},
+                            "data": owner[0]
+                        }
+                    };
+                """.trimIndent()
+                post.id to vkApiExecutor.execute(
+                    accessToken = accessToken.token,
+                    code = vkScriptRequest
+                )
+            }
 
             localRepository.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     localRepository.deleteAllWithPrimaryKeys()
                 }
                 val postEntities = posts.map { post ->
-                    val videos = postVideoAttachments[post.id] ?: emptyList()
-                    val postOwner = postsOwners[post.id] ?: UserDto()
+                    val videos = postsAdditionalData[post.id]
+                        ?.response
+                        ?.videos
+                        ?.items ?: emptyList()
+                    val postOwner = postsAdditionalData[post.id]
+                        ?.response
+                        ?.postOwner
+                        ?.data ?: UserDto()
                     post.toPostEntity(videos, postOwner)
                 }
                 localRepository.upsertAll(*postEntities.toTypedArray())
@@ -89,43 +142,21 @@ class PostsRemoteMediator(
         }
     }
 
-    private suspend fun extractPostOwners(
-        posts: List<PostDto>,
-        accessToken: String
-    ): Map<Long, UserDto> {
+    private fun extractVideoIds(posts: List<PostDto>): Map<Long, List<String>> {
         return posts.associate { post ->
-            post.id to remoteRepository.getUser(
-                accessToken = accessToken,
-                userId = post.ownerId,
-                fields = POST_OWNER_FIELDS
-            )
-        }
-    }
-
-    private suspend fun extractVideos(
-        posts: List<PostDto>,
-        accessToken: String
-    ): Map<Long, List<VideoExtendedDataDto>> {
-        return posts.associate { post ->
-            val videos = mutableListOf<VideoExtendedDataDto>()
+            val videoIds = mutableListOf<String>()
 
             for (attachment in post.attachments) {
                 if (attachment.type == VIDEO) {
                     attachment.video ?: continue
 
-                    val video = remoteRepository.getVideoData(
-                        accessToken = accessToken,
-                        ownerId = attachment.video.ownerId,
-                        videoId = combineFullVideoId(attachment.video)
-                    )
-                    videos += video
+                    videoIds += combineFullVideoId(attachment.video)
                 }
             }
 
-            post.id to videos
-        }
+            post.id to videoIds
+        }.filter { entry -> entry.value.isNotEmpty() }
     }
-
 
     private fun combineFullVideoId(video: VideoDto): String {
         val videoId = mutableListOf(video.ownerId.toString(), video.id.toString())
@@ -138,21 +169,52 @@ class PostsRemoteMediator(
     class Factory @Inject constructor(
         private val localRepository: LocalRepository<PostEntity>,
         private val remoteRepository: UserDataRemoteRepository,
-        private val accessTokenManager: AccessTokenManager
+        private val accessTokenManager: AccessTokenManager,
+        private val retrofit: Retrofit
     ) : BaseFactory<Long, PostsRemoteMediator> {
         override fun newInstance(initializationData: Long): PostsRemoteMediator {
             return PostsRemoteMediator(
                 localRepository,
                 remoteRepository,
                 accessTokenManager,
-                initializationData
+                initializationData,
+                retrofit
             )
         }
     }
 
     companion object {
         const val VIDEO = "video"
-        private val POST_OWNER_FIELDS = listOf("photo_200_orig")
     }
 
 }
+
+private interface VkApiExecutor {
+
+    @POST("execute?v=$CURRENT_API_VERSION")
+    suspend fun execute(
+        @Query("access_token") accessToken: String,
+        @Query("code") code: String
+    ): AdditionalPostDataResponse
+
+}
+
+
+private data class AdditionalPostDataResponse(
+    @Json(name = "response") val response: AdditionalPostData
+)
+
+private data class AdditionalPostData(
+    @Json(name = "videos") val videos: AdditionalVideosDataDto? = null,
+    @Json(name = "post_owner") val postOwner: AdditionalPostOwnerDto
+)
+
+private data class AdditionalVideosDataDto(
+    @Json(name = "post_id") val postId: Long,
+    @Json(name = "items") val items: List<VideoExtendedDataDto>
+)
+
+private data class AdditionalPostOwnerDto(
+    @Json(name = "post_id") val postId: Long,
+    @Json(name = "data") val data: UserDto
+)

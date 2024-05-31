@@ -1,7 +1,6 @@
 package com.ilya.friendsview.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -38,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +46,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.alertDialog.AlertDialogStateHandler
@@ -93,8 +93,8 @@ fun FriendsScreen(
         topBar = {
             TopBar(
                 accountOwner = accountOwner,
-                onProfileViewButtonClick = profileOpenRequest,
-                onPlaceholderAvatarClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
+                onAvatarClick = profileOpenRequest,
+                onPlaceholderClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
                 scrollBehavior = scrollBehavior
             )
         },
@@ -127,8 +127,8 @@ fun FriendsScreen(
 @Composable
 private fun TopBar(
     accountOwner: User?,
-    onProfileViewButtonClick: (Long) -> Unit,
-    onPlaceholderAvatarClick: () -> Unit,
+    onAvatarClick: (Long) -> Unit,
+    onPlaceholderClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     TopAppBar(
@@ -142,31 +142,19 @@ private fun TopBar(
             )
         },
         navigationIcon = {
-            when (accountOwner) {
-                null -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.avatar),
-                        contentDescription = "avatarPlaceholder",
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable(onClick = onPlaceholderAvatarClick),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-
-                else -> {
-                    AsyncImage(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable { onProfileViewButtonClick(accountOwner.id) },
-                        model = accountOwner.photoUrl,
-                        contentDescription = "ownerPhoto200",
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
+            AsyncImage(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable { accountOwner?.id?.let(onAvatarClick) ?: onPlaceholderClick() },
+                model = ImageRequest.Builder(LocalContext.current)
+                    .placeholder(R.drawable.avatar)
+                    .fallback(R.drawable.avatar)
+                    .data(accountOwner?.photoUrl)
+                    .build(),
+                contentDescription = "ownerPhoto200",
+                contentScale = ContentScale.Crop
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = LocalColorScheme.current.secondary,

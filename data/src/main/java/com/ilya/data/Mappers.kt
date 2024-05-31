@@ -84,7 +84,8 @@ fun PostDto.toPostEntity(videos: List<VideoExtendedDataDto>, owner: UserDto): Po
         }),
         likes = likes.toLikesDatabaseDto(),
         dateUnixTime = dateUnixTime,
-        owner = owner.toPostOwnerDatabaseDto()
+        owner = owner.toPostOwnerDatabaseDto(),
+        text = text
     )
 }
 

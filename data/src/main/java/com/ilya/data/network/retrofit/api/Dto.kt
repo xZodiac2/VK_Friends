@@ -61,6 +61,7 @@ data class WallResponseData(
 
 data class PostDto(
     @Json(name = "id") val id: Long,
+    @Json(name = "text") val text: String = "",
     @Json(name = "attachments") val attachments: List<AttachmentDto>,
     @Json(name = "likes") val likes: LikesDto,
     @Json(name = "date") val dateUnixTime: Long,

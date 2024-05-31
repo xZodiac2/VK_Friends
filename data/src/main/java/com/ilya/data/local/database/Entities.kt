@@ -30,6 +30,7 @@ data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val databaseId: Int = 0,
     val id: Long,
+    val text: String,
     val owner: PostOwnerDatabaseDto,
     val attachments: AttachmentsDatabaseDto,
     val likes: LikesDatabaseDto,

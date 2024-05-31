@@ -163,7 +163,7 @@ class ProfileScreenViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
-        private const val PAGE_SIZE = 2
+        private const val PAGE_SIZE = 1
         private const val INITIAL_LOAD_SIZE = 1
     }
 

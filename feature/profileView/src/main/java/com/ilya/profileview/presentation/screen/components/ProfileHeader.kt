@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
@@ -26,7 +25,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,7 +59,6 @@ import com.ilya.theme.LocalColorScheme
 @Composable
 fun ProfileHeader(
     user: User,
-    onBackClick: () -> Unit,
     friendRequest: (User) -> Unit
 ) {
     var showSheet by remember {
@@ -80,16 +77,6 @@ fun ProfileHeader(
                 .padding(bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            IconButton(
-                modifier = Modifier.align(Alignment.Start),
-                onClick = onBackClick
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "backButton",
-                    tint = LocalColorScheme.current.iconTintColor
-                )
-            }
             AsyncImage(
                 modifier = Modifier
                     .padding(top = 20.dp)

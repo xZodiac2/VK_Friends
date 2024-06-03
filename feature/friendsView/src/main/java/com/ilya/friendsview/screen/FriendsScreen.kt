@@ -134,11 +134,11 @@ private fun TopBar(
     TopAppBar(
         title = {
             Text(
+                modifier = Modifier.padding(start = 12.dp),
                 text = stringResource(id = R.string.friends_screen_name),
                 color = LocalColorScheme.current.primaryTextColor,
                 fontSize = LocalTypography.current.large,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.padding(start = 12.dp)
+                fontWeight = FontWeight.W500
             )
         },
         navigationIcon = {

@@ -2,6 +2,7 @@ package com.ilya.profileViewDomain
 
 import android.os.Parcelable
 import com.ilya.core.appCommon.enums.FriendStatus
+import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
 import kotlinx.parcelize.Parcelize
@@ -20,7 +21,8 @@ data class User(
     val partnerExtended: User? = null,
     val isAccountOwner: Boolean = false,
     val sex: Sex,
-    val counters: Counters?
+    val counters: Counters?,
+    val photos: List<Photo>
 )
 
 data class Partner(
@@ -80,7 +82,8 @@ data class Photo(
     val albumId: Int,
     val id: Long,
     val ownerId: Long,
-    val sizes: List<Size>?
+    val sizes: List<Size>,
+    val likes: Likes
 ) : Parcelable
 
 @Parcelize
@@ -101,7 +104,7 @@ data class Likes(
 
 @Parcelize
 data class Size(
-    val type: String,
+    val type: PhotoSize,
     val height: Int,
     val width: Int,
     val url: String

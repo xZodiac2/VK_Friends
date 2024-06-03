@@ -25,7 +25,7 @@ data class UserEntity(
 )
 
 
-@Entity(tableName = "wall_items_table")
+@Entity(tableName = "posts_table")
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val databaseId: Int = 0,
@@ -70,7 +70,8 @@ data class PhotoDatabaseDto(
     val albumId: Int,
     val id: Long,
     val ownerId: Long,
-    val sizes: List<SizeDatabaseDto>?
+    val sizes: List<SizeDatabaseDto>?,
+    val likes: LikesDatabaseDto?
 )
 
 data class VideoExtendedDatabaseDto(

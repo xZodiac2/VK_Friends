@@ -28,9 +28,9 @@ fun AuthorizationScreen(
         AuthorizationScreenState.NotAuthorized -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 OneTap(
+                    modifier = Modifier.padding(horizontal = 32.dp),
                     onAuth = { authViewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
-                    onFail = { Toast.makeText(context, it.description, Toast.LENGTH_LONG).show() },
-                    modifier = Modifier.padding(horizontal = 32.dp)
+                    onFail = { Toast.makeText(context, it.description, Toast.LENGTH_LONG).show() }
                 )
             }
         }

@@ -41,17 +41,17 @@ fun UserCard(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             AsyncImage(
-                model = user.photoUrl,
-                contentDescription = "user_photo",
                 modifier = Modifier
                     .clip(CircleShape)
                     .size(100.dp),
+                model = user.photoUrl,
+                contentDescription = "user_photo",
                 contentScale = ContentScale.Crop
             )
             Text(
+                modifier = Modifier.padding(vertical = 8.dp),
                 text = "${user.firstName} ${user.lastName}",
                 fontSize = LocalTypography.current.average,
-                modifier = Modifier.padding(vertical = 8.dp),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 color = LocalColorScheme.current.primaryTextColor

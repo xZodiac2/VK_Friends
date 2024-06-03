@@ -68,6 +68,12 @@ data class PostDto(
     @Json(name = "owner_id") val ownerId: Long
 )
 
+abstract class BaseAttachment {
+    abstract val id: Long
+    abstract val ownerId: Long
+    open val accessKey: String = ""
+}
+
 data class AttachmentDto(
     @Json(name = "type") val type: String,
     @Json(name = "photo") val photo: PhotoDto? = null,
@@ -77,28 +83,30 @@ data class AttachmentDto(
 
 data class AudioDto(
     @Json(name = "artist") val artist: String = "",
-    @Json(name = "id") val id: Long = 0,
-    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "id") override val id: Long = 0,
+    @Json(name = "owner_id") override val ownerId: Long = 0,
     @Json(name = "title") val title: String = "",
     @Json(name = "duration") val duration: Int = 0,
     @Json(name = "url") val url: String = "",
-)
+) : BaseAttachment()
 
 data class PhotoDto(
     @Json(name = "album_id") val albumId: Int = 0,
-    @Json(name = "id") val id: Long = 0,
-    @Json(name = "owner_id") val ownerId: Long = 0,
-    @Json(name = "sizes") val sizes: List<SizeDto>? = null
-)
+    @Json(name = "id") override val id: Long = 0,
+    @Json(name = "owner_id") override val ownerId: Long = 0,
+    @Json(name = "sizes") val sizes: List<SizeDto>? = null,
+    @Json(name = "likes") val likes: LikesDto? = null,
+    @Json(name = "access_key") override val accessKey: String = ""
+) : BaseAttachment()
 
 data class VideoDto(
     @Json(name = "duration") val duration: Int = 0,
     @Json(name = "first_frame") val firstFrame: List<PhotoDto>? = null,
-    @Json(name = "id") val id: Long = 0,
-    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "id") override val id: Long = 0,
+    @Json(name = "owner_id") override val ownerId: Long = 0,
     @Json(name = "title") val title: String = "",
-    @Json(name = "access_key") val accessKey: String = ""
-)
+    @Json(name = "access_key") override val accessKey: String = ""
+) : BaseAttachment()
 
 data class VideoExtendedResponse(
     @Json(name = "response") val response: VideoExtendedDtoResponse

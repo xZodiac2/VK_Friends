@@ -1,6 +1,7 @@
 package com.ilya.profileViewDomain
 
 import com.ilya.core.appCommon.enums.FriendStatus
+import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
 import com.ilya.data.local.database.AttachmentDatabaseDto
@@ -13,13 +14,16 @@ import com.ilya.data.local.database.SizeDatabaseDto
 import com.ilya.data.local.database.VideoExtendedDatabaseDto
 import com.ilya.data.network.retrofit.api.CityDto
 import com.ilya.data.network.retrofit.api.CountersDto
+import com.ilya.data.network.retrofit.api.LikesDto
 import com.ilya.data.network.retrofit.api.PartnerDto
+import com.ilya.data.network.retrofit.api.PhotoDto
+import com.ilya.data.network.retrofit.api.SizeDto
 import com.ilya.data.network.retrofit.api.UserDto
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-fun UserDto.toUser(): User {
+fun UserDto.toUser(photos: List<PhotoDto>): User {
     return User(
         id = id,
         firstName = firstName,
@@ -33,7 +37,8 @@ fun UserDto.toUser(): User {
         relation = Relation.entries.find { it.value == relation } ?: Relation.NOT_STATED,
         partner = partner?.toPartner(),
         sex = Sex.entries.find { it.value == sex } ?: Sex.NOT_STATED,
-        counters = counters?.toCounters()
+        counters = counters?.toCounters(),
+        photos = photos.map { it.toPhoto() }
     )
 }
 
@@ -115,13 +120,40 @@ private fun PhotoDatabaseDto.toPhoto(): Photo {
         albumId = albumId,
         id = id,
         ownerId = ownerId,
-        sizes = sizes?.map { it.toSize() }
+        sizes = sizes?.map { it.toSize() } ?: emptyList(),
+        likes = likes?.toLikes() ?: Likes(count = 0, userLikes = false)
+    )
+}
+
+private fun PhotoDto.toPhoto(): Photo {
+    return Photo(
+        albumId = albumId,
+        id = id,
+        ownerId = ownerId,
+        sizes = sizes?.map { it.toSize() } ?: emptyList(),
+        likes = likes?.toLikes() ?: Likes(count = 0, userLikes = false)
+    )
+}
+
+private fun LikesDto.toLikes(): Likes {
+    return Likes(
+        count = count,
+        userLikes = userLikes == 1
+    )
+}
+
+private fun SizeDto.toSize(): Size {
+    return Size(
+        type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
+        height = height,
+        width = width,
+        url = url
     )
 }
 
 private fun SizeDatabaseDto.toSize(): Size {
     return Size(
-        type = type,
+        type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
         height = height,
         width = width,
         url = url

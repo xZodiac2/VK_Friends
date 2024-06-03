@@ -14,6 +14,9 @@ internal interface FriendsDao {
     @Query("SELECT * FROM friends_table")
     fun getPagingSource(): PagingSource<Int, FriendEntity>
 
+    @Query("SELECT * FROM friends_table")
+    suspend fun getAll(): List<FriendEntity>
+
     @Query("DELETE FROM friends_table")
     suspend fun deleteAll()
 
@@ -31,6 +34,9 @@ internal interface UsersDao {
     @Query("SELECT * FROM users_table")
     fun getPagingSource(): PagingSource<Int, UserEntity>
 
+    @Query("SELECT * FROM users_table")
+    suspend fun getAll(): List<UserEntity>
+
     @Query("DELETE FROM users_table")
     suspend fun deleteAll()
 
@@ -45,13 +51,16 @@ internal interface PostsDao {
     @Upsert
     suspend fun upsertAll(posts: List<PostEntity>)
 
-    @Query("SELECT * FROM wall_items_table")
+    @Query("SELECT * FROM posts_table ORDER BY databaseId")
     fun getPagingSource(): PagingSource<Int, PostEntity>
 
-    @Query("DELETE FROM wall_items_table")
+    @Query("SELECT * FROM posts_table")
+    suspend fun getAll(): List<PostEntity>
+
+    @Query("DELETE FROM posts_table")
     suspend fun deleteAll()
 
-    @Query("DELETE FROM sqlite_sequence WHERE name = 'wall_items_table'")
+    @Query("DELETE FROM sqlite_sequence WHERE name = 'posts_table'")
     suspend fun deletePrimaryKeys()
 
 }

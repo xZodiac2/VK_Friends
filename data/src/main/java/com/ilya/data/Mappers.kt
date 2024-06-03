@@ -1,5 +1,6 @@
 package com.ilya.data
 
+import com.ilya.core.appCommon.enums.AttachmentType
 import com.ilya.data.local.database.AttachmentDatabaseDto
 import com.ilya.data.local.database.AttachmentsDatabaseDto
 import com.ilya.data.local.database.AudioDatabaseDto
@@ -68,18 +69,29 @@ fun FriendEntity.toUser(): User {
     )
 }
 
-fun PostDto.toPostEntity(videos: List<VideoExtendedDataDto>, owner: UserDto): PostEntity {
+fun PostDto.toPostEntity(
+    videos: List<VideoExtendedDataDto>,
+    photos: List<PhotoDto>,
+    owner: UserDto
+): PostEntity {
     var videoIndex = 0
+    var photoIndex = 0
 
     return PostEntity(
         id = id,
         attachments = AttachmentsDatabaseDto(attachments.map {
-            if (it.type == "video") {
-                val video = videos[videoIndex]
-                videoIndex++
-                it.toAttachmentDatabaseDto(video)
-            } else {
-                it.toAttachmentDatabaseDto(null)
+            when (it.type) {
+                AttachmentType.VIDEO.value -> {
+                    val video = videos[videoIndex++]
+                    it.toAttachmentDatabaseDto(video, null)
+                }
+
+                AttachmentType.PHOTO.value -> {
+                    val photo = photos[photoIndex++]
+                    it.toAttachmentDatabaseDto(null, photo)
+                }
+
+                else -> it.toAttachmentDatabaseDto(null, null)
             }
         }),
         likes = likes.toLikesDatabaseDto(),
@@ -99,11 +111,12 @@ private fun UserDto.toPostOwnerDatabaseDto(): PostOwnerDatabaseDto {
 }
 
 private fun AttachmentDto.toAttachmentDatabaseDto(
-    videoExtendedDto: VideoExtendedDataDto?
+    videoExtendedDto: VideoExtendedDataDto?,
+    photoDto: PhotoDto?
 ): AttachmentDatabaseDto {
     return AttachmentDatabaseDto(
         type = type,
-        photo = photo?.toPhotoDatabaseDto(),
+        photo = photoDto?.toPhotoDatabaseDto(),
         audio = audio?.toAudioDatabaseDto(),
         video = videoExtendedDto?.toVideoExtendedDatabaseDto()
     )
@@ -136,7 +149,8 @@ private fun PhotoDto.toPhotoDatabaseDto(): PhotoDatabaseDto {
         albumId = albumId,
         id = id,
         ownerId = ownerId,
-        sizes = sizes?.map { it.toSizeDatabaseDto() }
+        sizes = sizes?.map { it.toSizeDatabaseDto() },
+        likes = likes?.toLikesDatabaseDto()
     )
 }
 

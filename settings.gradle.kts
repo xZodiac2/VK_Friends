@@ -1,9 +1,5 @@
 import java.net.URI
 
-include(":domain:profileViewDomain")
-
-
-
 pluginManagement {
     repositories {
         google()
@@ -19,16 +15,20 @@ dependencyResolutionManagement {
         maven {
             url = URI("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-andorid/")
         }
+        maven {
+            url = URI("https://jitpack.io")
+        }
     }
 }
 
 rootProject.name = "VK Friends"
 
 include(":app")
-include(":feature:search")
-include(":feature:profileView")
 include(":core")
+include(":data")
+include(":theme")
+include(":domain:profileViewDomain")
 include(":feature:auth")
 include(":feature:friendsView")
-include(":theme")
-include(":data")
+include(":feature:search")
+include(":feature:profileView")

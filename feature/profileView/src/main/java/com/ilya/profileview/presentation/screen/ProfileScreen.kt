@@ -1,6 +1,5 @@
 package com.ilya.profileview.presentation.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -28,6 +27,7 @@ import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.profileview.presentation.ProfileScreenViewModel
+import com.ilya.profileview.presentation.screen.components.Photos
 import com.ilya.profileview.presentation.screen.components.ProfileHeader
 import com.ilya.theme.LocalColorScheme
 
@@ -43,7 +43,7 @@ fun ProfileScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val postsPagingItem = viewModel.pagingFlow.collectAsLazyPagingItems()
 
-    Log.d("mytag", postsPagingItem.itemSnapshotList.items.toString())
+    postsPagingItem.itemSnapshotList.items
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -133,5 +133,6 @@ private fun Content(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item { ProfileHeader(user, onBackClick, friendRequest) }
+        item { Photos(user.photos) }
     }
 }

@@ -15,8 +15,12 @@ internal class UsersLocalRepository @Inject constructor(
         database.usersDao.upsertAll(upsertData.toList())
     }
 
-    override fun getAll(): PagingSource<Int, UserEntity> {
+    override fun getPagingSource(): PagingSource<Int, UserEntity> {
         return database.usersDao.getPagingSource()
+    }
+
+    override suspend fun getAll(): List<UserEntity> {
+        return database.usersDao.getAll()
     }
 
     override suspend fun deleteAll() {

@@ -11,6 +11,6 @@ class FriendsPagingSourceFactory @Inject constructor(
 ) : BaseFactory<Unit, PagingSource<Int, FriendEntity>> {
 
     override fun newInstance(initializationData: Unit): PagingSource<Int, FriendEntity> {
-        return localRepository.getAll()
+        return localRepository.getPagingSource()
     }
 }

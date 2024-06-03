@@ -257,9 +257,9 @@ private fun Content(
         }
 
         PullRefreshIndicator(
+            modifier = Modifier.align(Alignment.TopCenter),
             refreshing = isRefreshing,
             state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter),
             contentColor = LocalColorScheme.current.primaryIconTintColor,
             backgroundColor = LocalColorScheme.current.cardContainerColor
         )

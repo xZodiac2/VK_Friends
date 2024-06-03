@@ -81,8 +81,8 @@ fun ProfileHeader(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier.align(Alignment.Start),
+                onClick = onBackClick
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -91,12 +91,12 @@ fun ProfileHeader(
                 )
             }
             AsyncImage(
-                model = user.photoUrl,
-                contentDescription = "avatar",
                 modifier = Modifier
                     .padding(top = 20.dp)
                     .size(140.dp)
                     .clip(CircleShape),
+                model = user.photoUrl,
+                contentDescription = "avatar",
                 contentScale = ContentScale.Crop
             )
             Text(
@@ -107,10 +107,10 @@ fun ProfileHeader(
             )
             if (user.status.isNotBlank()) {
                 Text(
-                    text = user.status,
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .widthIn(max = 350.dp),
+                    text = user.status,
                     textAlign = TextAlign.Center,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
@@ -120,11 +120,11 @@ fun ProfileHeader(
             TextButton(onClick = { showSheet = true }) {
                 Row {
                     Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "more",
                         modifier = Modifier
                             .padding(top = 2.dp, end = 2.dp)
                             .size(16.dp),
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = "more",
                         tint = LocalColorScheme.current.iconTintColor
                     )
                     Text(
@@ -136,12 +136,15 @@ fun ProfileHeader(
             }
             if (!user.isAccountOwner) {
                 BaseButton(
-                    onClick = { friendRequest(user) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 40.dp)
+                        .padding(horizontal = 40.dp),
+                    onClick = { friendRequest(user) }
                 ) {
                     Icon(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(20.dp),
                         painter = when (user.friendStatus) {
                             FriendStatus.NOT_FRIENDS -> painterResource(id = R.drawable.plus)
                             FriendStatus.WAITING -> painterResource(id = R.drawable.clock)
@@ -149,9 +152,6 @@ fun ProfileHeader(
                             FriendStatus.SUBSCRIBED -> painterResource(id = R.drawable.plus)
                         },
                         contentDescription = "add",
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(20.dp),
                         tint = Color.White
                     )
                     Text(
@@ -175,9 +175,7 @@ fun ProfileHeader(
             onDismissRequest = { showSheet = false },
             containerColor = LocalColorScheme.current.cardContainerColor,
             dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.iconTintColor) }
-        ) {
-            SheetContent(user = user)
-        }
+        ) { SheetContent(user = user) }
     }
 }
 
@@ -198,11 +196,11 @@ private fun SheetContent(user: User) {
         if (user.status.isNotBlank()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = "status",
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .size(20.dp),
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "status",
                     tint = LocalColorScheme.current.iconTintColor
                 )
                 Text(
@@ -214,11 +212,11 @@ private fun SheetContent(user: User) {
         if (user.birthday.isNotBlank()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Outlined.DateRange,
-                    contentDescription = "bdate",
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .size(20.dp),
+                    imageVector = Icons.Outlined.DateRange,
+                    contentDescription = "bdate",
                     tint = LocalColorScheme.current.iconTintColor
                 )
                 Text(
@@ -230,11 +228,11 @@ private fun SheetContent(user: User) {
         if (user.relation != Relation.NOT_STATED) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = "relation",
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .size(20.dp),
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = "relation",
                     tint = LocalColorScheme.current.iconTintColor
                 )
                 val text = when (user.relation) {
@@ -294,11 +292,11 @@ private fun SheetContent(user: User) {
             counters.followers?.let { followers ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Outlined.AccountCircle,
-                        contentDescription = "subscribers",
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .size(20.dp),
+                        imageVector = Icons.Outlined.AccountCircle,
+                        contentDescription = "subscribers",
                         tint = LocalColorScheme.current.iconTintColor
                     )
                     Text(
@@ -314,19 +312,17 @@ private fun SheetContent(user: User) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
             counters.friends?.let { friends ->
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Outlined.AccountBox,
-                            contentDescription = "friends",
                             modifier = Modifier
                                 .padding(end = 16.dp)
                                 .size(36.dp),
+                            imageVector = Icons.Outlined.AccountBox,
+                            contentDescription = "friends",
                             tint = LocalColorScheme.current.primaryIconTintColor
                         )
                         Text(
@@ -345,17 +341,17 @@ private fun SheetContent(user: User) {
             }
             counters.subscriptions?.let { subscriptions ->
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            painter = painterResource(id = R.drawable.subscribers),
-                            contentDescription = "friends",
                             modifier = Modifier
                                 .padding(end = 16.dp)
                                 .size(36.dp),
+                            painter = painterResource(id = R.drawable.subscribers),
+                            contentDescription = "friends",
                             tint = LocalColorScheme.current.primaryIconTintColor
                         )
                         Text(

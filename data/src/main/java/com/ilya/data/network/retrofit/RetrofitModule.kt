@@ -2,6 +2,8 @@ package com.ilya.data.network.retrofit
 
 import android.util.Log
 import com.ilya.data.network.retrofit.api.FriendsManageVkApi
+import com.ilya.data.network.retrofit.api.PostsDataExecuteVkApi
+import com.ilya.data.network.retrofit.api.UserDataExecuteVkApi
 import com.ilya.data.network.retrofit.api.UserDataVkApi
 import com.ilya.data.network.retrofit.api.UsersVkApi
 import com.squareup.moshi.Moshi
@@ -55,5 +57,12 @@ internal object RetrofitModule {
 
     @Provides
     fun provideFriendsManageApi(retrofit: Retrofit): FriendsManageVkApi = retrofit.create()
+
+    @Provides
+    fun provideUserDataExecutorApi(retrofit: Retrofit): UserDataExecuteVkApi = retrofit.create()
+
+    @Provides
+    fun providePostAdditionalDataExecutorApi(retrofit: Retrofit): PostsDataExecuteVkApi =
+        retrofit.create()
 
 }

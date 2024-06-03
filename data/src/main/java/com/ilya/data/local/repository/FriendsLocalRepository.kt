@@ -15,8 +15,12 @@ internal class FriendsLocalRepository @Inject constructor(
         database.friendsDao.upsertAll(upsertData.toList())
     }
 
-    override fun getAll(): PagingSource<Int, FriendEntity> {
+    override fun getPagingSource(): PagingSource<Int, FriendEntity> {
         return database.friendsDao.getPagingSource()
+    }
+
+    override suspend fun getAll(): List<FriendEntity> {
+        return database.friendsDao.getAll()
     }
 
     override suspend fun deleteAll() {

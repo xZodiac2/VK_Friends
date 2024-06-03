@@ -10,6 +10,6 @@ class UsersPagingSourceFactory @Inject constructor(
     private val localRepository: LocalRepository<UserEntity>
 ) : BaseFactory<Unit, PagingSource<Int, UserEntity>> {
     override fun newInstance(initializationData: Unit): PagingSource<Int, UserEntity> {
-        return localRepository.getAll()
+        return localRepository.getPagingSource()
     }
 }

@@ -23,9 +23,9 @@ fun BaseAlertDialog(state: AlertDialogState.Triggered) {
     AlertDialog(
         icon = {
             Icon(
+                modifier = Modifier.size(30.dp),
                 painter = painterResource(id = R.drawable.warning_icon),
                 contentDescription = "warning",
-                modifier = Modifier.size(30.dp),
                 tint = LocalColorScheme.current.selectedIconColor
             )
         },
@@ -46,19 +46,19 @@ fun BaseAlertDialog(state: AlertDialogState.Triggered) {
         containerColor = LocalColorScheme.current.primary,
         title = {
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = if (state.title == null) "" else state.title.resolve(),
                 textAlign = TextAlign.Center,
-                color = LocalColorScheme.current.primaryTextColor,
-                modifier = Modifier.fillMaxWidth()
+                color = LocalColorScheme.current.primaryTextColor
             )
         },
         text = {
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = if (state.text == null) "" else state.text.resolve(),
                 textAlign = TextAlign.Center,
                 color = LocalColorScheme.current.secondaryTextColor,
-                fontSize = LocalTypography.current.average,
-                modifier = Modifier.fillMaxWidth()
+                fontSize = LocalTypography.current.average
             )
         }
     )

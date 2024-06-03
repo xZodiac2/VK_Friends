@@ -6,7 +6,9 @@ interface LocalRepository<T : Any> {
 
     suspend fun upsertAll(vararg upsertData: T)
 
-    fun getAll(): PagingSource<Int, T>
+    fun getPagingSource(): PagingSource<Int, T>
+
+    suspend fun getAll(): List<T>
 
     suspend fun deleteAll()
 

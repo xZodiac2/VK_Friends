@@ -9,15 +9,15 @@ import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.appCommon.enums.AttachmentType
 import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.PostEntity
-import com.ilya.data.network.UserDataRemoteRepository
-import com.ilya.data.network.VkApiExecutor
-import com.ilya.data.network.retrofit.api.AdditionalPostData
-import com.ilya.data.network.retrofit.api.AttachmentDto
-import com.ilya.data.network.retrofit.api.BaseAttachment
-import com.ilya.data.network.retrofit.api.PostDto
-import com.ilya.data.network.retrofit.api.UserDto
+import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
+import com.ilya.data.remote.UserDataRemoteRepository
+import com.ilya.data.remote.VkApiExecutor
 import com.ilya.data.paging.PaginationError
+import com.ilya.data.remote.retrofit.api.dto.AdditionalPostData
+import com.ilya.data.remote.retrofit.api.dto.AttachmentDto
+import com.ilya.data.remote.retrofit.api.dto.BaseAttachment
+import com.ilya.data.remote.retrofit.api.dto.PostDto
+import com.ilya.data.remote.retrofit.api.dto.UserDto
 import com.ilya.data.toPostEntity
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -25,23 +25,23 @@ import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
 class PostsRemoteMediator(
-    private val localRepository: LocalRepository<PostEntity>,
+    private val localRepository: LocalRepository<PostWithAttachmentsAndOwner>,
     private val remoteRepository: UserDataRemoteRepository,
     private val accessTokenManager: AccessTokenManager,
     private val userId: Long,
     private val vkApiExecutor: VkApiExecutor<AdditionalPostData>
-) : RemoteMediator<Int, PostEntity>() {
+) : RemoteMediator<Int, PostWithAttachmentsAndOwner>() {
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, PostEntity>
+        state: PagingState<Int, PostWithAttachmentsAndOwner>
     ): MediatorResult {
         try {
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    state.lastItemOrNull()?.databaseId ?: return MediatorResult.Success(
+                    state.lastItemOrNull()?.data?.pagingId ?: return MediatorResult.Success(
                         endOfPaginationReached = false
                     )
                 }
@@ -84,9 +84,12 @@ class PostsRemoteMediator(
                         ?.items ?: emptyList()
                     post.toPostEntity(videos, photos, postOwner)
                 }.filterNot {
-                    databasePosts.map { databasePost ->
-                        databasePost.copy(databaseId = 0)
-                    }.contains(it.copy(databaseId = 0))
+                    databasePosts.map { post ->
+                        val data = post.data.copy(pagingId = 0)
+                        post.copy(data = data)
+                    }.contains(
+                        it.copy(data = it.data.copy(pagingId = 0))
+                    )
                 }
                 localRepository.upsertAll(*postEntities.toTypedArray())
             }
@@ -214,7 +217,7 @@ class PostsRemoteMediator(
     }
 
     class Factory @Inject constructor(
-        private val localRepository: LocalRepository<PostEntity>,
+        private val localRepository: LocalRepository<PostWithAttachmentsAndOwner>,
         private val remoteRepository: UserDataRemoteRepository,
         private val accessTokenManager: AccessTokenManager,
         private val vkApiExecutor: VkApiExecutor<AdditionalPostData>

@@ -8,10 +8,10 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.UserEntity
-import com.ilya.data.network.UsersRemoteRepository
-import com.ilya.data.network.retrofit.api.UserDto
+import com.ilya.data.local.database.entities.UserPagingEntity
+import com.ilya.data.remote.UsersRemoteRepository
 import com.ilya.data.paging.PaginationError
+import com.ilya.data.remote.retrofit.api.dto.UserDto
 import com.ilya.data.toUserEntity
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -20,21 +20,21 @@ import javax.inject.Inject
 @OptIn(ExperimentalPagingApi::class)
 class UsersRemoteMediator private constructor(
     private val remoteRepo: UsersRemoteRepository,
-    private val localRepository: LocalRepository<UserEntity>,
+    private val localRepository: LocalRepository<UserPagingEntity>,
     private val accessTokenManager: AccessTokenManager,
     private val query: String = ""
-) : RemoteMediator<Int, UserEntity>() {
+) : RemoteMediator<Int, UserPagingEntity>() {
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, UserEntity>
+        state: PagingState<Int, UserPagingEntity>
     ): MediatorResult {
         try {
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    state.lastItemOrNull()?.databaseId ?: return MediatorResult.Success(
+                    state.lastItemOrNull()?.pagingId ?: return MediatorResult.Success(
                         endOfPaginationReached = false
                     )
                 }
@@ -106,7 +106,7 @@ class UsersRemoteMediator private constructor(
 
     class Factory @Inject constructor(
         private val remoteRepo: UsersRemoteRepository,
-        private val localRepo: LocalRepository<UserEntity>,
+        private val localRepo: LocalRepository<UserPagingEntity>,
         private val accessTokenManager: AccessTokenManager
     ) : BaseFactory<String, UsersRemoteMediator> {
         override fun newInstance(initializationData: String): UsersRemoteMediator {

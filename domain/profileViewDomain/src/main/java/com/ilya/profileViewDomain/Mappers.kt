@@ -4,21 +4,20 @@ import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
-import com.ilya.data.local.database.AttachmentDatabaseDto
-import com.ilya.data.local.database.AudioDatabaseDto
-import com.ilya.data.local.database.LikesDatabaseDto
-import com.ilya.data.local.database.PhotoDatabaseDto
-import com.ilya.data.local.database.PostEntity
-import com.ilya.data.local.database.PostOwnerDatabaseDto
-import com.ilya.data.local.database.SizeDatabaseDto
-import com.ilya.data.local.database.VideoExtendedDatabaseDto
-import com.ilya.data.network.retrofit.api.CityDto
-import com.ilya.data.network.retrofit.api.CountersDto
-import com.ilya.data.network.retrofit.api.LikesDto
-import com.ilya.data.network.retrofit.api.PartnerDto
-import com.ilya.data.network.retrofit.api.PhotoDto
-import com.ilya.data.network.retrofit.api.SizeDto
-import com.ilya.data.network.retrofit.api.UserDto
+import com.ilya.data.local.database.entities.AudioEntity
+import com.ilya.data.local.database.entities.FirstFrameEntity
+import com.ilya.data.local.database.entities.PhotoWithSizes
+import com.ilya.data.local.database.entities.PostLikesEntity
+import com.ilya.data.local.database.entities.PostOwnerEntity
+import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
+import com.ilya.data.local.database.entities.SizeEntity
+import com.ilya.data.local.database.entities.VideoWithFirstFrames
+import com.ilya.data.remote.retrofit.api.dto.CityDto
+import com.ilya.data.remote.retrofit.api.dto.CountersDto
+import com.ilya.data.remote.retrofit.api.dto.PartnerDto
+import com.ilya.data.remote.retrofit.api.dto.PhotoDto
+import com.ilya.data.remote.retrofit.api.dto.SizeDto
+import com.ilya.data.remote.retrofit.api.dto.UserDto
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,17 +64,19 @@ private fun CityDto.toCity(): City {
     )
 }
 
-fun PostEntity.toPost(): Post {
+fun PostWithAttachmentsAndOwner.toPost(): Post {
     return Post(
-        id = id,
-        attachments = attachments.items.map { it.toAttachment() },
-        date = parseToString(dateUnixTime),
+        id = data.id,
+        videos = videos.map { it.toVideoExtended() },
+        audios = audios.map { it.toAudio() },
+        photos = photos.map { it.toPhoto() },
+        date = parseToString(data.dateUnixTime),
         likes = likes.toLikes(),
         postOwner = owner.toPostOwner()
     )
 }
 
-private fun PostOwnerDatabaseDto.toPostOwner(): PostOwner {
+private fun PostOwnerEntity.toPostOwner(): PostOwner = with(data) {
     return PostOwner(
         id = id,
         firstName = firstName,
@@ -84,16 +85,7 @@ private fun PostOwnerDatabaseDto.toPostOwner(): PostOwner {
     )
 }
 
-private fun AttachmentDatabaseDto.toAttachment(): Attachment {
-    return Attachment(
-        type = type,
-        audio = audio?.toAudio(),
-        video = video?.toVideoExtended(),
-        photo = photo?.toPhoto(),
-    )
-}
-
-private fun AudioDatabaseDto.toAudio(): Audio {
+private fun AudioEntity.toAudio(): Audio {
     return Audio(
         artist = artist,
         id = id,
@@ -104,24 +96,22 @@ private fun AudioDatabaseDto.toAudio(): Audio {
     )
 }
 
-private fun VideoExtendedDatabaseDto.toVideoExtended(): VideoExtended {
+private fun VideoWithFirstFrames.toVideoExtended(): VideoExtended {
     return VideoExtended(
-        duration = duration,
-        firstFrame = firstFrame?.map { it.toPhoto() },
-        id = id,
-        ownerId = ownerId,
-        title = title,
-        playerUrl = playerUrl
+        duration = video.duration,
+        firstFrame = firstFrames.map { it.toFirstFrame() },
+        id = video.id,
+        ownerId = video.ownerId,
+        title = video.title,
+        playerUrl = video.playerUrl
     )
 }
 
-private fun PhotoDatabaseDto.toPhoto(): Photo {
-    return Photo(
-        albumId = albumId,
-        id = id,
-        ownerId = ownerId,
-        sizes = sizes?.map { it.toSize() } ?: emptyList(),
-        likes = likes?.toLikes() ?: Likes(count = 0, userLikes = false)
+private fun FirstFrameEntity.toFirstFrame(): FirstFrame {
+    return FirstFrame(
+        url = url,
+        width = width,
+        height = height
     )
 }
 
@@ -130,15 +120,23 @@ private fun PhotoDto.toPhoto(): Photo {
         albumId = albumId,
         id = id,
         ownerId = ownerId,
-        sizes = sizes?.map { it.toSize() } ?: emptyList(),
-        likes = likes?.toLikes() ?: Likes(count = 0, userLikes = false)
+        sizes = sizes.map { it.toSize() },
     )
 }
 
-private fun LikesDto.toLikes(): Likes {
+private fun PhotoWithSizes.toPhoto(): Photo {
+    return Photo(
+        ownerId = photo.ownerId,
+        albumId = photo.albumId,
+        id = photo.id,
+        sizes = sizes.map { it.toSize() },
+    )
+}
+
+private fun PostLikesEntity.toLikes(): Likes {
     return Likes(
         count = count,
-        userLikes = userLikes == 1
+        userLikes = userLikes
     )
 }
 
@@ -151,7 +149,7 @@ private fun SizeDto.toSize(): Size {
     )
 }
 
-private fun SizeDatabaseDto.toSize(): Size {
+private fun SizeEntity.toSize(): Size {
     return Size(
         type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
         height = height,
@@ -160,15 +158,8 @@ private fun SizeDatabaseDto.toSize(): Size {
     )
 }
 
-private fun LikesDatabaseDto.toLikes(): Likes {
-    return Likes(
-        count = count,
-        userLikes = userLikes
-    )
-}
-
 private fun parseToString(dateUnixTime: Long): String {
-    val date = Date(dateUnixTime)
-    val formatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    val date = Date(dateUnixTime * 1000L)
+    val formatter = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
     return formatter.format(date)
 }

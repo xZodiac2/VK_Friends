@@ -3,9 +3,6 @@ package com.ilya.data.local.database.di
 import android.content.Context
 import androidx.room.Room
 import com.ilya.data.local.database.VkFriendsApplicationDatabase
-import com.ilya.data.local.database.converters.AttachmentsConverter
-import com.ilya.data.local.database.converters.LikesConverter
-import com.ilya.data.local.database.converters.PostOwnerConverter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,21 +17,12 @@ internal object DatabaseModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(
-        @ApplicationContext context: Context,
-        likesConverter: LikesConverter,
-        attachmentsConverter: AttachmentsConverter,
-        postOwnerConverter: PostOwnerConverter
-    ): VkFriendsApplicationDatabase {
+    fun provideDatabase(@ApplicationContext context: Context): VkFriendsApplicationDatabase {
         return Room.databaseBuilder(
             context = context,
             klass = VkFriendsApplicationDatabase::class.java,
             name = "vkFriendsApplicationDatabase.db"
-        )
-            .addTypeConverter(likesConverter)
-            .addTypeConverter(attachmentsConverter)
-            .addTypeConverter(postOwnerConverter)
-            .build()
+        ).build()
     }
 
 }

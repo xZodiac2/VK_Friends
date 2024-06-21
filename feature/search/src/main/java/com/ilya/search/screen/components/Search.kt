@@ -28,7 +28,7 @@ import com.ilya.search.R
 import com.ilya.theme.LocalColorScheme
 
 @Composable
-fun SearchBar(
+internal fun SearchBar(
     onSearch: (String) -> Unit,
     heightOffset: Float,
     heightOffsetLimit: Float,

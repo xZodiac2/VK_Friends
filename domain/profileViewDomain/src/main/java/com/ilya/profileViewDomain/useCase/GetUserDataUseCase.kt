@@ -2,8 +2,8 @@ package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.UseCase
 import com.ilya.core.appCommon.enums.NameCase
-import com.ilya.data.network.VkApiExecutor
-import com.ilya.data.network.retrofit.api.UserExtendedResponseData
+import com.ilya.data.remote.VkApiExecutor
+import com.ilya.data.remote.retrofit.api.dto.UserExtendedResponseData
 import com.ilya.profileViewDomain.User
 import com.ilya.profileViewDomain.toUser
 import javax.inject.Inject

@@ -1,18 +1,13 @@
 package com.ilya.profileview.presentation.screen.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,7 +23,7 @@ import com.ilya.profileViewDomain.Photo
 import com.ilya.theme.LocalColorScheme
 
 @Composable
-fun Photos(photos: List<Photo>) {
+internal fun Photos(photos: List<Photo>) {
     if (photos.isNotEmpty()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -37,37 +32,28 @@ fun Photos(photos: List<Photo>) {
         ) {
             Box(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(LocalColorScheme.current.primary)
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                val rowHeight = 135.dp
-
-                LazyHorizontalGrid(
+                Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .height(rowHeight * photos.chunked(3).size)
-                        .fillMaxWidth(),
-                    rows = GridCells.Fixed(photos.chunked(3).size),
-                    contentPadding = PaddingValues(12.dp),
-                    userScrollEnabled = false,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    items(photos.chunked(3)) { photoList ->
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            photoList.forEach { photo ->
+                    photos.chunked(3).forEach {
+                        Row(modifier = Modifier.fillMaxWidth((1f / 3f) * photos.size)) {
+                            it.forEach { photo ->
                                 AsyncImage(
                                     modifier = Modifier
+                                        .weight(1f)
+                                        .padding(2.dp)
                                         .clip(RoundedCornerShape(4.dp))
-                                        .size(120.dp),
+                                        .aspectRatio(1f),
                                     model = photo.sizes.find { it.type == PhotoSize.X }?.url,
-                                    contentDescription = "user_photo",
+                                    contentDescription = "",
                                     contentScale = ContentScale.Crop
                                 )
                             }

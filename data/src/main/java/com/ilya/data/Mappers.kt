@@ -1,26 +1,28 @@
 package com.ilya.data
 
-import com.ilya.core.appCommon.enums.AttachmentType
-import com.ilya.data.local.database.AttachmentDatabaseDto
-import com.ilya.data.local.database.AttachmentsDatabaseDto
-import com.ilya.data.local.database.AudioDatabaseDto
-import com.ilya.data.local.database.FriendEntity
-import com.ilya.data.local.database.LikesDatabaseDto
-import com.ilya.data.local.database.PhotoDatabaseDto
-import com.ilya.data.local.database.PostEntity
-import com.ilya.data.local.database.PostOwnerDatabaseDto
-import com.ilya.data.local.database.SizeDatabaseDto
-import com.ilya.data.local.database.UserEntity
-import com.ilya.data.local.database.VideoExtendedDatabaseDto
-import com.ilya.data.network.retrofit.api.AttachmentDto
-import com.ilya.data.network.retrofit.api.AudioDto
-import com.ilya.data.network.retrofit.api.LikesDto
-import com.ilya.data.network.retrofit.api.PhotoDto
-import com.ilya.data.network.retrofit.api.PostDto
-import com.ilya.data.network.retrofit.api.SizeDto
-import com.ilya.data.network.retrofit.api.UserDto
-import com.ilya.data.network.retrofit.api.VideoExtendedDataDto
+import com.ilya.data.local.database.entities.AudioEntity
+import com.ilya.data.local.database.entities.FirstFrameEntity
+import com.ilya.data.local.database.entities.FriendPagingEntity
+import com.ilya.data.local.database.entities.PhotoEntity
+import com.ilya.data.local.database.entities.PhotoWithSizes
+import com.ilya.data.local.database.entities.PostLikesEntity
+import com.ilya.data.local.database.entities.PostOwnerEntity
+import com.ilya.data.local.database.entities.PostPagingEntity
+import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
+import com.ilya.data.local.database.entities.SizeEntity
+import com.ilya.data.local.database.entities.UserData
+import com.ilya.data.local.database.entities.UserPagingEntity
+import com.ilya.data.local.database.entities.VideoEntity
+import com.ilya.data.local.database.entities.VideoWithFirstFrames
 import com.ilya.data.paging.User
+import com.ilya.data.remote.retrofit.api.dto.AudioDto
+import com.ilya.data.remote.retrofit.api.dto.FirstFrameDto
+import com.ilya.data.remote.retrofit.api.dto.LikesDto
+import com.ilya.data.remote.retrofit.api.dto.PhotoDto
+import com.ilya.data.remote.retrofit.api.dto.PostDto
+import com.ilya.data.remote.retrofit.api.dto.SizeDto
+import com.ilya.data.remote.retrofit.api.dto.UserDto
+import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
 import com.vk.id.AccessToken
 import com.vk.id.VKIDUser
 
@@ -33,25 +35,29 @@ fun VKIDUser.toUser(accessToken: AccessToken): User {
     )
 }
 
-fun UserDto.toFriendEntity(): FriendEntity {
-    return FriendEntity(
-        id = id,
-        firstName = firstName,
-        lastName = lastName,
-        photoUrl = photoUrl
+fun UserDto.toFriendEntity(): FriendPagingEntity {
+    return FriendPagingEntity(
+        data = UserData(
+            id = id,
+            firstName = firstName,
+            lastName = lastName,
+            photoUrl = photoUrl
+        )
     )
 }
 
-fun UserDto.toUserEntity(): UserEntity {
-    return UserEntity(
-        id = id,
-        firstName = firstName,
-        lastName = lastName,
-        photoUrl = photoUrl
+fun UserDto.toUserEntity(): UserPagingEntity {
+    return UserPagingEntity(
+        data = UserData(
+            id = id,
+            firstName = firstName,
+            lastName = lastName,
+            photoUrl = photoUrl
+        )
     )
 }
 
-fun UserEntity.toUser(): User {
+fun UserPagingEntity.toUser(): User = with(data) {
     return User(
         id = id,
         firstName = firstName,
@@ -60,7 +66,7 @@ fun UserEntity.toUser(): User {
     )
 }
 
-fun FriendEntity.toUser(): User {
+fun FriendPagingEntity.toUser(): User = with(data) {
     return User(
         id = id,
         firstName = firstName,
@@ -68,64 +74,86 @@ fun FriendEntity.toUser(): User {
         photoUrl = photoUrl
     )
 }
+
+private const val AUDIO_TYPE = "audio"
 
 fun PostDto.toPostEntity(
     videos: List<VideoExtendedDataDto>,
     photos: List<PhotoDto>,
     owner: UserDto
-): PostEntity {
-    var videoIndex = 0
-    var photoIndex = 0
+): PostWithAttachmentsAndOwner {
 
-    return PostEntity(
-        id = id,
-        attachments = AttachmentsDatabaseDto(attachments.map {
-            when (it.type) {
-                AttachmentType.VIDEO.value -> {
-                    val video = videos[videoIndex++]
-                    it.toAttachmentDatabaseDto(video, null)
-                }
-
-                AttachmentType.PHOTO.value -> {
-                    val photo = photos[photoIndex++]
-                    it.toAttachmentDatabaseDto(null, photo)
-                }
-
-                else -> it.toAttachmentDatabaseDto(null, null)
+    return PostWithAttachmentsAndOwner(
+        data = PostPagingEntity(
+            id = id,
+            text = text,
+            dateUnixTime = dateUnixTime
+        ),
+        photos = photos.map {
+            val photoWithSizes = it.toPhotoWithSizes(id)
+            PhotoWithSizes(photoWithSizes.first, photoWithSizes.second)
+        },
+        videos = videos.map {
+            val videoWithFirstFrames = it.toVideoWithFirstFrames(id)
+            VideoWithFirstFrames(videoWithFirstFrames.first, videoWithFirstFrames.second)
+        },
+        audios = attachments.mapNotNull { attachment ->
+            if (attachment.type == AUDIO_TYPE) {
+                attachment.audio?.toAudioEntity(id)
+            } else {
+                null
             }
-        }),
-        likes = likes.toLikesDatabaseDto(),
-        dateUnixTime = dateUnixTime,
-        owner = owner.toPostOwnerDatabaseDto(),
-        text = text
+        },
+        owner = owner.toPostOwnerEntity(id),
+        likes = likes.toPostLikesEntity(id)
     )
 }
 
-private fun UserDto.toPostOwnerDatabaseDto(): PostOwnerDatabaseDto {
-    return PostOwnerDatabaseDto(
+private fun VideoExtendedDataDto.toVideoWithFirstFrames(postId: Long): Pair<VideoEntity, List<FirstFrameEntity>> {
+    return this.toVideoEntity(postId) to firstFrame.map { it.toFirstFrameEntity(this.id) }
+}
+
+private fun PhotoDto.toPhotoWithSizes(postId: Long): Pair<PhotoEntity, List<SizeEntity>> {
+    return this.toPhotoEntity(postId) to sizes.map { it.toSizeEntity(id) }
+}
+
+private fun FirstFrameDto.toFirstFrameEntity(videoId: Long): FirstFrameEntity {
+    return FirstFrameEntity(
+        videoId = videoId,
+        url = url,
+        width = width,
+        height = height
+    )
+}
+
+private fun AudioDto.toAudioEntity(postId: Long): AudioEntity {
+    return AudioEntity(
         id = id,
-        firstName = firstName,
-        lastName = lastName,
-        photoUrl = photoUrl
+        artist = artist,
+        postId = postId,
+        ownerId = ownerId,
+        title = title,
+        url = url,
+        duration = duration
     )
 }
 
-private fun AttachmentDto.toAttachmentDatabaseDto(
-    videoExtendedDto: VideoExtendedDataDto?,
-    photoDto: PhotoDto?
-): AttachmentDatabaseDto {
-    return AttachmentDatabaseDto(
-        type = type,
-        photo = photoDto?.toPhotoDatabaseDto(),
-        audio = audio?.toAudioDatabaseDto(),
-        video = videoExtendedDto?.toVideoExtendedDatabaseDto()
+private fun UserDto.toPostOwnerEntity(postId: Long): PostOwnerEntity {
+    return PostOwnerEntity(
+        postId = postId,
+        data = UserData(
+            id = id,
+            firstName = firstName,
+            lastName = lastName,
+            photoUrl = photoUrl
+        )
     )
 }
 
-private fun VideoExtendedDataDto.toVideoExtendedDatabaseDto(): VideoExtendedDatabaseDto {
-    return VideoExtendedDatabaseDto(
+private fun VideoExtendedDataDto.toVideoEntity(postId: Long): VideoEntity {
+    return VideoEntity(
+        postId = postId,
         duration = duration,
-        firstFrame = firstFrame?.map { it.toPhotoDatabaseDto() },
         id = id,
         ownerId = ownerId,
         title = title,
@@ -133,38 +161,28 @@ private fun VideoExtendedDataDto.toVideoExtendedDatabaseDto(): VideoExtendedData
     )
 }
 
-private fun AudioDto.toAudioDatabaseDto(): AudioDatabaseDto {
-    return AudioDatabaseDto(
-        artist = artist,
-        id = id,
-        ownerId = ownerId,
-        title = title,
-        duration = duration,
-        url = url,
-    )
-}
-
-private fun PhotoDto.toPhotoDatabaseDto(): PhotoDatabaseDto {
-    return PhotoDatabaseDto(
+private fun PhotoDto.toPhotoEntity(postId: Long): PhotoEntity {
+    return PhotoEntity(
         albumId = albumId,
         id = id,
         ownerId = ownerId,
-        sizes = sizes?.map { it.toSizeDatabaseDto() },
-        likes = likes?.toLikesDatabaseDto()
+        postId = postId
     )
 }
 
-private fun SizeDto.toSizeDatabaseDto(): SizeDatabaseDto {
-    return SizeDatabaseDto(
+private fun SizeDto.toSizeEntity(photoId: Long): SizeEntity {
+    return SizeEntity(
         type = type,
         height = height,
         width = width,
-        url = url
+        url = url,
+        photoId = photoId
     )
 }
 
-private fun LikesDto.toLikesDatabaseDto(): LikesDatabaseDto {
-    return LikesDatabaseDto(
+private fun LikesDto.toPostLikesEntity(postId: Long): PostLikesEntity {
+    return PostLikesEntity(
+        postId = postId,
         count = count,
         userLikes = userLikes == 1
     )

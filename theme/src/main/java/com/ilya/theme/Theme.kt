@@ -37,7 +37,10 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(colorScheme.secondary)
 
-    CompositionLocalProvider(LocalColorScheme provides colorScheme) {
+    CompositionLocalProvider(
+        LocalColorScheme provides colorScheme,
+        LocalTypography provides Typography
+    ) {
         Box(modifier = Modifier.background(colorScheme.primary)) { content() }
     }
 }

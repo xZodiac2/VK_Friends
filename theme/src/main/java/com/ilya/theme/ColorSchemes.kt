@@ -23,7 +23,7 @@ data class ColorScheme(
     val primaryIconTintColor: Color = LightColorScheme.primaryIconTintColor
 )
 
-object LightColorScheme {
+internal object LightColorScheme {
     val primary = Color(243, 243, 243, 255)
     val secondary = Color(245, 245, 245, 255)
 
@@ -50,7 +50,7 @@ object LightColorScheme {
     val iconTintColor = Color.Black
 }
 
-object DarkColorScheme {
+internal object DarkColorScheme {
     val primary = Color(48, 48, 48, 255)
     val secondary = Color(52, 52, 52, 255)
 

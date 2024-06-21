@@ -25,7 +25,7 @@ import com.ilya.friendsview.screen.ErrorType
 import com.ilya.theme.LocalColorScheme
 
 @Composable
-fun FriendsList(
+internal fun FriendsList(
     pagingState: LazyPagingItems<User>,
     onProfileViewButtonClick: (Long) -> Unit,
     onEmptyAccessToken: () -> Unit,

@@ -21,7 +21,7 @@ import com.ilya.search.R
 import com.ilya.search.screen.ErrorType
 import com.ilya.theme.LocalColorScheme
 
-fun LazyGridScope.usersList(
+internal fun LazyGridScope.usersList(
     pagingItems: LazyPagingItems<User>,
     onCardClick: (Long) -> Unit,
     onEmptyAccessToken: () -> Unit,

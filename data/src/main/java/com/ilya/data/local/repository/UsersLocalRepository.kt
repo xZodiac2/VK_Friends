@@ -3,23 +3,23 @@ package com.ilya.data.local.repository
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.UserEntity
 import com.ilya.data.local.database.VkFriendsApplicationDatabase
+import com.ilya.data.local.database.entities.UserPagingEntity
 import javax.inject.Inject
 
 internal class UsersLocalRepository @Inject constructor(
     private val database: VkFriendsApplicationDatabase
-) : LocalRepository<UserEntity> {
+) : LocalRepository<UserPagingEntity> {
 
-    override suspend fun upsertAll(vararg upsertData: UserEntity) {
+    override suspend fun upsertAll(vararg upsertData: UserPagingEntity) {
         database.usersDao.upsertAll(upsertData.toList())
     }
 
-    override fun getPagingSource(): PagingSource<Int, UserEntity> {
+    override fun getPagingSource(): PagingSource<Int, UserPagingEntity> {
         return database.usersDao.getPagingSource()
     }
 
-    override suspend fun getAll(): List<UserEntity> {
+    override suspend fun getAll(): List<UserPagingEntity> {
         return database.usersDao.getAll()
     }
 

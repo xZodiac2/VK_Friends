@@ -57,7 +57,7 @@ import com.ilya.theme.LocalColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileHeader(
+internal fun ProfileHeader(
     user: User,
     friendRequest: (User) -> Unit
 ) {

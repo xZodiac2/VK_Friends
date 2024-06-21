@@ -3,23 +3,45 @@ package com.ilya.data.local.repository
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.PostEntity
 import com.ilya.data.local.database.VkFriendsApplicationDatabase
+import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
 import javax.inject.Inject
 
 internal class PostsLocalRepository @Inject constructor(
     private val database: VkFriendsApplicationDatabase
-) : LocalRepository<PostEntity> {
+) : LocalRepository<PostWithAttachmentsAndOwner> {
 
-    override suspend fun upsertAll(vararg upsertData: PostEntity) {
-        database.postsDao.upsertAll(upsertData.toList())
+    override suspend fun upsertAll(vararg upsertData: PostWithAttachmentsAndOwner) {
+        val data = upsertData.map { it.data }
+        val photosWithSizes = upsertData.flatMap { it.photos }
+        val videosWithFirstFrames = upsertData.flatMap { it.videos }
+        val audios = upsertData.flatMap { it.audios }
+        val postOwner = upsertData.map { it.owner }
+        val likes = upsertData.map { it.likes }
+
+        val photos = photosWithSizes.map { it.photo }
+        val sizes = photosWithSizes.flatMap { it.sizes }
+
+        val videos = videosWithFirstFrames.map { it.video }
+        val firstFrames = videosWithFirstFrames.flatMap { it.firstFrames }
+
+        withTransaction {
+            database.postsDao.upsertPostOwners(postOwner)
+            database.postsDao.upsertPhotos(photos)
+            database.postsDao.upsertAudios(audios)
+            database.postsDao.upsertSizes(sizes)
+            database.postsDao.upsertVideos(videos)
+            database.postsDao.upsertFirstFrames(firstFrames)
+            database.postsDao.upsertPosts(data)
+            database.postsDao.upsertLikes(likes)
+        }
     }
 
-    override fun getPagingSource(): PagingSource<Int, PostEntity> {
+    override fun getPagingSource(): PagingSource<Int, PostWithAttachmentsAndOwner> {
         return database.postsDao.getPagingSource()
     }
 
-    override suspend fun getAll(): List<PostEntity> {
+    override suspend fun getAll(): List<PostWithAttachmentsAndOwner> {
         return database.postsDao.getAll()
     }
 

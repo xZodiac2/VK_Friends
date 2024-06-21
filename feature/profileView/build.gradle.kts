@@ -77,7 +77,11 @@ dependencies {
     implementation("com.vk.id:onetap-compose:1.0.0")
 
     // Image Viewer
-    implementation("com.github.jvziyaoyao:ImageViewer:1.0.2-alpha.8")
+    val version = "1.1.0-alpha.3"
+// 图片浏览库
+    implementation("com.jvziyaoyao.scale:image-viewer:$version")
+// 大型图片支持
+    implementation("com.jvziyaoyao.scale:sampling-decoder:$version")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

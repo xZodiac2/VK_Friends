@@ -53,7 +53,7 @@ fun ProfileScreen(
     val screenState = viewModel.screenStateFlow.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val postsPagingItem = viewModel.pagingFlow.collectAsLazyPagingItems()
+    val postsPagingItems = viewModel.pagingFlow.collectAsLazyPagingItems().itemSnapshotList.items
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 

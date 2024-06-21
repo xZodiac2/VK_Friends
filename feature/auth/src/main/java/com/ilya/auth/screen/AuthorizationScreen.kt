@@ -19,9 +19,10 @@ import com.vk.id.onetap.compose.onetap.OneTap
 @Composable
 fun AuthorizationScreen(
     onAuthorize: () -> Unit,
-    authViewModel: AuthorizationScreenViewModel = hiltViewModel(),
+    viewModel: AuthorizationScreenViewModel = hiltViewModel()
 ) {
-    val screenState by authViewModel.authorizationScreenState.collectAsState()
+
+    val screenState by viewModel.authorizationScreenState.collectAsState()
     val context = LocalContext.current
 
     when (screenState) {
@@ -29,7 +30,7 @@ fun AuthorizationScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 OneTap(
                     modifier = Modifier.padding(horizontal = 32.dp),
-                    onAuth = { authViewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
+                    onAuth = { viewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
                     onFail = { Toast.makeText(context, it.description, Toast.LENGTH_LONG).show() }
                 )
             }

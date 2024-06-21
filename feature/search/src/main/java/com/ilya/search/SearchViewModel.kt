@@ -10,7 +10,7 @@ import androidx.paging.map
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.data.local.database.UserEntity
+import com.ilya.data.local.database.entities.UserPagingEntity
 import com.ilya.data.paging.User
 import com.ilya.data.paging.pagingSources.UsersPagingSourceFactory
 import com.ilya.data.paging.remoteMediators.UsersRemoteMediator
@@ -57,7 +57,7 @@ class SearchViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun newPager(query: String): Pager<Int, UserEntity> {
+    private fun newPager(query: String): Pager<Int, UserPagingEntity> {
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,

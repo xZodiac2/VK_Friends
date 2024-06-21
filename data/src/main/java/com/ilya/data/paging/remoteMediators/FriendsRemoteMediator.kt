@@ -8,8 +8,8 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.FriendEntity
-import com.ilya.data.network.UsersRemoteRepository
+import com.ilya.data.local.database.entities.FriendPagingEntity
+import com.ilya.data.remote.UsersRemoteRepository
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.toFriendEntity
 import java.net.SocketTimeoutException
@@ -19,20 +19,20 @@ import javax.inject.Inject
 @OptIn(ExperimentalPagingApi::class)
 class FriendsRemoteMediator private constructor(
     private val remoteRepository: UsersRemoteRepository,
-    private val localRepository: LocalRepository<FriendEntity>,
+    private val localRepository: LocalRepository<FriendPagingEntity>,
     private val accessTokenManager: AccessTokenManager
-) : RemoteMediator<Int, FriendEntity>() {
+) : RemoteMediator<Int, FriendPagingEntity>() {
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, FriendEntity>
+        state: PagingState<Int, FriendPagingEntity>
     ): MediatorResult {
         try {
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    state.lastItemOrNull()?.databaseId ?: return MediatorResult.Success(
+                    state.lastItemOrNull()?.pagingId ?: return MediatorResult.Success(
                         endOfPaginationReached = false
                     )
                 }
@@ -79,7 +79,7 @@ class FriendsRemoteMediator private constructor(
     }
 
     class Factory @Inject constructor(
-        private val localRepository: LocalRepository<FriendEntity>,
+        private val localRepository: LocalRepository<FriendPagingEntity>,
         private val remoteRepository: UsersRemoteRepository,
         private val accessTokenManager: AccessTokenManager
     ) : BaseFactory<Unit, FriendsRemoteMediator> {

@@ -23,7 +23,7 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-fun UserCard(
+internal fun UserCard(
     modifier: Modifier = Modifier,
     onCardClick: (Long) -> Unit,
     user: User

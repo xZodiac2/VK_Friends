@@ -45,7 +45,9 @@ data class Counters(
 @Parcelize
 data class Post(
     val id: Long,
-    val attachments: List<Attachment> = emptyList(),
+    val videos: List<VideoExtended>,
+    val photos: List<Photo>,
+    val audios: List<Audio>,
     val likes: Likes,
     val date: String,
     val postOwner: PostOwner
@@ -57,14 +59,6 @@ data class PostOwner(
     val firstName: String,
     val lastName: String,
     val photoUrl: String
-) : Parcelable
-
-@Parcelize
-data class Attachment(
-    val type: String,
-    val photo: Photo? = null,
-    val video: VideoExtended? = null,
-    val audio: Audio? = null
 ) : Parcelable
 
 @Parcelize
@@ -83,13 +77,12 @@ data class Photo(
     val id: Long,
     val ownerId: Long,
     val sizes: List<Size>,
-    val likes: Likes
 ) : Parcelable
 
 @Parcelize
 data class VideoExtended(
     val duration: Int = 0,
-    val firstFrame: List<Photo>?,
+    val firstFrame: List<FirstFrame>?,
     val id: Long,
     val ownerId: Long,
     val title: String,
@@ -108,4 +101,11 @@ data class Size(
     val height: Int,
     val width: Int,
     val url: String
+) : Parcelable
+
+@Parcelize
+data class FirstFrame(
+    val url: String,
+    val width: Int,
+    val height: Int
 ) : Parcelable

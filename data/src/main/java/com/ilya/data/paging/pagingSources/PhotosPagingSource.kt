@@ -1,4 +1,4 @@
-package com.ilya.data.paging.pagingSources.nonDatabase
+package com.ilya.data.paging.pagingSources
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

@@ -1,21 +1,16 @@
 package com.ilya.data.mappers
 
-import com.ilya.data.local.database.entities.FirstFrameEntity
-import com.ilya.data.local.database.entities.VideoEntity
+import com.ilya.data.paging.Video
 import com.ilya.data.remote.retrofit.api.dto.VideoAdditionalData
-import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
 
-private fun VideoAdditionalData.toVideoEntity(postId: Long): VideoEntity {
-    return VideoEntity(
-        postId = postId,
+fun VideoAdditionalData.toVideo(): Video {
+    return Video(
         duration = duration,
         id = id,
         ownerId = ownerId,
         title = title,
-        playerUrl = playerUrl
+        playerUrl = playerUrl,
+        firstFrame = firstFrame.map { it.toFirstFrame() },
+        likes = likes?.toLikes()
     )
-}
-
-fun VideoAdditionalData.toVideoWithFirstFrames(postId: Long): Pair<VideoEntity, List<FirstFrameEntity>> {
-    return this.toVideoEntity(postId) to firstFrame.map { it.toFirstFrameEntity(this.id) }
 }

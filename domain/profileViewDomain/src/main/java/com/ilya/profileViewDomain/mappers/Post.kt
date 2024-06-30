@@ -1,16 +1,8 @@
 package com.ilya.profileViewDomain.mappers
 
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.data.local.database.entities.AudioEntity
-import com.ilya.data.local.database.entities.FirstFrameEntity
-import com.ilya.data.local.database.entities.PhotoLikesEntity
-import com.ilya.data.local.database.entities.PhotoWithSizesAndLikes
-import com.ilya.data.local.database.entities.PostLikesEntity
-import com.ilya.data.local.database.entities.PostOwnerEntity
-import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
-import com.ilya.data.local.database.entities.SizeEntity
-import com.ilya.data.local.database.entities.VideoLikesEntity
-import com.ilya.data.local.database.entities.VideoWithFirstFramesAndLikes
+import com.ilya.data.paging.User
+import com.ilya.data.paging.Video
 import com.ilya.data.remote.retrofit.api.dto.LikesDto
 import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.SizeDto
@@ -26,19 +18,19 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-fun PostWithAttachmentsAndOwner.toPost(): Post {
+fun com.ilya.data.paging.Post.toPost(): Post {
     return Post(
-        id = data.id,
+        id = id,
         videos = videos.map { it.toVideoExtended() },
         audios = audios.map { it.toAudio() },
         photos = photos.map { it.toPhoto() },
-        date = parseToString(data.dateUnixTime),
+        date = parseToString(dateUnixTime),
         likes = likes.toLikes(),
         owner = owner.toPostOwner()
     )
 }
 
-private fun PostOwnerEntity.toPostOwner(): PostOwner = with(data) {
+private fun User.toPostOwner(): PostOwner {
     return PostOwner(
         id = id,
         firstName = firstName,
@@ -47,7 +39,7 @@ private fun PostOwnerEntity.toPostOwner(): PostOwner = with(data) {
     )
 }
 
-private fun AudioEntity.toAudio(): Audio {
+private fun com.ilya.data.paging.Audio.toAudio(): Audio {
     return Audio(
         artist = artist,
         id = id,
@@ -58,30 +50,23 @@ private fun AudioEntity.toAudio(): Audio {
     )
 }
 
-private fun VideoWithFirstFramesAndLikes.toVideoExtended(): VideoExtended {
+private fun Video.toVideoExtended(): VideoExtended {
     return VideoExtended(
-        duration = video.duration,
-        firstFrame = firstFrames.map { it.toFirstFrame() },
-        id = video.id,
-        ownerId = video.ownerId,
-        title = video.title,
-        playerUrl = video.playerUrl,
+        duration = duration,
+        firstFrame = firstFrame.map { it.toFirstFrame() },
+        id = id,
+        ownerId = ownerId,
+        title = title,
+        playerUrl = playerUrl,
         likes = likes?.toLikes()
     )
 }
 
-private fun FirstFrameEntity.toFirstFrame(): FirstFrame {
+private fun com.ilya.data.paging.FirstFrame.toFirstFrame(): FirstFrame {
     return FirstFrame(
         url = url,
         width = width,
         height = height
-    )
-}
-
-private fun VideoLikesEntity.toLikes(): Likes {
-    return Likes(
-        count = count,
-        userLikes = userLikes
     )
 }
 
@@ -102,24 +87,17 @@ private fun LikesDto.toLikes(): Likes {
     )
 }
 
-private fun PhotoWithSizesAndLikes.toPhoto(): Photo {
+private fun com.ilya.data.paging.Photo.toPhoto(): Photo {
     return Photo(
-        ownerId = photo.ownerId,
-        albumId = photo.albumId,
-        id = photo.id,
+        ownerId = ownerId,
+        albumId = albumId,
+        id = id,
         sizes = sizes.map { it.toSize() },
         likes = likes?.toLikes()
     )
 }
 
-private fun PostLikesEntity.toLikes(): Likes {
-    return Likes(
-        count = count,
-        userLikes = userLikes
-    )
-}
-
-private fun PhotoLikesEntity.toLikes(): Likes {
+private fun com.ilya.data.paging.Likes.toLikes(): Likes {
     return Likes(
         count = count,
         userLikes = userLikes
@@ -135,7 +113,7 @@ private fun SizeDto.toSize(): Size {
     )
 }
 
-private fun SizeEntity.toSize(): Size {
+private fun com.ilya.data.paging.Size.toSize(): Size {
     return Size(
         type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
         height = height,

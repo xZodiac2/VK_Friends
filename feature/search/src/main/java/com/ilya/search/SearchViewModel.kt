@@ -10,11 +10,10 @@ import androidx.paging.map
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.data.local.database.entities.UserPagingEntity
-import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.factories.UsersPagingSourceFactory
-import com.ilya.data.paging.remoteMediators.UsersRemoteMediator
 import com.ilya.data.mappers.toUser
+import com.ilya.data.paging.User
+import com.ilya.data.paging.pagingSources.UsersPagingSource
+import com.ilya.data.remote.retrofit.api.dto.UserDto
 import com.ilya.search.screen.SearchScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,8 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val usersRemoteMediatorFactory: UsersRemoteMediator.Factory,
-    private val pagingSourceFactory: UsersPagingSourceFactory,
+    private val usersPagingSourceFactory: UsersPagingSource.Factory,
     private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
 
@@ -40,7 +38,7 @@ class SearchViewModel @Inject constructor(
     val pagingFlow = searchValueSharedFlow
         .map(::newPager)
         .flatMapLatest { it.flow }
-        .map { data -> data.map { userEntity -> userEntity.toUser() } }
+        .map { data -> data.map { userDto -> userDto.toUser() } }
         .cachedIn(viewModelScope)
 
     private val _snackbarStateFlow = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
@@ -57,14 +55,13 @@ class SearchViewModel @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun newPager(query: String): Pager<Int, UserPagingEntity> {
+    private fun newPager(query: String): Pager<Int, UserDto> {
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
                 initialLoadSize = PAGE_SIZE
             ),
-            remoteMediator = usersRemoteMediatorFactory.newInstance(query),
-            pagingSourceFactory = { pagingSourceFactory.newInstance(Unit) }
+            pagingSourceFactory = { usersPagingSourceFactory.newInstance(query) }
         )
     }
 

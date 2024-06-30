@@ -222,8 +222,8 @@ private fun Content(
         }
         items(count = posts.itemCount) { index ->
             val post = posts[index]
-            if (post != null) {
-                PostCard(post)
+            post?.let {
+                PostCard(it)
             }
         }
         item {

@@ -1,6 +1,6 @@
-package com.ilya.profileview.presentation.screen
+package com.ilya.profileview.presentation.profileScreen
 
-import com.ilya.profileViewDomain.User
+import com.ilya.profileViewDomain.models.User
 
 
 sealed interface ProfileScreenEvent {

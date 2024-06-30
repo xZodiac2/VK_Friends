@@ -39,4 +39,11 @@
     <string name="operation_not_completed">Операция не удалась. Проверьте подключение к интернету</string>
     <string name="operation_not_completed_try_later">Операция не удалась. Повторите попытку позже</string>
     <string name="profile_screen_name">Профиль %s</string>
+    <string name="error_faled_display_photo">Не удалось отобразить фотографию</string>
+    <string name="photo_number">%d из %d</string>
+    <string name="error_cant_like">Не удалось лайкнуть</string>
+    <string name="error_unknown">Неизвестная ошибка: %s</string>
+    <string name="no_posts">Здесь пока нет записей</string>
+    <string name="photos_screen_name">Фотографии</string>
+    <string name="open_photos">Показать все</string>
 </resources>

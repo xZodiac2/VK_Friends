@@ -3,6 +3,7 @@ package com.ilya.data.remote.repository
 import com.ilya.core.appCommon.enums.NameCase
 import com.ilya.data.remote.UserDataRemoteRepository
 import com.ilya.data.remote.retrofit.api.UserDataVkApi
+import com.ilya.data.remote.retrofit.api.dto.PhotosResponseData
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
 import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
@@ -16,7 +17,7 @@ internal class UserDataVkRepository @Inject constructor(
     retrofit: Retrofit
 ) : UserDataRemoteRepository {
 
-    private val userDataVkApi = retrofit.create<UserDataVkApi>()
+    private val api = retrofit.create<UserDataVkApi>()
 
     override suspend fun getUser(
         accessToken: String,
@@ -25,7 +26,7 @@ internal class UserDataVkRepository @Inject constructor(
         fields: List<String>
     ): UserDto {
         return withContext(Dispatchers.IO) {
-            userDataVkApi.getUserData(
+            api.getUserData(
                 accessToken = accessToken,
                 userId = userId,
                 fields = fields.joinToString(","),
@@ -41,7 +42,7 @@ internal class UserDataVkRepository @Inject constructor(
         offset: Int
     ): List<PostDto> {
         return withContext(Dispatchers.IO) {
-            userDataVkApi.getWall(
+            api.getWall(
                 accessToken = accessToken,
                 ownerId = ownerId,
                 offset = offset,
@@ -56,12 +57,34 @@ internal class UserDataVkRepository @Inject constructor(
         videoId: String,
     ): VideoExtendedDataDto {
         return withContext(Dispatchers.IO) {
-            userDataVkApi.getVideoData(
+            api.getVideoData(
                 accessToken = accessToken,
                 ownerId = ownerId,
                 videoId = videoId
             )
         }.response.items.first()
+    }
+
+    override suspend fun getPhotos(
+        accessToken: String,
+        ownerId: Long,
+        extended: Boolean,
+        offset: Int,
+        count: Int
+    ): PhotosResponseData {
+        return withContext(Dispatchers.IO) {
+            api.getPhotos(
+                accessToken = accessToken,
+                ownerId = ownerId,
+                extended = extended.toInt(),
+                offset = offset,
+                count = count
+            )
+        }.response
+    }
+
+    private fun Boolean.toInt(): Int {
+        return if (this) 1 else 0
     }
 
 }

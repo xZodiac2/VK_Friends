@@ -7,7 +7,7 @@ import androidx.compose.ui.res.stringResource
 
 sealed interface StringResource {
     data class Str(val value: String) : StringResource
-    data class Resource(
+    data class FromId(
         @StringRes val id: Int,
         val formatArgs: List<Any> = emptyList()
     ) : StringResource
@@ -18,7 +18,7 @@ sealed interface StringResource {
 fun StringResource.resolve(): String {
     return when (this) {
         is StringResource.Str -> value
-        is StringResource.Resource -> stringResource(
+        is StringResource.FromId -> stringResource(
             id = id, formatArgs = formatArgs.toTypedArray()
         )
     }

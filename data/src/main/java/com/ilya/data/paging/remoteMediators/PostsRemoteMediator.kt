@@ -18,13 +18,14 @@ import com.ilya.data.remote.retrofit.api.dto.AttachmentDto
 import com.ilya.data.remote.retrofit.api.dto.BaseAttachment
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
-import com.ilya.data.toPostEntity
+import com.ilya.data.mappers.toPostEntity
+import kotlinx.coroutines.delay
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
-class PostsRemoteMediator(
+class PostsRemoteMediator private constructor(
     private val localRepository: LocalRepository<PostWithAttachmentsAndOwner>,
     private val remoteRepository: UserDataRemoteRepository,
     private val accessTokenManager: AccessTokenManager,
@@ -32,11 +33,16 @@ class PostsRemoteMediator(
     private val vkApiExecutor: VkApiExecutor<AdditionalPostData>
 ) : RemoteMediator<Int, PostWithAttachmentsAndOwner>() {
 
+    // delays in this method are necessary because of requests limit 3/sec
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, PostWithAttachmentsAndOwner>
     ): MediatorResult {
         try {
+            if (loadType == LoadType.REFRESH) {
+                localRepository.deleteAllWithPrimaryKeys()
+            }
+
             val offset = when (loadType) {
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -57,8 +63,9 @@ class PostsRemoteMediator(
                 PaginationError.NoAccessToken
             )
 
-            val databasePosts = localRepository.getAll()
+            val databasePostIds = localRepository.getAll().map { it.data.id }
 
+            delay(500)
             val posts = remoteRepository.getWall(
                 accessToken = accessToken.token,
                 ownerId = userId,
@@ -68,11 +75,8 @@ class PostsRemoteMediator(
 
             val postsAdditionalData = getPostsAdditionalData(posts, accessToken.token)
 
-            localRepository.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    localRepository.deleteAllWithPrimaryKeys()
-                }
-                val postEntities = posts.map { post ->
+            val postEntities = posts
+                .map { post ->
                     val videos = postsAdditionalData[post.id]
                         ?.videos
                         ?.items ?: emptyList()
@@ -83,16 +87,9 @@ class PostsRemoteMediator(
                         ?.photos
                         ?.items ?: emptyList()
                     post.toPostEntity(videos, photos, postOwner)
-                }.filterNot {
-                    databasePosts.map { post ->
-                        val data = post.data.copy(pagingId = 0)
-                        post.copy(data = data)
-                    }.contains(
-                        it.copy(data = it.data.copy(pagingId = 0))
-                    )
                 }
-                localRepository.upsertAll(*postEntities.toTypedArray())
-            }
+                .filterNot { databasePostIds.contains(it.data.id) }
+            localRepository.upsertAll(*postEntities.toTypedArray())
 
             return MediatorResult.Success(endOfPaginationReached = posts.isEmpty())
 
@@ -152,6 +149,7 @@ class PostsRemoteMediator(
         )
 
         return posts.associate { post ->
+            delay(500)
             val vkScriptRequest = """ 
             ${
                 if (postVideoIds[post.id] != null) {
@@ -176,7 +174,7 @@ class PostsRemoteMediator(
                     ""
                 }
             }
-                var owner = API.users.get({"user_ids": [${post.ownerId}], "fields": ["photo_200_orig"]});
+                var owner = API.users.get({"user_ids": [${post.authorId}], "fields": ["photo_200_orig"]});
                     
                 return {
             ${
@@ -224,11 +222,11 @@ class PostsRemoteMediator(
     ) : BaseFactory<Long, PostsRemoteMediator> {
         override fun newInstance(initializationData: Long): PostsRemoteMediator {
             return PostsRemoteMediator(
-                localRepository,
-                remoteRepository,
-                accessTokenManager,
-                initializationData,
-                vkApiExecutor
+                localRepository = localRepository,
+                remoteRepository = remoteRepository,
+                accessTokenManager = accessTokenManager,
+                userId = initializationData,
+                vkApiExecutor = vkApiExecutor
             )
         }
     }

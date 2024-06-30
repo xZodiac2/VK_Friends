@@ -18,6 +18,11 @@ data class NavigationTransition(
 
 sealed class ScreenTransition(val transition: NavigationTransition) {
 
+    data object PhotosScreen : ScreenTransition(NavigationTransition(
+        enterTransition = { fadeIn(animationSpec = tween(0)) },
+        exitTransition = { fadeOut(animationSpec = tween(0)) }
+    ))
+
     data object AuthScreen : ScreenTransition(NavigationTransition(
         enterTransition = { fadeIn(animationSpec = tween(0)) },
         exitTransition = { fadeOut(animationSpec = tween(0)) }
@@ -34,6 +39,11 @@ sealed class ScreenTransition(val transition: NavigationTransition) {
     ))
 
     data object ProfileScreen : ScreenTransition(NavigationTransition(
+        enterTransition = { fadeIn(animationSpec = tween(0)) },
+        exitTransition = { fadeOut(animationSpec = tween(0)) }
+    ))
+
+    data object PhotosPreview : ScreenTransition(NavigationTransition(
         enterTransition = { fadeIn(animationSpec = tween(0)) },
         exitTransition = { fadeOut(animationSpec = tween(0)) }
     ))

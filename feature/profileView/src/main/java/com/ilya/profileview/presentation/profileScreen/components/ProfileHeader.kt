@@ -1,4 +1,4 @@
-package com.ilya.profileview.presentation.screen.components
+package com.ilya.profileview.presentation.profileScreen.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -51,19 +51,14 @@ import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
 import com.ilya.core.basicComposables.BaseButton
-import com.ilya.profileViewDomain.User
+import com.ilya.profileViewDomain.models.User
 import com.ilya.profileview.R
 import com.ilya.theme.LocalColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProfileHeader(
-    user: User,
-    friendRequest: (User) -> Unit
-) {
-    var showSheet by remember {
-        mutableStateOf(false)
-    }
+internal fun ProfileHeader(user: User, friendRequest: (User) -> Unit) {
+    var showSheet by remember { mutableStateOf(false) }
 
     Card(
         shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),

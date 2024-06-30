@@ -38,4 +38,11 @@
     <string name="operation_not_completed">Operation failed. Check Internet connection</string>
     <string name="operation_not_completed_try_later">Operation failed. Try again later</string>
     <string name="profile_screen_name">Profile %s</string>
+    <string name="error_faled_display_photo">Loading...</string>
+    <string name="photo_number">%d of %d</string>
+    <string name="error_cant_like">Failed to like</string>
+    <string name="error_unknown">Unknown erro: %s</string>
+    <string name="no_posts">Here is no yet posts</string>
+    <string name="photos_screen_name">Photos</string>
+    <string name="open_photos">Show all</string>
 </resources>

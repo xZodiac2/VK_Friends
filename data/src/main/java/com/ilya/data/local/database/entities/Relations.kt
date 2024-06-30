@@ -3,7 +3,7 @@ package com.ilya.data.local.database.entities
 import androidx.room.Embedded
 import androidx.room.Relation
 
-data class PhotoWithSizes(
+data class PhotoWithSizesAndLikes(
     @Embedded
     val photo: PhotoEntity,
     @Relation(
@@ -11,16 +11,26 @@ data class PhotoWithSizes(
         entityColumn = "photoId"
     )
     val sizes: List<SizeEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "photoId"
+    )
+    val likes: PhotoLikesEntity?
 )
 
-data class VideoWithFirstFrames(
+data class VideoWithFirstFramesAndLikes(
     @Embedded
     val video: VideoEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "videoId"
     )
-    val firstFrames: List<FirstFrameEntity>
+    val firstFrames: List<FirstFrameEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "videoId"
+    )
+    val likes: VideoLikesEntity?
 )
 
 data class PostWithAttachmentsAndOwner(
@@ -31,13 +41,13 @@ data class PostWithAttachmentsAndOwner(
         parentColumn = "id",
         entityColumn = "postId"
     )
-    val photos: List<PhotoWithSizes>,
+    val photos: List<PhotoWithSizesAndLikes>,
     @Relation(
         entity = VideoEntity::class,
         parentColumn = "id",
         entityColumn = "postId"
     )
-    val videos: List<VideoWithFirstFrames>,
+    val videos: List<VideoWithFirstFramesAndLikes>,
     @Relation(
         parentColumn = "id",
         entityColumn = "postId"

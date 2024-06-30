@@ -1,6 +1,7 @@
-package com.ilya.profileview.presentation.screen
+package com.ilya.profileview.presentation.profileScreen.states
 
-import com.ilya.profileViewDomain.User
+import com.ilya.profileViewDomain.models.User
+import com.ilya.profileview.presentation.profileScreen.ErrorType
 
 
 sealed interface ProfileScreenState {

@@ -20,20 +20,26 @@ internal class PostsLocalRepository @Inject constructor(
         val likes = upsertData.map { it.likes }
 
         val photos = photosWithSizes.map { it.photo }
+        val photoLikes = photosWithSizes.mapNotNull { it.likes }
         val sizes = photosWithSizes.flatMap { it.sizes }
 
         val videos = videosWithFirstFrames.map { it.video }
+        val videoLikes = videosWithFirstFrames.mapNotNull { it.likes }
         val firstFrames = videosWithFirstFrames.flatMap { it.firstFrames }
 
-        withTransaction {
-            database.postsDao.upsertPostOwners(postOwner)
-            database.postsDao.upsertPhotos(photos)
-            database.postsDao.upsertAudios(audios)
-            database.postsDao.upsertSizes(sizes)
-            database.postsDao.upsertVideos(videos)
-            database.postsDao.upsertFirstFrames(firstFrames)
-            database.postsDao.upsertPosts(data)
-            database.postsDao.upsertLikes(likes)
+        with(database) {
+            withTransaction {
+                postsDao.upsertPostOwners(postOwner)
+                postsDao.upsertPhotos(photos)
+                postsDao.upsertAudios(audios)
+                postsDao.upsertSizes(sizes)
+                postsDao.upsertVideos(videos)
+                postsDao.upsertFirstFrames(firstFrames)
+                postsDao.upsertPosts(data)
+                postsDao.upsertPostLikes(likes)
+                postsDao.upsertPhotoLikes(photoLikes)
+                postsDao.upsertVideoLikes(videoLikes)
+            }
         }
     }
 
@@ -45,13 +51,23 @@ internal class PostsLocalRepository @Inject constructor(
         return database.postsDao.getAll()
     }
 
-    override suspend fun deleteAll() {
-        database.postsDao.deleteAll()
+    override suspend fun deleteAll() = with(database) {
+        postsDao.deleteVideos()
+        postsDao.deleteVideoLikes()
+        postsDao.deleteFirstFrames()
+        postsDao.deletePostLikes()
+        postsDao.deletePhotos()
+        postsDao.deletePhotoLikes()
+        postsDao.deletePhotoSizes()
+        postsDao.deleteAudios()
+        postsDao.deleteOwners()
+        postsDao.deletePosts()
+        postsDao.deletePostPrimaryKeys()
     }
 
     override suspend fun deleteAllWithPrimaryKeys() {
-        database.postsDao.deleteAll()
-        database.postsDao.deletePrimaryKeys()
+        deleteAll()
+        database.postsDao.deletePostPrimaryKeys()
     }
 
     override suspend fun withTransaction(block: suspend () -> Unit) {

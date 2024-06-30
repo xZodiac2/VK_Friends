@@ -12,7 +12,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -27,14 +31,15 @@ import androidx.navigation.toRoute
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.friendsview.screen.FriendsScreen
-import com.ilya.profileview.presentation.screen.ProfileScreen
+import com.ilya.profileview.presentation.photosPreview.PhotosPreview
+import com.ilya.profileview.presentation.photosScreen.PhotosScreen
+import com.ilya.profileview.presentation.profileScreen.ProfileScreen
 import com.ilya.search.screen.SearchScreen
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
 import com.ilya.vkfriends.navigation.Destination
 import com.ilya.vkfriends.navigation.NavigationBarItem
 import com.ilya.vkfriends.navigation.ScreenTransition
-import com.ilya.vkfriends.navigation.lastDestination
 import com.ilya.vkfriends.navigation.lastDestinationName
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -52,13 +57,21 @@ class MainActivity : ComponentActivity() {
             VkFriendsAppTheme {
                 val navController = rememberNavController()
 
+                var bottomBarVisible by remember { mutableStateOf(false) }
+
                 Scaffold(
-                    bottomBar = { BottomBar(navController = navController) },
+                    bottomBar = {
+                        if (bottomBarVisible) {
+                            BottomBar(navController = navController)
+                        }
+                    },
                     containerColor = LocalColorScheme.current.primary
                 ) { paddingValues ->
                     Navigation(
                         navController = navController,
-                        paddingValues = paddingValues
+                        paddingValues = paddingValues,
+                        hideBottomBar = { bottomBarVisible = false },
+                        showBottomBar = { bottomBarVisible = true }
                     )
                 }
 
@@ -69,11 +82,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun BottomBar(navController: NavController) {
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
-        if (currentBackStackEntry?.lastDestination == Destination.AuthScreen) return
-
         val currentDestination = currentBackStackEntry?.destination
-
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
+
         NavigationBar(
             containerColor = LocalColorScheme.current.primary,
             modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
@@ -107,6 +118,8 @@ class MainActivity : ComponentActivity() {
     private fun Navigation(
         navController: NavHostController,
         paddingValues: PaddingValues,
+        hideBottomBar: () -> Unit,
+        showBottomBar: () -> Unit,
     ) {
         NavHost(
             navController = navController,
@@ -148,6 +161,9 @@ class MainActivity : ComponentActivity() {
                     },
                     onExitConfirm = { finish() }
                 )
+                LaunchedEffect(Unit) {
+                    showBottomBar()
+                }
             }
             composable<Destination.ProfileScreen>(
                 enterTransition = ScreenTransition.ProfileScreen.transition.enterTransition,
@@ -155,18 +171,24 @@ class MainActivity : ComponentActivity() {
             ) { backStackEntry ->
                 ProfileScreen(
                     userId = backStackEntry.toRoute<Destination.ProfileScreen>().userId,
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
+                    onBackClick = { navController.popBackStack() },
                     onEmptyAccessToken = {
                         navController.navigate(Destination.AuthScreen) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 inclusive = true
                             }
-
                         }
+                    },
+                    onPhotoClick = { userId, targetIndex ->
+                        navController.navigate(Destination.PhotoPreview(userId, targetIndex))
+                    },
+                    onOpenPhotosClick = {
+                        navController.navigate(Destination.PhotosScreen(it))
                     }
                 )
+                LaunchedEffect(Unit) {
+                    showBottomBar()
+                }
             }
             composable<Destination.SearchScreen>(
                 enterTransition = ScreenTransition.SearchScreen.transition.enterTransition,
@@ -184,6 +206,39 @@ class MainActivity : ComponentActivity() {
                                 inclusive = true
                             }
                         }
+                    }
+                )
+                LaunchedEffect(Unit) {
+                    showBottomBar()
+                }
+            }
+            composable<Destination.PhotoPreview>(
+                enterTransition = ScreenTransition.PhotosPreview.transition.enterTransition,
+                exitTransition = ScreenTransition.PhotosPreview.transition.exitTransition
+            ) {
+                val route = it.toRoute<Destination.PhotoPreview>()
+
+                PhotosPreview(
+                    userId = route.userId,
+                    targetPhotoIndex = route.targetPhotoIndex,
+                    onBackClick = { navController.popBackStack() }
+                )
+
+                LaunchedEffect(Unit) {
+                    hideBottomBar()
+                }
+            }
+            composable<Destination.PhotosScreen>(
+                enterTransition = ScreenTransition.PhotosScreen.transition.enterTransition,
+                exitTransition = ScreenTransition.PhotosScreen.transition.exitTransition
+            ) {
+                val route = it.toRoute<Destination.PhotosScreen>()
+
+                PhotosScreen(
+                    userId = route.userId,
+                    onBackClick = { navController.popBackStack() },
+                    onPhotoClick = { userId, photoIndex ->
+                        navController.navigate(Destination.PhotoPreview(userId, photoIndex))
                     }
                 )
             }

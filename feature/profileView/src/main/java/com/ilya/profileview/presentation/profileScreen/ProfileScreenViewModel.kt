@@ -1,14 +1,15 @@
-package com.ilya.profileview.presentation
+package com.ilya.profileview.presentation.profileScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.profileViewDomain.Post
-import com.ilya.profileViewDomain.User
+import com.ilya.profileViewDomain.models.Post
+import com.ilya.profileViewDomain.models.User
 import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCase
 import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCaseInvokeData
 import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
@@ -16,9 +17,7 @@ import com.ilya.profileViewDomain.useCase.GetUserUseCaseData
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCaseData
 import com.ilya.profileview.R
-import com.ilya.profileview.presentation.screen.ErrorType
-import com.ilya.profileview.presentation.screen.ProfileScreenEvent
-import com.ilya.profileview.presentation.screen.ProfileScreenState
+import com.ilya.profileview.presentation.profileScreen.states.ProfileScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -38,13 +37,13 @@ class ProfileScreenViewModel @Inject constructor(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
     private val accessTokenManager: AccessTokenManager,
-    private val getPostsPagingFlowUseCase: GetPostsPagingFlowUseCase
+    private val getPostsPagingFlowUseCase: GetPostsPagingFlowUseCase,
 ) : ViewModel() {
 
-    private val userIdStateFlow = MutableStateFlow(DEFAULT_USER_ID)
+    private val userId = MutableStateFlow(DEFAULT_USER_ID)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingFlow: Flow<PagingData<Post>> = userIdStateFlow.flatMapLatest { id ->
+    val postsFlow: Flow<PagingData<Post>> = userId.flatMapLatest { id ->
         if (id == DEFAULT_USER_ID) {
             return@flatMapLatest flow { emit(PagingData.empty()) }
         }
@@ -57,16 +56,16 @@ class ProfileScreenViewModel @Inject constructor(
                 userId = id
             )
         )
-    }
+    }.cachedIn(viewModelScope)
 
-    private val _screenStateFlow = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
-    val screenStateFlow = _screenStateFlow.asStateFlow()
+    private val _screenState = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
+    val screenState = _screenState.asStateFlow()
 
     private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
     val snackbarState = _snackbarState.asStateFlow()
 
     private val getDataExceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _screenStateFlow.value = when (throwable) {
+        _screenState.value = when (throwable) {
             is UnknownHostException -> ProfileScreenState.Error(ErrorType.NoInternet)
             is SocketTimeoutException -> ProfileScreenState.Error(ErrorType.NoInternet)
             else -> ProfileScreenState.Error(ErrorType.Unknown(throwable))
@@ -76,15 +75,15 @@ class ProfileScreenViewModel @Inject constructor(
     private val friendRequestExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         _snackbarState.value = when (throwable) {
             is UnknownHostException -> SnackbarState.Triggered(
-                text = StringResource.Resource(R.string.operation_not_completed)
+                text = StringResource.FromId(R.string.operation_not_completed)
             )
 
             is SocketTimeoutException -> SnackbarState.Triggered(
-                text = StringResource.Resource(R.string.operation_not_completed)
+                text = StringResource.FromId(R.string.operation_not_completed)
             )
 
             else -> SnackbarState.Triggered(
-                text = StringResource.Resource(R.string.operation_not_completed_try_later)
+                text = StringResource.FromId(R.string.operation_not_completed_try_later)
             )
         }
     }
@@ -92,7 +91,7 @@ class ProfileScreenViewModel @Inject constructor(
     fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.Start -> {
-                userIdStateFlow.value = event.userId
+                userId.value = event.userId
                 onStart()
             }
 
@@ -111,7 +110,7 @@ class ProfileScreenViewModel @Inject constructor(
             val accessToken = accessTokenManager.accessToken
 
             if (accessToken == null) {
-                _screenStateFlow.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
+                _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
                 return@launch
             }
 
@@ -121,9 +120,9 @@ class ProfileScreenViewModel @Inject constructor(
                     user = user
                 )
             )
-            val state = _screenStateFlow.value as? ProfileScreenState.Success ?: return@launch
+            val state = _screenState.value as? ProfileScreenState.Success ?: return@launch
 
-            _screenStateFlow.value = state.copy(
+            _screenState.value = state.copy(
                 user = state.user.copy(
                     friendStatus = newFriendStatus
                 )
@@ -132,7 +131,7 @@ class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onRetry() {
-        _screenStateFlow.value = ProfileScreenState.Loading
+        _screenState.value = ProfileScreenState.Loading
         onStart()
     }
 
@@ -141,20 +140,20 @@ class ProfileScreenViewModel @Inject constructor(
             val accessToken = accessTokenManager.accessToken
 
             if (accessToken == null) {
-                _screenStateFlow.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
+                _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
                 return@launch
             }
 
             val userData = getUserDataUseCase(
                 GetUserUseCaseData(
                     accessToken = accessToken.token,
-                    userId = userIdStateFlow.value
+                    userId = userId.value
                 )
             )
 
-            _screenStateFlow.value = ProfileScreenState.Success(
+            _screenState.value = ProfileScreenState.Success(
                 user = when {
-                    userIdStateFlow.value == accessToken.userID -> userData.copy(isAccountOwner = true)
+                    userId.value == accessToken.userID -> userData.copy(isAccountOwner = true)
                     else -> userData
                 }
             )
@@ -163,8 +162,8 @@ class ProfileScreenViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
-        private const val PAGE_SIZE = 1
-        private const val INITIAL_LOAD_SIZE = 1
+        private const val PAGE_SIZE = 20
+        private const val INITIAL_LOAD_SIZE = 6
     }
 
 }

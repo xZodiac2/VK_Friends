@@ -17,7 +17,8 @@ data class VideoExtendedDataDto(
     @Json(name = "id") val id: Long = 0,
     @Json(name = "owner_id") val ownerId: Long = 0,
     @Json(name = "title") val title: String = "",
-    @Json(name = "player") val playerUrl: String = ""
+    @Json(name = "player") val playerUrl: String = "",
+    @Json(name = "likes") val likes: LikesDto? = null
 )
 
 data class FirstFrameDto(

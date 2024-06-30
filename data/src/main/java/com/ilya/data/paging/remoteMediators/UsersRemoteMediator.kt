@@ -12,7 +12,7 @@ import com.ilya.data.local.database.entities.UserPagingEntity
 import com.ilya.data.remote.UsersRemoteRepository
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.remote.retrofit.api.dto.UserDto
-import com.ilya.data.toUserEntity
+import com.ilya.data.mappers.toUserEntity
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -111,10 +111,10 @@ class UsersRemoteMediator private constructor(
     ) : BaseFactory<String, UsersRemoteMediator> {
         override fun newInstance(initializationData: String): UsersRemoteMediator {
             return UsersRemoteMediator(
-                remoteRepo,
-                localRepo,
-                accessTokenManager,
-                initializationData
+                remoteRepo = remoteRepo,
+                localRepository = localRepo,
+                accessTokenManager = accessTokenManager,
+                query = initializationData
             )
         }
     }

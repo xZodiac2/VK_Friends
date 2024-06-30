@@ -70,18 +70,14 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Paging
-    implementation("androidx.paging:paging-runtime:3.2.1")
-    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
+    implementation("androidx.paging:paging-runtime-ktx:3.3.0")
+    implementation("androidx.paging:paging-compose:3.3.0")
 
     // OneTap
     implementation("com.vk.id:onetap-compose:1.0.0")
 
-    // Image Viewer
-    val version = "1.1.0-alpha.3"
-// 图片浏览库
-    implementation("com.jvziyaoyao.scale:image-viewer:$version")
-// 大型图片支持
-    implementation("com.jvziyaoyao.scale:sampling-decoder:$version")
+    // Moshi
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -91,6 +87,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation:1.6.8")
+    implementation("com.google.accompanist:accompanist-pager:0.35.1-alpha")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -1,6 +1,7 @@
 package com.ilya.data.remote
 
 import com.ilya.core.appCommon.enums.NameCase
+import com.ilya.data.remote.retrofit.api.dto.PhotosResponseData
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
 import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
@@ -26,5 +27,13 @@ interface UserDataRemoteRepository {
         ownerId: Long,
         videoId: String,
     ): VideoExtendedDataDto
+
+    suspend fun getPhotos(
+        accessToken: String,
+        ownerId: Long,
+        extended: Boolean,
+        offset: Int,
+        count: Int
+    ): PhotosResponseData
 
 }

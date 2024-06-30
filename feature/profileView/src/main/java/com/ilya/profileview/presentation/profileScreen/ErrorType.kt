@@ -1,4 +1,4 @@
-package com.ilya.profileview.presentation.screen
+package com.ilya.profileview.presentation.profileScreen
 
 sealed interface ErrorType {
     data object NoInternet : ErrorType

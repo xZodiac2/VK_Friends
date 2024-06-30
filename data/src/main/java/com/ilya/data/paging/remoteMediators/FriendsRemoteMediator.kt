@@ -11,7 +11,7 @@ import com.ilya.data.local.LocalRepository
 import com.ilya.data.local.database.entities.FriendPagingEntity
 import com.ilya.data.remote.UsersRemoteRepository
 import com.ilya.data.paging.PaginationError
-import com.ilya.data.toFriendEntity
+import com.ilya.data.mappers.toFriendEntity
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -84,7 +84,11 @@ class FriendsRemoteMediator private constructor(
         private val accessTokenManager: AccessTokenManager
     ) : BaseFactory<Unit, FriendsRemoteMediator> {
         override fun newInstance(initializationData: Unit): FriendsRemoteMediator {
-            return FriendsRemoteMediator(remoteRepository, localRepository, accessTokenManager)
+            return FriendsRemoteMediator(
+                remoteRepository = remoteRepository,
+                localRepository = localRepository,
+                accessTokenManager = accessTokenManager
+            )
         }
 
     }

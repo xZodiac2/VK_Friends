@@ -277,11 +277,11 @@ private fun OnErrorState(
         ErrorType.NoAccessToken -> onEmptyAccessToken()
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.fillMaxHeight(),
-            message = StringResource.Resource(
+            message = StringResource.FromId(
                 id = R.string.error_unknown,
                 formatArgs = listOf(errorType.error.message ?: "")
             ),
-            buttonText = StringResource.Resource(id = R.string.retry),
+            buttonText = StringResource.FromId(id = R.string.retry),
             onButtonClick = onTryAgainClick
         )
     }

@@ -12,9 +12,9 @@ import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.FriendsPagingSourceFactory
+import com.ilya.data.paging.pagingSources.factories.FriendsPagingSourceFactory
 import com.ilya.data.paging.remoteMediators.FriendsRemoteMediator
-import com.ilya.data.toUser
+import com.ilya.data.mappers.toUser
 import com.ilya.friendsview.screen.FriendsScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,12 +67,12 @@ class FriendsScreenViewModel @Inject constructor(
 
     private fun onPlaceholderAvatarClick() {
         _snackbarState.value =
-            SnackbarState.Triggered(StringResource.Resource(R.string.data_not_loaded_yet))
+            SnackbarState.Triggered(StringResource.FromId(R.string.data_not_loaded_yet))
     }
 
     private fun onBackPress(onConfirm: () -> Unit) {
         _alertDialogState.value = AlertDialogState.Triggered(
-            text = StringResource.Resource(R.string.app_exit_warning),
+            text = StringResource.FromId(R.string.app_exit_warning),
             onConfirm = {
                 onConfirm()
                 _alertDialogState.value = AlertDialogState.Consumed

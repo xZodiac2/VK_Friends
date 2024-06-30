@@ -12,9 +12,9 @@ import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.data.local.database.entities.UserPagingEntity
 import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.UsersPagingSourceFactory
+import com.ilya.data.paging.pagingSources.factories.UsersPagingSourceFactory
 import com.ilya.data.paging.remoteMediators.UsersRemoteMediator
-import com.ilya.data.toUser
+import com.ilya.data.mappers.toUser
 import com.ilya.search.screen.SearchScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,7 +94,7 @@ class SearchViewModel @Inject constructor(
 
     private fun onPlugAvatarClick() {
         _snackbarStateFlow.value =
-            SnackbarState.Triggered(StringResource.Resource(R.string.data_not_loaded_yet))
+            SnackbarState.Triggered(StringResource.FromId(R.string.data_not_loaded_yet))
     }
 
     companion object {

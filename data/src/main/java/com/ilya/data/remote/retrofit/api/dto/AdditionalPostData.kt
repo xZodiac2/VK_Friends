@@ -20,7 +20,17 @@ data class AdditionalPhotosDataDto(
 
 data class AdditionalVideosDataDto(
     @Json(name = "post_id") val postId: Long,
-    @Json(name = "items") val items: List<VideoExtendedDataDto>
+    @Json(name = "items") val items: List<VideoAdditionalData>
+)
+
+data class VideoAdditionalData(
+    @Json(name = "duration") val duration: Int = 0,
+    @Json(name = "image") val firstFrame: List<FirstFrameDto>,
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
+    @Json(name = "title") val title: String = "",
+    @Json(name = "player") val playerUrl: String = "",
+    @Json(name = "likes") val likes: LikesDto? = null
 )
 
 data class AdditionalPostOwnerDto(

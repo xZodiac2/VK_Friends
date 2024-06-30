@@ -8,13 +8,11 @@ import okio.IOException
 import javax.inject.Inject
 
 class AccessTokenManager @Inject constructor(
-    private val shPrefs: SharedPreferences
+    private val shPrefs: SharedPreferences,
+    moshi: Moshi
 ) : BaseObservable<AccessTokenListener>() {
 
-    private val jsonAdapter = Moshi.Builder()
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-        .adapter(AccessToken::class.java)
+    private val jsonAdapter = moshi.adapter(AccessToken::class.java)
 
     var accessToken: AccessToken? = restoreToken()
         set(value) {

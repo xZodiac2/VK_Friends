@@ -1,10 +1,12 @@
 package com.ilya.data.remote.di
 
 import com.ilya.data.remote.FriendsManageRemoteRepository
+import com.ilya.data.remote.LikesRemoteRepository
 import com.ilya.data.remote.UserDataRemoteRepository
 import com.ilya.data.remote.UsersRemoteRepository
 import com.ilya.data.remote.VkApiExecutor
 import com.ilya.data.remote.repository.FriendsManageVkRepository
+import com.ilya.data.remote.repository.LikesVkRepository
 import com.ilya.data.remote.repository.UserDataVkRepository
 import com.ilya.data.remote.repository.UsersVkRepository
 import com.ilya.data.remote.repository.executor.PostAdditionalDataExecutor
@@ -34,5 +36,8 @@ internal interface RemoteRepositoryModule {
 
     @Binds
     fun bindPostsAdditionalDataExecutor(impl: PostAdditionalDataExecutor): VkApiExecutor<AdditionalPostData>
+
+    @Binds
+    fun bindLikesRemoteRepository(impl: LikesVkRepository): LikesRemoteRepository
 
 }

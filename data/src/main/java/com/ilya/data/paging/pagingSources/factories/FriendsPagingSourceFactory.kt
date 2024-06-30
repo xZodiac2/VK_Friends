@@ -1,4 +1,4 @@
-package com.ilya.data.paging.pagingSources
+package com.ilya.data.paging.pagingSources.factories
 
 import androidx.paging.PagingSource
 import com.ilya.core.appCommon.BaseFactory

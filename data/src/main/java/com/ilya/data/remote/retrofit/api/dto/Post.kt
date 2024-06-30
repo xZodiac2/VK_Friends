@@ -17,7 +17,7 @@ data class PostDto(
     @Json(name = "attachments") val attachments: List<AttachmentDto>,
     @Json(name = "likes") val likes: LikesDto,
     @Json(name = "date") val dateUnixTime: Long,
-    @Json(name = "owner_id") val ownerId: Long
+    @Json(name = "from_id") val authorId: String
 )
 
 abstract class BaseAttachment {
@@ -42,17 +42,9 @@ data class AudioDto(
     @Json(name = "url") val url: String = "",
 ) : BaseAttachment()
 
-data class PhotoDto(
-    @Json(name = "album_id") val albumId: Int = 0,
-    @Json(name = "id") override val id: Long = 0,
-    @Json(name = "owner_id") override val ownerId: Long = 0,
-    @Json(name = "sizes") val sizes: List<SizeDto>,
-    @Json(name = "access_key") override val accessKey: String = ""
-) : BaseAttachment()
-
 data class VideoDto(
     @Json(name = "duration") val duration: Int = 0,
-    @Json(name = "first_frame") val firstFrame: List<PhotoDto>? = null,
+    @Json(name = "first_frame") val firstFrame: List<FirstFrameDto>? = null,
     @Json(name = "id") override val id: Long = 0,
     @Json(name = "owner_id") override val ownerId: Long = 0,
     @Json(name = "title") val title: String = "",

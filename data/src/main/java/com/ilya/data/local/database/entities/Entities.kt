@@ -4,6 +4,8 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+// Common
+
 data class UserData(
     val id: Long,
     val firstName: String,
@@ -11,7 +13,7 @@ data class UserData(
     val photoUrl: String
 )
 
-
+// Paging
 
 @Entity(tableName = "friends_paging")
 data class FriendPagingEntity(
@@ -37,6 +39,8 @@ data class PostPagingEntity(
     val text: String,
     val dateUnixTime: Long
 )
+
+// Posts
 
 @Entity(tableName = "post_owners")
 data class PostOwnerEntity(
@@ -101,6 +105,22 @@ data class AudioEntity(
 data class PostLikesEntity(
     @PrimaryKey
     val postId: Long,
+    val count: Int,
+    val userLikes: Boolean
+)
+
+@Entity(tableName = "video_likes")
+data class VideoLikesEntity(
+    @PrimaryKey
+    val videoId: Long,
+    val count: Int,
+    val userLikes: Boolean
+)
+
+@Entity(tableName = "photo_likes")
+data class PhotoLikesEntity(
+    @PrimaryKey
+    val photoId: Long,
     val count: Int,
     val userLikes: Boolean
 )

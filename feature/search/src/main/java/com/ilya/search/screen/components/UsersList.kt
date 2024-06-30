@@ -78,18 +78,18 @@ private fun OnAppendError(
         ErrorType.NoInternet -> OnError(
             modifier = Modifier.height(140.dp),
             onButtonClick = onTryAgainClick,
-            message = StringResource.Resource(R.string.error_no_able_to_load_data),
-            buttonText = StringResource.Resource(R.string.retry)
+            message = StringResource.FromId(R.string.error_no_able_to_load_data),
+            buttonText = StringResource.FromId(R.string.retry)
         )
 
         ErrorType.NoAccessToken -> onEmptyAccessToken()
         is ErrorType.Unknown -> OnError(
             modifier = Modifier.height(140.dp),
-            message = StringResource.Resource(
+            message = StringResource.FromId(
                 id = R.string.error_unknown,
                 formatArgs = listOf(error.error.message ?: "")
             ),
-            buttonText = StringResource.Resource(id = R.string.retry),
+            buttonText = StringResource.FromId(id = R.string.retry),
             onButtonClick = onTryAgainClick
         )
     }

@@ -1,68 +1,30 @@
-package com.ilya.profileViewDomain
+package com.ilya.profileViewDomain.mappers
 
-import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.core.appCommon.enums.Relation
-import com.ilya.core.appCommon.enums.Sex
 import com.ilya.data.local.database.entities.AudioEntity
 import com.ilya.data.local.database.entities.FirstFrameEntity
-import com.ilya.data.local.database.entities.PhotoWithSizes
+import com.ilya.data.local.database.entities.PhotoLikesEntity
+import com.ilya.data.local.database.entities.PhotoWithSizesAndLikes
 import com.ilya.data.local.database.entities.PostLikesEntity
 import com.ilya.data.local.database.entities.PostOwnerEntity
 import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
 import com.ilya.data.local.database.entities.SizeEntity
-import com.ilya.data.local.database.entities.VideoWithFirstFrames
-import com.ilya.data.remote.retrofit.api.dto.CityDto
-import com.ilya.data.remote.retrofit.api.dto.CountersDto
-import com.ilya.data.remote.retrofit.api.dto.PartnerDto
+import com.ilya.data.local.database.entities.VideoLikesEntity
+import com.ilya.data.local.database.entities.VideoWithFirstFramesAndLikes
+import com.ilya.data.remote.retrofit.api.dto.LikesDto
 import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.SizeDto
-import com.ilya.data.remote.retrofit.api.dto.UserDto
+import com.ilya.profileViewDomain.models.Audio
+import com.ilya.profileViewDomain.models.FirstFrame
+import com.ilya.profileViewDomain.models.Likes
+import com.ilya.profileViewDomain.models.Photo
+import com.ilya.profileViewDomain.models.Post
+import com.ilya.profileViewDomain.models.PostOwner
+import com.ilya.profileViewDomain.models.Size
+import com.ilya.profileViewDomain.models.VideoExtended
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-fun UserDto.toUser(photos: List<PhotoDto>): User {
-    return User(
-        id = id,
-        firstName = firstName,
-        lastName = lastName,
-        photoUrl = photoUrl,
-        friendStatus = FriendStatus.entries.find { it.value == friendStatus }
-            ?: FriendStatus.NOT_FRIENDS,
-        birthday = birthday,
-        status = status,
-        city = city?.toCity(),
-        relation = Relation.entries.find { it.value == relation } ?: Relation.NOT_STATED,
-        partner = partner?.toPartner(),
-        sex = Sex.entries.find { it.value == sex } ?: Sex.NOT_STATED,
-        counters = counters?.toCounters(),
-        photos = photos.map { it.toPhoto() }
-    )
-}
-
-private fun CountersDto.toCounters(): Counters {
-    return Counters(
-        friends = friends,
-        subscriptions = subscriptions,
-        followers = followers
-    )
-}
-
-private fun PartnerDto.toPartner(): Partner {
-    return Partner(
-        id = id,
-        firstName = firstName,
-        lastName = lastName
-    )
-}
-
-private fun CityDto.toCity(): City {
-    return City(
-        name = name,
-        id = id
-    )
-}
 
 fun PostWithAttachmentsAndOwner.toPost(): Post {
     return Post(
@@ -72,7 +34,7 @@ fun PostWithAttachmentsAndOwner.toPost(): Post {
         photos = photos.map { it.toPhoto() },
         date = parseToString(data.dateUnixTime),
         likes = likes.toLikes(),
-        postOwner = owner.toPostOwner()
+        owner = owner.toPostOwner()
     )
 }
 
@@ -96,14 +58,15 @@ private fun AudioEntity.toAudio(): Audio {
     )
 }
 
-private fun VideoWithFirstFrames.toVideoExtended(): VideoExtended {
+private fun VideoWithFirstFramesAndLikes.toVideoExtended(): VideoExtended {
     return VideoExtended(
         duration = video.duration,
         firstFrame = firstFrames.map { it.toFirstFrame() },
         id = video.id,
         ownerId = video.ownerId,
         title = video.title,
-        playerUrl = video.playerUrl
+        playerUrl = video.playerUrl,
+        likes = likes?.toLikes()
     )
 }
 
@@ -115,25 +78,48 @@ private fun FirstFrameEntity.toFirstFrame(): FirstFrame {
     )
 }
 
-private fun PhotoDto.toPhoto(): Photo {
+private fun VideoLikesEntity.toLikes(): Likes {
+    return Likes(
+        count = count,
+        userLikes = userLikes
+    )
+}
+
+fun PhotoDto.toPhoto(): Photo {
     return Photo(
         albumId = albumId,
         id = id,
         ownerId = ownerId,
         sizes = sizes.map { it.toSize() },
+        likes = likes?.toLikes()
     )
 }
 
-private fun PhotoWithSizes.toPhoto(): Photo {
+private fun LikesDto.toLikes(): Likes {
+    return Likes(
+        count = count,
+        userLikes = userLikes == 1
+    )
+}
+
+private fun PhotoWithSizesAndLikes.toPhoto(): Photo {
     return Photo(
         ownerId = photo.ownerId,
         albumId = photo.albumId,
         id = photo.id,
         sizes = sizes.map { it.toSize() },
+        likes = likes?.toLikes()
     )
 }
 
 private fun PostLikesEntity.toLikes(): Likes {
+    return Likes(
+        count = count,
+        userLikes = userLikes
+    )
+}
+
+private fun PhotoLikesEntity.toLikes(): Likes {
     return Likes(
         count = count,
         userLikes = userLikes

@@ -1,7 +1,6 @@
 package com.ilya.vkfriends.navigation
 
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 
 
@@ -20,6 +19,12 @@ sealed interface Destination {
     @Serializable
     data object FriendsScreen : Destination
 
+    @Serializable
+    data class PhotoPreview(val userId: Long, val targetPhotoIndex: Int) : Destination
+
+    @Serializable
+    data class PhotosScreen(val userId: Long) : Destination
+
 }
 
 val NavBackStackEntry.lastDestinationName: String
@@ -30,17 +35,4 @@ val NavBackStackEntry.lastDestinationName: String
             ?.substringAfterLast(".") ?: ""
     }
 
-val NavBackStackEntry.lastDestination: Destination
-    get() {
-        return when (lastDestinationName) {
-            Destination.AuthScreen::class.simpleName -> Destination.AuthScreen
-            Destination.FriendsScreen::class.simpleName -> Destination.FriendsScreen
-            Destination.ProfileScreen::class.simpleName -> Destination.ProfileScreen(
-                toRoute<Destination.ProfileScreen>().userId
-            )
 
-            Destination.SearchScreen::class.simpleName -> Destination.SearchScreen
-            else -> Destination.AuthScreen
-        }
-
-    }

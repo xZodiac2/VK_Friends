@@ -15,9 +15,6 @@ dependencyResolutionManagement {
         maven {
             url = URI("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-andorid/")
         }
-        maven {
-            url = URI("https://jitpack.io")
-        }
     }
 }
 

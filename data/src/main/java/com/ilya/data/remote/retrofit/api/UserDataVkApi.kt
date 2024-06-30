@@ -1,6 +1,7 @@
 package com.ilya.data.remote.retrofit.api
 
 import com.ilya.data.remote.retrofit.CURRENT_API_VERSION
+import com.ilya.data.remote.retrofit.api.dto.PhotosResponse
 import com.ilya.data.remote.retrofit.api.dto.UserDataResponse
 import com.ilya.data.remote.retrofit.api.dto.VideoExtendedResponse
 import com.ilya.data.remote.retrofit.api.dto.WallResponse
@@ -32,6 +33,15 @@ internal interface UserDataVkApi {
         @Query("owner_id") ownerId: Long,
         @Query("videos") videoId: String,
     ): VideoExtendedResponse
+
+    @GET("photos.getAll?v=$CURRENT_API_VERSION")
+    suspend fun getPhotos(
+        @Query("access_token") accessToken: String,
+        @Query("owner_id") ownerId: Long,
+        @Query("offset") offset: Int,
+        @Query("count") count: Int,
+        @Query("extended") extended: Int
+    ) : PhotosResponse
 
 }
 

@@ -9,12 +9,14 @@ import com.ilya.data.local.database.entities.AudioEntity
 import com.ilya.data.local.database.entities.FirstFrameEntity
 import com.ilya.data.local.database.entities.FriendPagingEntity
 import com.ilya.data.local.database.entities.PhotoEntity
+import com.ilya.data.local.database.entities.PhotoLikesEntity
 import com.ilya.data.local.database.entities.PostLikesEntity
 import com.ilya.data.local.database.entities.PostOwnerEntity
 import com.ilya.data.local.database.entities.PostPagingEntity
 import com.ilya.data.local.database.entities.SizeEntity
 import com.ilya.data.local.database.entities.UserPagingEntity
 import com.ilya.data.local.database.entities.VideoEntity
+import com.ilya.data.local.database.entities.VideoLikesEntity
 
 @Database(
     entities = [
@@ -27,7 +29,9 @@ import com.ilya.data.local.database.entities.VideoEntity
         SizeEntity::class,
         FirstFrameEntity::class,
         PostOwnerEntity::class,
-        PostLikesEntity::class
+        PostLikesEntity::class,
+        VideoLikesEntity::class,
+        PhotoLikesEntity::class,
     ],
     version = 1,
     exportSchema = false

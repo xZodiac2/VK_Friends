@@ -5,7 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.ilya.core.appCommon.UseCase
-import com.ilya.data.paging.pagingSources.nonDatabase.PhotosPagingSource
+import com.ilya.data.paging.pagingSources.PhotosPagingSource
 import com.ilya.profileViewDomain.mappers.toPhoto
 import com.ilya.profileViewDomain.models.Photo
 import kotlinx.coroutines.flow.Flow

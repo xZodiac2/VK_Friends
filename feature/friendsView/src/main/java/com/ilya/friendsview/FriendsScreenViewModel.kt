@@ -2,7 +2,6 @@ package com.ilya.friendsview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -11,10 +10,9 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.factories.FriendsPagingSourceFactory
-import com.ilya.data.paging.remoteMediators.FriendsRemoteMediator
 import com.ilya.data.mappers.toUser
+import com.ilya.data.paging.User
+import com.ilya.data.paging.pagingSources.FriendsPagingSource
 import com.ilya.friendsview.screen.FriendsScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,18 +22,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendsScreenViewModel @Inject constructor(
-    private val friendsPagingSourceFactory: FriendsPagingSourceFactory,
+    private val friendsPagingSource: FriendsPagingSource,
     private val accessTokenManager: AccessTokenManager,
-    friendsRemoteMediatorFactory: FriendsRemoteMediator.Factory
 ) : ViewModel() {
 
-    @OptIn(ExperimentalPagingApi::class)
     val pagingFlow = Pager(
         config = PagingConfig(pageSize = PAGE_SIZE),
-        remoteMediator = friendsRemoteMediatorFactory.newInstance(Unit),
-        pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
+        pagingSourceFactory = { friendsPagingSource }
     ).flow
-        .map { it.map { entity -> entity.toUser() } }
+        .map { it.map { userDto -> userDto.toUser() } }
         .cachedIn(viewModelScope)
 
     private val _alertDialogState = MutableStateFlow<AlertDialogState>(AlertDialogState.Consumed)

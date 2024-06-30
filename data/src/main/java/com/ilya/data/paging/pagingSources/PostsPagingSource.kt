@@ -1,107 +1,79 @@
-package com.ilya.data.paging.remoteMediators
+package com.ilya.data.paging.pagingSources
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
+import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.appCommon.enums.AttachmentType
 import com.ilya.core.util.logThrowable
-import com.ilya.data.local.LocalRepository
-import com.ilya.data.local.database.entities.PostWithAttachmentsAndOwner
+import com.ilya.data.mappers.toPost
+import com.ilya.data.paging.PaginationError
+import com.ilya.data.paging.Post
 import com.ilya.data.remote.UserDataRemoteRepository
 import com.ilya.data.remote.VkApiExecutor
-import com.ilya.data.paging.PaginationError
 import com.ilya.data.remote.retrofit.api.dto.AdditionalPostData
 import com.ilya.data.remote.retrofit.api.dto.AttachmentDto
 import com.ilya.data.remote.retrofit.api.dto.BaseAttachment
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
-import com.ilya.data.mappers.toPostEntity
 import kotlinx.coroutines.delay
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
-@OptIn(ExperimentalPagingApi::class)
-class PostsRemoteMediator private constructor(
-    private val localRepository: LocalRepository<PostWithAttachmentsAndOwner>,
-    private val remoteRepository: UserDataRemoteRepository,
+class PostsPagingSource private constructor(
+    private val vkApiExecutor: VkApiExecutor<AdditionalPostData>,
+    private val userDataRemoteRepository: UserDataRemoteRepository,
     private val accessTokenManager: AccessTokenManager,
-    private val userId: Long,
-    private val vkApiExecutor: VkApiExecutor<AdditionalPostData>
-) : RemoteMediator<Int, PostWithAttachmentsAndOwner>() {
+    private val userId: Long
+) : PagingSource<Int, Post>() {
 
-    // delays in this method are necessary because of requests limit 3/sec
-    override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, PostWithAttachmentsAndOwner>
-    ): MediatorResult {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Post> {
         try {
-            if (loadType == LoadType.REFRESH) {
-                localRepository.deleteAllWithPrimaryKeys()
-            }
+            val key = params.key ?: 0
+            val offset = key * params.loadSize
 
-            val offset = when (loadType) {
-                LoadType.REFRESH -> 0
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> {
-                    state.lastItemOrNull()?.data?.pagingId ?: return MediatorResult.Success(
-                        endOfPaginationReached = false
-                    )
-                }
-            }
-
-            val count = when (loadType) {
-                LoadType.REFRESH -> state.config.initialLoadSize
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                LoadType.APPEND -> state.config.pageSize
-            }
-
-            val accessToken = accessTokenManager.accessToken ?: return MediatorResult.Error(
+            val accessToken = accessTokenManager.accessToken?.token ?: return LoadResult.Error(
                 PaginationError.NoAccessToken
             )
 
-            val databasePostIds = localRepository.getAll().map { it.data.id }
-
-            delay(500)
-            val posts = remoteRepository.getWall(
-                accessToken = accessToken.token,
+            val wall = userDataRemoteRepository.getWall(
+                accessToken = accessToken,
                 ownerId = userId,
-                count = count,
+                count = params.loadSize,
                 offset = offset
             )
 
-            val postsAdditionalData = getPostsAdditionalData(posts, accessToken.token)
+            val postsAdditionalData = getPostsAdditionalData(wall, accessToken)
 
-            val postEntities = posts
-                .map { post ->
-                    val videos = postsAdditionalData[post.id]
-                        ?.videos
-                        ?.items ?: emptyList()
-                    val postOwner = postsAdditionalData[post.id]
-                        ?.postOwner
-                        ?.data ?: UserDto()
-                    val photos = postsAdditionalData[post.id]
-                        ?.photos
-                        ?.items ?: emptyList()
-                    post.toPostEntity(videos, photos, postOwner)
-                }
-                .filterNot { databasePostIds.contains(it.data.id) }
-            localRepository.upsertAll(*postEntities.toTypedArray())
+            val posts = wall.map { post ->
+                val videos = postsAdditionalData[post.id]
+                    ?.videos
+                    ?.items ?: emptyList()
+                val postOwner = postsAdditionalData[post.id]
+                    ?.postOwner
+                    ?.data ?: UserDto()
+                val photos = postsAdditionalData[post.id]
+                    ?.photos
+                    ?.items ?: emptyList()
+                post.toPost(videos, photos, postOwner)
+            }
 
-            return MediatorResult.Success(endOfPaginationReached = posts.isEmpty())
+            return LoadResult.Page(
+                data = posts,
+                nextKey = if (posts.isEmpty()) null else key + 1,
+                prevKey = null,
+            )
 
         } catch (e: SocketTimeoutException) {
             logThrowable(e)
-            return MediatorResult.Error(PaginationError.NoInternet)
+            return LoadResult.Error(PaginationError.NoInternet)
         } catch (e: UnknownHostException) {
             logThrowable(e)
-            return MediatorResult.Error(PaginationError.NoInternet)
+            return LoadResult.Error(PaginationError.NoInternet)
         } catch (e: Exception) {
             logThrowable(e)
-            return MediatorResult.Error(e)
+            return LoadResult.Error(e)
         }
     }
 
@@ -214,21 +186,27 @@ class PostsRemoteMediator private constructor(
         }
     }
 
+    override fun getRefreshKey(state: PagingState<Int, Post>): Int? {
+        return state.anchorPosition?.let { anchorPosition ->
+            val anchorPage = state.closestPageToPosition(anchorPosition)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
+        }
+    }
+
     class Factory @Inject constructor(
-        private val localRepository: LocalRepository<PostWithAttachmentsAndOwner>,
-        private val remoteRepository: UserDataRemoteRepository,
+        private val vkApiExecutor: VkApiExecutor<AdditionalPostData>,
+        private val userDataRemoteRepository: UserDataRemoteRepository,
         private val accessTokenManager: AccessTokenManager,
-        private val vkApiExecutor: VkApiExecutor<AdditionalPostData>
-    ) : BaseFactory<Long, PostsRemoteMediator> {
-        override fun newInstance(initializationData: Long): PostsRemoteMediator {
-            return PostsRemoteMediator(
-                localRepository = localRepository,
-                remoteRepository = remoteRepository,
+    ) : BaseFactory<Long, PostsPagingSource> {
+        override fun newInstance(initializationData: Long): PostsPagingSource {
+            return PostsPagingSource(
+                vkApiExecutor = vkApiExecutor,
+                userDataRemoteRepository = userDataRemoteRepository,
                 accessTokenManager = accessTokenManager,
-                userId = initializationData,
-                vkApiExecutor = vkApiExecutor
+                userId = initializationData
             )
         }
+
     }
 
 }

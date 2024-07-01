@@ -8,4 +8,5 @@
     <string name="search_screen_name">Search friends</string>
     <string name="data_not_loaded_yet">The data is not loaded yet. Please wait</string>
     <string name="error_unknown">Unknown error: %s</string>
+    <string name="no_users_found">Nothing found</string>
 </resources>

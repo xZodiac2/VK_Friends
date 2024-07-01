@@ -180,7 +180,7 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     onPhotoClick = { userId, targetIndex ->
-                        navController.navigate(Destination.PhotoPreview(userId, targetIndex))
+                        navController.navigate(Destination.PhotosPreview(userId, targetIndex))
                     },
                     onOpenPhotosClick = {
                         navController.navigate(Destination.PhotosScreen(it))
@@ -212,11 +212,11 @@ class MainActivity : ComponentActivity() {
                     showBottomBar()
                 }
             }
-            composable<Destination.PhotoPreview>(
+            composable<Destination.PhotosPreview>(
                 enterTransition = ScreenTransition.PhotosPreview.transition.enterTransition,
                 exitTransition = ScreenTransition.PhotosPreview.transition.exitTransition
             ) {
-                val route = it.toRoute<Destination.PhotoPreview>()
+                val route = it.toRoute<Destination.PhotosPreview>()
 
                 PhotosPreview(
                     userId = route.userId,
@@ -238,7 +238,7 @@ class MainActivity : ComponentActivity() {
                     userId = route.userId,
                     onBackClick = { navController.popBackStack() },
                     onPhotoClick = { userId, photoIndex ->
-                        navController.navigate(Destination.PhotoPreview(userId, photoIndex))
+                        navController.navigate(Destination.PhotosPreview(userId, photoIndex))
                     }
                 )
             }

@@ -8,4 +8,5 @@
     <string name="search_screen_name">Поиск друзей</string>
     <string name="data_not_loaded_yet">Данные ещё не загрузились. Пожалуйста подождите</string>
     <string name="error_unknown">Неизвестная ошибка: %s</string>
+    <string name="no_users_found">Ничего не найдено</string>
 </resources>

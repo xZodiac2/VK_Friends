@@ -40,7 +40,7 @@ private fun CountersDto.toCounters(): Counters {
     )
 }
 
-private fun PartnerDto.toPartner(): Partner {
+fun PartnerDto.toPartner(): Partner {
     return Partner(
         id = id,
         firstName = firstName,

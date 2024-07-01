@@ -379,17 +379,17 @@ private fun calculateRelationString(
 ): String {
     return stringResource(
         id = when (user.sex) {
-            Sex.WOMAN -> when (user.partnerExtended) {
+            Sex.WOMAN -> when (user.partner) {
                 null -> womanString
                 else -> womanStringExtended
             }
 
-            else -> when (user.partnerExtended) {
+            else -> when (user.partner) {
                 null -> manString
                 else -> manStringExtended
             }
         },
-        user.partnerExtended?.let {
+        user.partner?.let {
             "${it.firstName} ${it.lastName}"
         } ?: ""
     )

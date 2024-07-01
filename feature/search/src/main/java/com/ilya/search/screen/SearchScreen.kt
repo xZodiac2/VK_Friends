@@ -1,15 +1,12 @@
 package com.ilya.search.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,7 +18,6 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -52,15 +48,15 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.ilya.core.appCommon.StringResource
-import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.search.R
 import com.ilya.search.SearchViewModel
+import com.ilya.search.screen.components.OnEmptyUsers
+import com.ilya.search.screen.components.ResolveAppend
+import com.ilya.search.screen.components.ResolveRefresh
 import com.ilya.search.screen.components.SearchBar
-import com.ilya.search.screen.components.usersList
+import com.ilya.search.screen.components.UserCard
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -68,9 +64,10 @@ import com.ilya.theme.LocalTypography
 @Composable
 fun SearchScreen(
     openProfileRequest: (Long) -> Unit,
-    onEmptyAccessToken: () -> Unit,
-    viewModel: SearchViewModel = hiltViewModel()
+    onEmptyAccessToken: () -> Unit
 ) {
+    val viewModel: SearchViewModel = hiltViewModel()
+
     val pagingItems = viewModel.pagingFlow.collectAsLazyPagingItems()
     val accountOwner by viewModel.accountOwnerStateFlow.collectAsState()
     val snackbarState by viewModel.snackbarStateFlow.collectAsState()
@@ -110,8 +107,7 @@ fun SearchScreen(
         containerColor = LocalColorScheme.current.primary
     ) { padding ->
         Content(
-            pagingItems = pagingItems,
-            onTryAgainClick = { pagingItems.refresh() },
+            users = pagingItems,
             onEmptyAccessToken = onEmptyAccessToken,
             onCardClick = openProfileRequest,
             paddingValues = padding,
@@ -178,8 +174,7 @@ private fun TopBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
-    pagingItems: LazyPagingItems<User>,
-    onTryAgainClick: () -> Unit,
+    users: LazyPagingItems<User>,
     onEmptyAccessToken: () -> Unit,
     onCardClick: (Long) -> Unit,
     paddingValues: PaddingValues,
@@ -199,61 +194,10 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            when (val refreshLoadState = pagingItems.loadState.refresh) {
-                LoadState.Loading -> {
-                    if (isRefreshing) {
-                        usersList(
-                            pagingItems = pagingItems,
-                            onCardClick = onCardClick,
-                            onEmptyAccessToken = onEmptyAccessToken,
-                            onTryAgainClick = { pagingItems.retry() },
-                            onDataLoaded = onDataLoaded
-                        )
-                    } else {
-                        item(span = { GridItemSpan(2) }) { OnLoadingState() }
-                    }
-                }
-
-                is LoadState.Error -> {
-                    /**
-                     * If [LoadState.Error] is [PaginationError.NoInternet], [LazyPagingItems] will be
-                     * receive from local database
-                     */
-                    if (refreshLoadState.error == PaginationError.NoInternet) {
-                        usersList(
-                            pagingItems = pagingItems,
-                            onCardClick = onCardClick,
-                            onEmptyAccessToken = onEmptyAccessToken,
-                            onTryAgainClick = { pagingItems.retry() },
-                            onDataLoaded = onDataLoaded
-                        )
-                    } else {
-                        item {
-                            OnErrorState(
-                                errorType = when (refreshLoadState.error) {
-                                    is PaginationError.NoInternet -> ErrorType.NoInternet
-                                    is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
-                                    else -> ErrorType.Unknown(refreshLoadState.error)
-                                },
-                                onTryAgainClick = onTryAgainClick,
-                                onEmptyAccessToken = onEmptyAccessToken
-                            )
-                        }
-                    }
-
-                    onDataLoaded()
-                }
-
-                is LoadState.NotLoading -> {
-                    usersList(
-                        pagingItems = pagingItems,
-                        onCardClick = onCardClick,
-                        onEmptyAccessToken = onEmptyAccessToken,
-                        onTryAgainClick = { pagingItems.retry() },
-                        onDataLoaded = onDataLoaded
-                    )
-                }
-            }
+            items(count = users.itemCount) { User(users, it, onCardClick, onDataLoaded) }
+            item(span = { GridItemSpan(2) }) { ResolveRefresh(users, onEmptyAccessToken) }
+            item(span = { GridItemSpan(2) }) { ResolveAppend(users, onEmptyAccessToken) }
+            item(span = { GridItemSpan(2) }) { OnEmptyUsers(users) }
         }
 
         PullRefreshIndicator(
@@ -267,34 +211,22 @@ private fun Content(
 }
 
 @Composable
-private fun OnErrorState(
-    errorType: ErrorType,
-    onTryAgainClick: () -> Unit,
-    onEmptyAccessToken: () -> Unit,
+private fun User(
+    users: LazyPagingItems<User>,
+    index: Int,
+    onCardClick: (Long) -> Unit,
+    onDataLoaded: () -> Unit
 ) {
-    when (errorType) {
-        ErrorType.NoInternet -> Unit
-        ErrorType.NoAccessToken -> onEmptyAccessToken()
-        is ErrorType.Unknown -> OnError(
-            modifier = Modifier.fillMaxHeight(),
-            message = StringResource.FromId(
-                id = R.string.error_unknown,
-                formatArgs = listOf(errorType.error.message ?: "")
-            ),
-            buttonText = StringResource.FromId(id = R.string.retry),
-            onButtonClick = onTryAgainClick
+    val user = users[index]
+    if (user != null) {
+        UserCard(
+            onCardClick = onCardClick,
+            user = user
         )
+        LaunchedEffect(key1 = Unit) {
+            onDataLoaded()
+        }
     }
 }
 
 
-@Composable
-private fun OnLoadingState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .height(400.dp)
-            .background(LocalColorScheme.current.primary),
-        contentAlignment = Alignment.Center
-    ) { CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor) }
-}

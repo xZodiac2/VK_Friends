@@ -3,6 +3,7 @@ package com.ilya.data.paging.pagingSources
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.ilya.core.appCommon.AccessTokenManager
+import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.remote.UsersRemoteRepository
@@ -11,7 +12,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
 
-class FriendsPagingSource @Inject constructor(
+class FriendsPagingSource private constructor(
     private val usersRemoteRepository: UsersRemoteRepository,
     private val accessTokenManager: AccessTokenManager
 ) : PagingSource<Int, UserDto>() {
@@ -25,7 +26,7 @@ class FriendsPagingSource @Inject constructor(
                 PaginationError.NoAccessToken
             )
 
-            val users = usersRemoteRepository.getFriends(
+            val friends = usersRemoteRepository.getFriends(
                 accessToken = accessToken,
                 offset = offset,
                 count = params.loadSize,
@@ -33,8 +34,8 @@ class FriendsPagingSource @Inject constructor(
             )
 
             return LoadResult.Page(
-                data = users,
-                nextKey = if (users.isEmpty()) null else key + 1,
+                data = friends,
+                nextKey = if (friends.isEmpty()) null else key + 1,
                 prevKey = null
             )
 
@@ -55,6 +56,19 @@ class FriendsPagingSource @Inject constructor(
             val anchorPage = state.closestPageToPosition(anchorPosition)
             anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
         }
+    }
+
+    class Factory @Inject constructor(
+        private val usersRemoteRepository: UsersRemoteRepository,
+        private val accessTokenManager: AccessTokenManager
+    ) : BaseFactory<Unit, FriendsPagingSource> {
+        override fun newInstance(initializationData: Unit): FriendsPagingSource {
+            return FriendsPagingSource(
+                usersRemoteRepository = usersRemoteRepository,
+                accessTokenManager = accessTokenManager
+            )
+        }
+
     }
 
     companion object {

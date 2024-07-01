@@ -8,7 +8,8 @@ data class User(
     val id: Long,
     val firstName: String,
     val lastName: String,
-    val photoUrl: String
+    val photoUrl: String,
+    val isClosed: Boolean
 ) : Parcelable
 
 data class Post(

@@ -1,7 +1,7 @@
 package com.ilya.friendsview.screen
 
 
-sealed interface FriendsScreenEvent {
+internal sealed interface FriendsScreenEvent {
     data object PlaceholderAvatarClick : FriendsScreenEvent
     data object SnackbarConsumed : FriendsScreenEvent
     data object Start : FriendsScreenEvent

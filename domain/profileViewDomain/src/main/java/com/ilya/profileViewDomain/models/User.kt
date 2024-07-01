@@ -15,7 +15,6 @@ data class User(
     val city: City?,
     val relation: Relation,
     val partner: Partner?,
-    val partnerExtended: User? = null,
     val isAccountOwner: Boolean = false,
     val sex: Sex,
     val counters: Counters?,

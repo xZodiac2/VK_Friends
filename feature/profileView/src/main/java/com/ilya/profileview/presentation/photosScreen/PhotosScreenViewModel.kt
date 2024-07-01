@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @HiltViewModel
-class PhotosScreenViewModel @Inject constructor(
+internal class PhotosScreenViewModel @Inject constructor(
     private val getPhotosPagingFlowUseCase: GetPhotosPagingFlowUseCase,
 ) : ViewModel() {
 

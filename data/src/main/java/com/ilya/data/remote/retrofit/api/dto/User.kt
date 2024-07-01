@@ -12,9 +12,9 @@ data class ResponseData(
 )
 
 data class UserDto(
-    @Json(name = "id") val id: Long = 0,
-    @Json(name = "first_name") val firstName: String = "",
-    @Json(name = "last_name") val lastName: String = "",
+    @Json(name = "id") val id: Long,
+    @Json(name = "first_name") val firstName: String,
+    @Json(name = "last_name") val lastName: String,
     @Json(name = "sex") val sex: Int = 0,
     @Json(name = "photo_200_orig") val photoUrl: String = "",
     @Json(name = "bdate") val birthday: String = "",
@@ -23,18 +23,19 @@ data class UserDto(
     @Json(name = "relation") val relation: Int = 0,
     @Json(name = "relation_partner") val partner: PartnerDto? = null,
     @Json(name = "friend_status") val friendStatus: Int = 0,
-    @Json(name = "counters") val counters: CountersDto? = null
+    @Json(name = "counters") val counters: CountersDto? = null,
+    @Json(name = "is_closed") val isClosed: Boolean
 )
 
 data class PartnerDto(
-    @Json(name = "id") val id: Long = 0,
-    @Json(name = "first_name") val firstName: String = "",
-    @Json(name = "last_name") val lastName: String = ""
+    @Json(name = "id") val id: Long,
+    @Json(name = "first_name") val firstName: String,
+    @Json(name = "last_name") val lastName: String
 )
 
 data class CityDto(
-    @Json(name = "title") val name: String = "",
-    @Json(name = "id") val id: Int = 0
+    @Json(name = "title") val name: String,
+    @Json(name = "id") val id: Int
 )
 
 data class CountersDto(

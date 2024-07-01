@@ -3,7 +3,7 @@ package com.ilya.profileview.presentation.profileScreen
 import com.ilya.profileViewDomain.models.User
 
 
-sealed interface ProfileScreenEvent {
+internal sealed interface ProfileScreenEvent {
     data object SnackbarConsumed : ProfileScreenEvent
     data object Retry : ProfileScreenEvent
     data class Start(val userId: Long) : ProfileScreenEvent

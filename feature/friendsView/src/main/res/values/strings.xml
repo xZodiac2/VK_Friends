@@ -9,4 +9,5 @@
     <string name="app_exit_warning">Are you sure you want to quit?</string>
     <string name="data_not_loaded_yet">The data is not loaded yet. Please wait</string>
     <string name="error_unknown">Unknown error: %s</string>
+    <string name="no_friends_found">You haven\'t friends yet</string>
 </resources>

@@ -69,7 +69,7 @@ private fun BaseButtonStyles.resolveBorder(): BorderStroke? {
     return when (this) {
         BaseButtonStyles.Attractive -> null
         BaseButtonStyles.Unattractive -> BorderStroke(
-            width = 1.dp,
+            width = 2.dp,
             color = LocalColorScheme.current.buttonColor
         )
     }

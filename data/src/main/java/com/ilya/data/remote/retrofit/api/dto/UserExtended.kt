@@ -8,6 +8,6 @@ data class UserExtendedResponse(
 
 data class UserExtendedResponseData(
     @Json(name = "user") val user: UserDto,
-    @Json(name = "partner") val partner: UserDto? = null,
+    @Json(name = "partner") val partner: PartnerDto? = null,
     @Json(name = "photos") val photos: List<PhotoDto>
 )

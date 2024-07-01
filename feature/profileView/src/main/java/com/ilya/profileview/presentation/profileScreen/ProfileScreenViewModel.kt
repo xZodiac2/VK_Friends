@@ -17,7 +17,6 @@ import com.ilya.profileViewDomain.useCase.GetUserUseCaseData
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCaseData
 import com.ilya.profileview.R
-import com.ilya.profileview.presentation.profileScreen.states.ProfileScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +32,7 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileScreenViewModel @Inject constructor(
+internal class ProfileScreenViewModel @Inject constructor(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
     private val accessTokenManager: AccessTokenManager,
@@ -162,7 +161,7 @@ class ProfileScreenViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
-        private const val PAGE_SIZE = 20
+        private const val PAGE_SIZE = 3
         private const val INITIAL_LOAD_SIZE = 6
     }
 

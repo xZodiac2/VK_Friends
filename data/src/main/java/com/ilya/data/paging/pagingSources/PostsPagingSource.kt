@@ -15,7 +15,6 @@ import com.ilya.data.remote.retrofit.api.dto.AdditionalPostData
 import com.ilya.data.remote.retrofit.api.dto.AttachmentDto
 import com.ilya.data.remote.retrofit.api.dto.BaseAttachment
 import com.ilya.data.remote.retrofit.api.dto.PostDto
-import com.ilya.data.remote.retrofit.api.dto.UserDto
 import kotlinx.coroutines.delay
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -46,17 +45,17 @@ class PostsPagingSource private constructor(
 
             val postsAdditionalData = getPostsAdditionalData(wall, accessToken)
 
-            val posts = wall.map { post ->
+            val posts = wall.mapNotNull { post ->
                 val videos = postsAdditionalData[post.id]
                     ?.videos
                     ?.items ?: emptyList()
                 val postOwner = postsAdditionalData[post.id]
                     ?.postOwner
-                    ?.data ?: UserDto()
+                    ?.data
                 val photos = postsAdditionalData[post.id]
                     ?.photos
                     ?.items ?: emptyList()
-                post.toPost(videos, photos, postOwner)
+                postOwner?.let { post.toPost(videos, photos, it) }
             }
 
             return LoadResult.Page(

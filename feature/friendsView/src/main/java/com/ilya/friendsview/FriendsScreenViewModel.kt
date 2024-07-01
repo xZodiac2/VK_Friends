@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
-class FriendsScreenViewModel @Inject constructor(
-    private val friendsPagingSource: FriendsPagingSource,
+internal class FriendsScreenViewModel @Inject constructor(
+    private val friendsPagingSourceFactory: FriendsPagingSource.Factory,
     private val accessTokenManager: AccessTokenManager,
 ) : ViewModel() {
 
     val pagingFlow = Pager(
         config = PagingConfig(pageSize = PAGE_SIZE),
-        pagingSourceFactory = { friendsPagingSource }
+        pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
     ).flow
         .map { it.map { userDto -> userDto.toUser() } }
         .cachedIn(viewModelScope)

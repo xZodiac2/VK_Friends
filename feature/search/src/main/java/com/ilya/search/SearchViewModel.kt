@@ -2,7 +2,6 @@ package com.ilya.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
@@ -27,7 +26,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(
+internal class SearchViewModel @Inject constructor(
     private val usersPagingSourceFactory: UsersPagingSource.Factory,
     private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
@@ -54,7 +53,6 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    @OptIn(ExperimentalPagingApi::class)
     private fun newPager(query: String): Pager<Int, UserDto> {
         return Pager(
             config = PagingConfig(

@@ -10,7 +10,8 @@ fun VKIDUser.toUser(accessToken: AccessToken): User {
         id = accessToken.userID,
         firstName = firstName,
         lastName = lastName,
-        photoUrl = photo200 ?: ""
+        photoUrl = photo200 ?: "",
+        isClosed = false
     )
 }
 
@@ -19,6 +20,7 @@ fun UserDto.toUser(): User {
         id = id,
         firstName = firstName,
         lastName = lastName,
-        photoUrl = photoUrl
+        photoUrl = photoUrl,
+        isClosed = isClosed
     )
 }

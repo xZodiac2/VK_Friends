@@ -3,19 +3,13 @@ package com.ilya.profileview.presentation.profileScreen
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,11 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ilya.core.appCommon.StringResource
@@ -47,12 +39,13 @@ import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.profileViewDomain.models.Post
 import com.ilya.profileViewDomain.models.User
 import com.ilya.profileview.R
+import com.ilya.profileview.presentation.profileScreen.components.OnEmptyPostsMessage
 import com.ilya.profileview.presentation.profileScreen.components.Photos
 import com.ilya.profileview.presentation.profileScreen.components.PostCard
 import com.ilya.profileview.presentation.profileScreen.components.ProfileHeader
-import com.ilya.profileview.presentation.profileScreen.states.ProfileScreenState
+import com.ilya.profileview.presentation.profileScreen.components.ResolveAppend
+import com.ilya.profileview.presentation.profileScreen.components.ResolveRefresh
 import com.ilya.theme.LocalColorScheme
-import com.ilya.theme.LocalTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +55,9 @@ fun ProfileScreen(
     onBackClick: () -> Unit,
     onPhotoClick: (id: Long, targetPhotoIndex: Int) -> Unit,
     onOpenPhotosClick: (Long) -> Unit,
-    viewModel: ProfileScreenViewModel = hiltViewModel()
 ) {
+    val viewModel: ProfileScreenViewModel = hiltViewModel()
+
     val screenState = viewModel.screenState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -213,125 +207,18 @@ private fun Content(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item { ProfileHeader(user, friendRequest) }
-        item {
-            Photos(
-                photos = user.photos,
-                onPhotoClick = onPhotoClick,
-                onOpenPhotosClick = onOpenPhotosClick
-            )
-        }
-        items(count = posts.itemCount) { index ->
-            val post = posts[index]
-            post?.let {
-                PostCard(it)
-            }
-        }
-        item {
-            AppendIndicator(
-                loadState = posts.loadState.append,
-                onTryAgainClick = { posts.retry() }
-            )
-        }
-        item {
-            RefreshIndicator(
-                loadState = posts.loadState.refresh,
-                onTryAgainClick = { posts.refresh() }
-            )
-        }
+        item { Photos(user.photos, onPhotoClick, onOpenPhotosClick) }
+        items(count = posts.itemCount) { Post(posts, it) }
+        item { ResolveAppend(posts) }
+        item { ResolveRefresh(posts) }
         item { OnEmptyPostsMessage(posts) }
     }
 }
 
 @Composable
-private fun OnEmptyPostsMessage(posts: LazyPagingItems<Post>) {
-    if (posts.itemCount == 0 && posts.loadState.refresh is LoadState.NotLoading) {
-        Card(
-            modifier = Modifier.aspectRatio(2f / 1),
-            colors = CardDefaults.cardColors(
-                containerColor = LocalColorScheme.current.cardContainerColor,
-                contentColor = LocalColorScheme.current.secondaryTextColor
-            )
-        ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.8f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.empty),
-                        modifier = Modifier.fillMaxSize(0.5f),
-                        contentDescription = "noPosts",
-                    )
-                    Text(
-                        text = stringResource(R.string.no_posts),
-                        fontSize = LocalTypography.current.big
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun RefreshIndicator(
-    loadState: LoadState,
-    onTryAgainClick: () -> Unit
-) {
-    when (loadState) {
-        LoadState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor)
-            }
-        }
-
-        is LoadState.Error -> {
-            OnError(
-                modifier = Modifier.fillMaxSize(),
-                message = StringResource.FromId(
-                    R.string.error_unknown,
-                    listOf(loadState.error.message.toString())
-                ),
-                buttonText = StringResource.FromId(R.string.try_again),
-                onButtonClick = onTryAgainClick
-            )
-        }
-
-        else -> Unit
-    }
-}
-
-@Composable
-private fun AppendIndicator(
-    loadState: LoadState,
-    onTryAgainClick: () -> Unit
-) {
-    when (loadState) {
-        LoadState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .height(220.dp)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor)
-            }
-        }
-
-        is LoadState.Error -> {
-            OnError(
-                modifier = Modifier.height(220.dp),
-                message = StringResource.FromId(
-                    R.string.error_unknown,
-                    listOf(loadState.error.message.toString())
-                ),
-                buttonText = StringResource.FromId(R.string.try_again),
-                onButtonClick = onTryAgainClick
-            )
-        }
-
-        else -> Unit
+private fun Post(posts: LazyPagingItems<Post>, index: Int) {
+    val post = posts[index]
+    post?.let {
+        PostCard(it)
     }
 }

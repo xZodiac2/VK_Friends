@@ -4,6 +4,7 @@ import com.ilya.core.appCommon.UseCase
 import com.ilya.core.appCommon.enums.NameCase
 import com.ilya.data.remote.VkApiExecutor
 import com.ilya.data.remote.retrofit.api.dto.UserExtendedResponseData
+import com.ilya.profileViewDomain.mappers.toPartner
 import com.ilya.profileViewDomain.mappers.toUser
 import com.ilya.profileViewDomain.models.User
 import javax.inject.Inject
@@ -50,9 +51,9 @@ class GetUserDataUseCase @Inject constructor(
 
         val photos = response.photos
         val user = response.user.toUser(photos)
-        val partner = response.partner?.toUser(emptyList()) ?: return user
+        val partner = response.partner?.toPartner() ?: return user
 
-        return user.copy(partnerExtended = partner)
+        return user.copy(partner = partner)
     }
 
     companion object {

@@ -14,8 +14,8 @@ class ResolveLikeUseCase @Inject constructor(
     private val repository: LikesRemoteRepository
 ) : UseCase<ResolveLikeUseCaseInvokeData, Result<Likes>> {
     override suspend fun invoke(data: ResolveLikeUseCaseInvokeData): Result<Likes> {
-        val likes = data.attachment.likes ?: return Result.failure(IllegalArgumentException())
-        val type = when (data.attachment) {
+        val likes = data.likeable.likes ?: return Result.failure(IllegalArgumentException())
+        val type = when (data.likeable) {
             is Photo -> ObjectType.PHOTO
             is VideoExtended -> ObjectType.VIDEO
             is Post -> ObjectType.POST
@@ -26,15 +26,15 @@ class ResolveLikeUseCase @Inject constructor(
             repository.deleteLike(
                 accessToken = data.accessToken,
                 type = type,
-                ownerId = data.attachment.ownerId,
-                itemId = data.attachment.id
+                ownerId = data.likeable.ownerId,
+                itemId = data.likeable.id
             )
         } else {
             repository.addLike(
                 accessToken = data.accessToken,
                 type = type,
-                ownerId = data.attachment.ownerId,
-                itemId = data.attachment.id
+                ownerId = data.likeable.ownerId,
+                itemId = data.likeable.id
             )
         }
 
@@ -46,7 +46,7 @@ class ResolveLikeUseCase @Inject constructor(
 }
 
 data class ResolveLikeUseCaseInvokeData(
-    val attachment: Likeable,
+    val likeable: Likeable,
     val accessToken: String
 )
 

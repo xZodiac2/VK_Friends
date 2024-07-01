@@ -1,22 +1,23 @@
 package com.ilya.friendsview.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -47,15 +48,15 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.ilya.core.appCommon.StringResource
-import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.alertDialog.AlertDialogStateHandler
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.User
 import com.ilya.friendsview.FriendsScreenViewModel
 import com.ilya.friendsview.R
-import com.ilya.friendsview.screen.components.FriendsList
+import com.ilya.friendsview.screen.components.OnEmptyFriends
+import com.ilya.friendsview.screen.components.ResolveAppend
+import com.ilya.friendsview.screen.components.ResolveRefresh
+import com.ilya.friendsview.screen.components.UserCard
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -66,8 +67,9 @@ fun FriendsScreen(
     onEmptyAccessToken: () -> Unit,
     profileOpenRequest: (Long) -> Unit,
     onExitConfirm: () -> Unit,
-    viewModel: FriendsScreenViewModel = hiltViewModel(),
 ) {
+    val viewModel: FriendsScreenViewModel = hiltViewModel()
+
     val pagingItems = viewModel.pagingFlow.collectAsLazyPagingItems()
     val alertDialogState = viewModel.alertDialogState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
@@ -101,7 +103,7 @@ fun FriendsScreen(
         containerColor = LocalColorScheme.current.primary
     ) { paddingValues ->
         Content(
-            pagingState = pagingItems,
+            friends = pagingItems,
             paddingValues = paddingValues,
             onEmptyAccessToken = onEmptyAccessToken,
             onProfileViewButtonClick = profileOpenRequest,
@@ -168,7 +170,7 @@ private fun TopBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
-    pagingState: LazyPagingItems<User>,
+    friends: LazyPagingItems<User>,
     paddingValues: PaddingValues,
     onEmptyAccessToken: () -> Unit,
     onProfileViewButtonClick: (Long) -> Unit,
@@ -182,54 +184,16 @@ private fun Content(
             .padding(paddingValues)
             .pullRefresh(pullRefreshState)
     ) {
-        when (val refreshState = pagingState.loadState.refresh) {
-            is LoadState.Loading -> {
-                if (isRefreshing) {
-                    FriendsList(
-                        pagingState = pagingState,
-                        onProfileViewButtonClick = onProfileViewButtonClick,
-                        onEmptyAccessToken = onEmptyAccessToken,
-                        onDataLoaded = onDataLoaded
-                    )
-                } else {
-                    OnLoadingState()
-                }
-            }
-
-            is LoadState.Error -> {
-                /**
-                 *  If error is [PaginationError.NoInternet], [LazyPagingItems] will be receive
-                 *  from local database
-                 */
-                if (refreshState.error == PaginationError.NoInternet) {
-                    FriendsList(
-                        pagingState = pagingState,
-                        onProfileViewButtonClick = onProfileViewButtonClick,
-                        onEmptyAccessToken = onEmptyAccessToken,
-                        onDataLoaded = onDataLoaded
-                    )
-                }
-                OnErrorState(
-                    error = when (refreshState.error) {
-                        is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
-                        is PaginationError.NoInternet -> ErrorType.NoInternet
-                        else -> ErrorType.Unknown(refreshState.error)
-                    },
-                    onEmptyAccessToken = onEmptyAccessToken,
-                    onRetry = { pagingState.retry() }
-                )
-
-                LaunchedEffect(key1 = Unit) {
-                    onDataLoaded()
-                }
-            }
-
-            is LoadState.NotLoading -> FriendsList(
-                pagingState = pagingState,
-                onProfileViewButtonClick = onProfileViewButtonClick,
-                onEmptyAccessToken = onEmptyAccessToken,
-                onDataLoaded = onDataLoaded
-            )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(count = friends.itemCount) { Friend(friends, it, onDataLoaded, onProfileViewButtonClick) }
+            item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
+            item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
+            item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }
         }
 
         PullRefreshIndicator(
@@ -243,35 +207,23 @@ private fun Content(
 }
 
 @Composable
-private fun OnLoadingState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(LocalColorScheme.current.primary),
-        contentAlignment = Alignment.Center
-    ) { CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor) }
-}
-
-
-@Composable
-private fun OnErrorState(
-    error: ErrorType,
-    onEmptyAccessToken: () -> Unit,
-    onRetry: () -> Unit,
+private fun Friend(
+    friends: LazyPagingItems<User>,
+    index: Int,
+    onDataLoaded: () -> Unit,
+    onProfileViewButtonClick: (Long) -> Unit
 ) {
-    when (error) {
-        ErrorType.NoAccessToken -> onEmptyAccessToken()
-        is ErrorType.Unknown -> OnError(
-            modifier = Modifier.fillMaxHeight(),
-            message = StringResource.FromId(
-                id = R.string.error_unknown,
-                formatArgs = listOf(error.error.message ?: "")
-            ),
-            buttonText = StringResource.FromId(id = R.string.retry),
-            onButtonClick = onRetry
+    val user = friends[index]
+    if (user != null) {
+        UserCard(
+            user = user,
+            onCardClick = onProfileViewButtonClick
         )
-
-        ErrorType.NoInternet -> Unit
+        LaunchedEffect(key1 = Unit) {
+            onDataLoaded()
+        }
     }
 }
+
+
 

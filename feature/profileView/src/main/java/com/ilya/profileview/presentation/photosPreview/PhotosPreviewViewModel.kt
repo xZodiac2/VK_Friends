@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PhotosPreviewViewModel @Inject constructor(
+internal class PhotosPreviewViewModel @Inject constructor(
     private val resolveLikeUseCase: ResolveLikeUseCase,
     private val accessTokenManager: AccessTokenManager,
     private val getPhotosPagingFlowUseCase: GetPhotosPagingFlowUseCase,
@@ -88,11 +88,13 @@ class PhotosPreviewViewModel @Inject constructor(
     private fun onLike(photo: Photo?) {
         photo ?: run {
             showSnackbarError()
+            rollbackState()
             return
         }
 
         val accessToken = accessTokenManager.accessToken?.token ?: run {
             showSnackbarError()
+            rollbackState()
             return
         }
 
@@ -100,17 +102,16 @@ class PhotosPreviewViewModel @Inject constructor(
             val result = resolveLikeUseCase(
                 data = ResolveLikeUseCaseInvokeData(
                     accessToken = accessToken,
-                    attachment = photo
+                    likeable = photo
                 )
             )
 
             result.fold(
                 onFailure = {
                     showSnackbarError()
+                    rollbackState()
                 },
-                onSuccess = {
-                    updateState(photo.id to it)
-                }
+                onSuccess = { updateState(photo.id to it) }
             )
         }
     }
@@ -123,6 +124,10 @@ class PhotosPreviewViewModel @Inject constructor(
         likesMap[photoId] = likes
 
         _likesState.value = LikesState(likesMap)
+    }
+
+    private fun rollbackState() {
+        _likesState.value = LikesState(_likesState.value.likes)
     }
 
     private fun showSnackbarError() {

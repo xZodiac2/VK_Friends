@@ -26,7 +26,7 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-fun PostCard(post: Post) {
+internal fun PostCard(post: Post) {
     Box(
         modifier = Modifier
             .padding(bottom = 460.dp)

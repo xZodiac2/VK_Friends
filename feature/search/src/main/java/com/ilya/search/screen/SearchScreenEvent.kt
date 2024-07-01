@@ -1,6 +1,6 @@
 package com.ilya.search.screen
 
-sealed interface SearchScreenEvent {
+internal sealed interface SearchScreenEvent {
     data object PlugAvatarClick : SearchScreenEvent
     data object SnackbarConsumed : SearchScreenEvent
     data object Start : SearchScreenEvent

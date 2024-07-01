@@ -20,7 +20,7 @@ sealed interface Destination {
     data object FriendsScreen : Destination
 
     @Serializable
-    data class PhotoPreview(val userId: Long, val targetPhotoIndex: Int) : Destination
+    data class PhotosPreview(val userId: Long, val targetPhotoIndex: Int) : Destination
 
     @Serializable
     data class PhotosScreen(val userId: Long) : Destination

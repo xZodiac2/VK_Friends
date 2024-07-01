@@ -2,19 +2,24 @@ package com.ilya.search.screen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -29,33 +34,47 @@ internal fun UserCard(
     user: User
 ) {
     Card(
-        modifier = Modifier.clickable { onCardClick(user.id) },
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clickable { onCardClick(user.id) },
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp, vertical = 30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            AsyncImage(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .size(100.dp),
-                model = user.photoUrl,
-                contentDescription = "user_photo",
-                contentScale = ContentScale.Crop
-            )
-            Text(
-                modifier = Modifier.padding(vertical = 8.dp),
-                text = "${user.firstName} ${user.lastName}",
-                fontSize = LocalTypography.current.average,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                color = LocalColorScheme.current.primaryTextColor
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (user.isClosed) {
+                Icon(
+                    modifier = Modifier.padding(12.dp),
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "lockedProfile",
+                    tint = LocalColorScheme.current.primaryTextColor
+                )
+            }
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 14.dp)
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                        .clip(CircleShape)
+                        .aspectRatio(1f),
+                    model = user.photoUrl,
+                    contentDescription = "user_photo",
+                    contentScale = ContentScale.Crop
+                )
+                Text(
+                    text = "${user.firstName} ${user.lastName}",
+                    fontSize = LocalTypography.current.small,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    color = LocalColorScheme.current.primaryTextColor,
+                    textAlign = TextAlign.Center
+                )
+            }
+
         }
     }
 }

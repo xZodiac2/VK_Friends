@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,28 +19,25 @@ import com.vk.id.onetap.compose.onetap.OneTap
 @Composable
 fun AuthorizationScreen(
     onAuthorize: () -> Unit,
-    authViewModel: AuthorizationScreenViewModel = hiltViewModel(),
+    viewModel: AuthorizationScreenViewModel = hiltViewModel()
 ) {
-    val screenState by authViewModel.authorizationScreenState.collectAsState()
+
+    val screenState by viewModel.authorizationScreenState.collectAsState()
     val context = LocalContext.current
-    
+
     when (screenState) {
         AuthorizationScreenState.NotAuthorized -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                OneTap(onAuth = {
-                    authViewModel.handleEvent(AuthorizationScreenEvent.Authorize(it))
-                }, onFail = {
-                    Toast.makeText(context, it.description, Toast.LENGTH_LONG).show()
-                }, modifier = Modifier.padding(horizontal = 32.dp))
+                OneTap(
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    onAuth = { viewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
+                    onFail = { Toast.makeText(context, it.description, Toast.LENGTH_LONG).show() }
+                )
             }
         }
-        
+
         AuthorizationScreenState.Authorized -> onAuthorize()
-        AuthorizationScreenState.Idle -> Unit
     }
-    
-    LaunchedEffect(key1 = Unit, block = {
-        authViewModel.handleEvent(AuthorizationScreenEvent.Start)
-    })
+
 }
 

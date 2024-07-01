@@ -6,18 +6,30 @@ plugins {
 android {
     namespace = "com.ilya.theme"
     compileSdk = 34
-    
+
     defaultConfig {
         minSdk = 26
-        
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDRedirectHost" to "vk.com",
+                "VKIDRedirectScheme" to "vk51848121",
+                "VKIDClientID" to "51848121",
+                "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
+            )
+        )
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -31,7 +43,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = "1.5.2"
     }
     packaging {
         resources {

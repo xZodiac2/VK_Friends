@@ -1,25 +1,39 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("kotlin-parcelize")
 }
 
 android {
     namespace = "com.ilya.data"
     compileSdk = 34
-    
+
     defaultConfig {
         minSdk = 26
-        
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDRedirectHost" to "vk.com",
+                "VKIDRedirectScheme" to "vk51848121",
+                "VKIDClientID" to "51848121",
+                "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
+            )
+        )
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -32,16 +46,29 @@ android {
 }
 
 dependencies {
+    // Project
+    implementation(project(":core"))
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Moshi
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
-    
+    implementation("com.google.dagger:hilt-android:2.46")
+    kapt("com.google.dagger:hilt-android-compiler:2.46")
+
+    // OneTap
+    implementation("com.vk.id:onetap-compose:1.0.0")
+
+    // Paging
+    implementation("androidx.paging:paging-runtime:3.2.1")
+    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")

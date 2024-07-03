@@ -1,5 +1,6 @@
-package com.ilya.profileview.presentation.photosPreview
+package com.ilya.profileview.photosPreview
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingConfig
@@ -13,9 +14,12 @@ import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
 import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCaseInvokeData
+import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCaseInvokeData
 import com.ilya.profileview.R
+import com.ilya.profileview.photosPreview.states.PhotosLikesState
+import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +37,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
     private val resolveLikeUseCase: ResolveLikeUseCase,
     private val accessTokenManager: AccessTokenManager,
     private val getPhotosPagingFlowUseCase: GetPhotosPagingFlowUseCase,
+    private val getPhotosUseCase: GetPhotosUseCase
 ) : ViewModel() {
 
     private val idsFlow = MutableStateFlow<IdsState?>(null)
@@ -53,28 +59,56 @@ internal class PhotosPreviewViewModel @Inject constructor(
             )
         }.cachedIn(viewModelScope)
 
-    private val _likesState = MutableStateFlow(LikesState(emptyMap()))
+    private val _photosState = MutableStateFlow<RestrainedPhotosState>(RestrainedPhotosState.Loading)
+    val photosState = _photosState.asStateFlow()
+
+    private val _likesState = MutableStateFlow(PhotosLikesState(emptyMap()))
     val likesState = _likesState.asStateFlow()
 
     private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
     val snackbarState = _snackbarState.asStateFlow()
 
-    private val likesExceptionHandler = CoroutineExceptionHandler { _, e ->
-        logThrowable(e)
-        showSnackbarError()
-    }
-
     fun handleEvent(event: PhotosPreviewEvent) {
         when (event) {
             is PhotosPreviewEvent.Start -> onStart(event.userId, event.targetPhotoIndex)
             PhotosPreviewEvent.SnackbarConsumed -> onSnackbarConsumed()
+            is PhotosPreviewEvent.RestrainedStart -> onRestrainedStart(event.userId, event.photoIds)
             is PhotosPreviewEvent.Like -> onLike(event.photo)
             is PhotosPreviewEvent.PhotosAdded -> onPhotosAdded(event.likes)
         }
     }
 
+    private fun onRestrainedStart(userId: Long, photoIds: Map<Long, String>) {
+        val photosExceptionHandler = CoroutineExceptionHandler { _, e ->
+            logThrowable(e)
+            when (e) {
+                is IOException -> showSnackbar(R.string.error_no_internet)
+                else -> showSnackbar(R.string.error_cant_open_photos)
+            }
+        }
+
+        val accessToken = accessTokenManager.accessToken ?: run {
+            showSnackbar(R.string.error_cant_open_photos)
+            return
+        }
+
+        viewModelScope.launch(Dispatchers.IO + photosExceptionHandler) {
+            val photos = getPhotosUseCase(
+                GetPhotosUseCase.InvokeData(
+                    accessToken = accessToken.token,
+                    userId = userId,
+                    photoIds = photoIds
+                )
+            )
+
+            val likes = photos.mapNotNull { it.likes?.let { likes -> it.id to likes } }.toMap()
+            _photosState.value = RestrainedPhotosState.ShowPhotos(photos)
+            _likesState.value = PhotosLikesState(likes)
+        }
+    }
+
     private fun onPhotosAdded(likes: Map<Long, Likes>) {
-        _likesState.value = LikesState(likes)
+        _likesState.value = PhotosLikesState(likes)
     }
 
     private fun onStart(userId: Long, targetPhotoIndex: Int) {
@@ -87,17 +121,23 @@ internal class PhotosPreviewViewModel @Inject constructor(
 
     private fun onLike(photo: Photo?) {
         photo ?: run {
-            showSnackbarError()
-            rollbackState()
+            showSnackbar(R.string.error_cant_like)
+            rollbackLikesState()
             return
         }
 
         val accessToken = accessTokenManager.accessToken?.token ?: run {
-            showSnackbarError()
-            rollbackState()
+            showSnackbar(R.string.error_cant_like)
+            rollbackLikesState()
             return
         }
 
+        val likesExceptionHandler = CoroutineExceptionHandler { _, e ->
+            logThrowable(e)
+            showSnackbar(R.string.error_cant_like)
+            rollbackLikesState()
+        }
+        
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
                 data = ResolveLikeUseCaseInvokeData(
@@ -108,32 +148,30 @@ internal class PhotosPreviewViewModel @Inject constructor(
 
             result.fold(
                 onFailure = {
-                    showSnackbarError()
-                    rollbackState()
+                    showSnackbar(R.string.error_cant_like)
+                    rollbackLikesState()
                 },
-                onSuccess = { updateState(photo.id to it) }
+                onSuccess = { updateLikesState(photo.id to it) }
             )
         }
     }
 
-    private fun updateState(pair: Pair<Long, Likes>) {
+    private fun updateLikesState(pair: Pair<Long, Likes>) {
         val photoId = pair.first
         val likes = pair.second
 
         val likesMap = _likesState.value.likes.toMutableMap()
         likesMap[photoId] = likes
 
-        _likesState.value = LikesState(likesMap)
+        _likesState.value = PhotosLikesState(likesMap)
     }
 
-    private fun rollbackState() {
-        _likesState.value = LikesState(_likesState.value.likes)
+    private fun rollbackLikesState() {
+        _likesState.value = PhotosLikesState(_likesState.value.likes)
     }
 
-    private fun showSnackbarError() {
-        _snackbarState.value = SnackbarState.Triggered(
-            text = StringResource.FromId(R.string.error_cant_like)
-        )
+    private fun showSnackbar(@StringRes text: Int) {
+        _snackbarState.value = SnackbarState.Triggered(StringResource.FromId(text))
     }
 
     private data class IdsState(

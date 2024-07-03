@@ -14,7 +14,7 @@ class GetUserDataUseCase @Inject constructor(
 ) : UseCase<GetUserUseCaseData, User> {
 
     override suspend fun invoke(data: GetUserUseCaseData): User {
-        val vkApiRequest = """
+        val vkScriptRequest = """
             var user = API.users.get({
                 "user_ids": [${data.userId}],
                 "fields": [${FIELDS.joinToString(",") { "\"$it\"" }}]
@@ -46,7 +46,7 @@ class GetUserDataUseCase @Inject constructor(
 
         val response = vkApiExecutor.execute(
             accessToken = data.accessToken,
-            code = vkApiRequest
+            code = vkScriptRequest
         )
 
         val photos = response.photos

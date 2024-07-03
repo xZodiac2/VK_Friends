@@ -30,10 +30,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.AccessTokenManager
+import com.ilya.core.util.logThrowable
 import com.ilya.friendsview.screen.FriendsScreen
-import com.ilya.profileview.presentation.photosPreview.PhotosPreview
-import com.ilya.profileview.presentation.photosScreen.PhotosScreen
-import com.ilya.profileview.presentation.profileScreen.ProfileScreen
+import com.ilya.profileview.photosPreview.PhotosPreview
+import com.ilya.profileview.photosScreen.PhotosScreen
+import com.ilya.profileview.profileScreen.ProfileScreen
 import com.ilya.search.screen.SearchScreen
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
@@ -43,6 +44,7 @@ import com.ilya.vkfriends.navigation.ScreenTransition
 import com.ilya.vkfriends.navigation.lastDestinationName
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -184,6 +186,13 @@ class MainActivity : ComponentActivity() {
                     },
                     onOpenPhotosClick = {
                         navController.navigate(Destination.PhotosScreen(it))
+                    },
+                    onPostPhotoClick = { userId, targetIndex, ids ->
+                        navController.navigate(Destination.PhotosPreview(
+                            userId = userId,
+                            targetPhotoIndex = targetIndex,
+                            photoIds = ids.toIdsString()
+                        ))
                     }
                 )
                 LaunchedEffect(Unit) {
@@ -221,6 +230,7 @@ class MainActivity : ComponentActivity() {
                 PhotosPreview(
                     userId = route.userId,
                     targetPhotoIndex = route.targetPhotoIndex,
+                    photoIds = route.photoIds.fromIdsString(),
                     onBackClick = { navController.popBackStack() }
                 )
 
@@ -243,6 +253,43 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun Map<Long, String>.toIdsString(): String {
+        val ids = keys.map {
+            val accessKey = this[it] ?: ""
+            if (accessKey.isNotBlank()) {
+                "${it}_${accessKey}"
+            } else {
+                "${it}_$BLANK_ACCESS_KEY"
+            }
+        }
+        return ids.joinToString(",")
+    }
+
+    private fun String.fromIdsString(): Map<Long, String> {
+        return try {
+            val ids = this.split(",")
+            ids.associate {
+                val idWithAccessKey = it.split("_")
+                if (idWithAccessKey[1] == BLANK_ACCESS_KEY) {
+                    idWithAccessKey[0].toLong() to ""
+                } else {
+                    idWithAccessKey[0].toLong() to idWithAccessKey[1]
+                }
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            logThrowable(e)
+            emptyMap()
+        } catch (e: NumberFormatException) {
+            logThrowable(e)
+            emptyMap()
+        }
+
+    }
+
+    companion object {
+        private const val BLANK_ACCESS_KEY = "blankAccessKey"
     }
 
 }

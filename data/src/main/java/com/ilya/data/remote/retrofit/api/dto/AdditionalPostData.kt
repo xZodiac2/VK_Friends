@@ -35,5 +35,13 @@ data class VideoAdditionalData(
 
 data class AdditionalPostOwnerDto(
     @Json(name = "post_id") val postId: Long,
-    @Json(name = "data") val data: UserDto
+    @Json(name = "user") val data: UserDto?,
+    @Json(name = "group") val group: GroupDto?,
+    @Json(name = "posted_by_group") val postedByGroup: Boolean
+)
+
+data class GroupDto(
+    @Json(name = "id") val id: Long,
+    @Json(name = "name") val name: String,
+    @Json(name = "photo_200") val photoUrl: String
 )

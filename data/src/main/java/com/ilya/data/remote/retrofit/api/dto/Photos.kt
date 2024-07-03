@@ -11,10 +11,14 @@ data class PhotosResponseData(
     @Json(name = "count") val count: Int
 )
 
+data class RestrainedPhotosListResponse(
+    @Json(name = "response") val response: List<PhotoDto>
+)
+
 data class PhotoDto(
-    @Json(name = "album_id") val albumId: Int = 0,
-    @Json(name = "id") override val id: Long = 0,
-    @Json(name = "owner_id") override val ownerId: Long = 0,
+    @Json(name = "album_id") val albumId: Int,
+    @Json(name = "id") override val id: Long,
+    @Json(name = "owner_id") override val ownerId: Long,
     @Json(name = "sizes") val sizes: List<SizeDto>,
     @Json(name = "likes") val likes: LikesDto? = null,
     @Json(name = "access_key") override val accessKey: String = ""

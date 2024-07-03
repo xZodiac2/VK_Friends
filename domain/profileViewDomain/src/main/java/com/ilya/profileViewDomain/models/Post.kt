@@ -4,11 +4,13 @@ import android.os.Parcelable
 import com.ilya.core.appCommon.enums.PhotoSize
 import kotlinx.parcelize.Parcelize
 
-abstract class Likeable {
-    abstract val id: Long
-    abstract val ownerId: Long
-    abstract val likes: Likes?
+interface Likeable {
+    val id: Long
+    val ownerId: Long
+    val likes: Likes?
 }
+
+interface Attachment
 
 @Parcelize
 data class Post(
@@ -19,8 +21,29 @@ data class Post(
     override val id: Long,
     override val likes: Likes,
     override val ownerId: Long = owner.id,
-    val date: String
-) : Likeable(), Parcelable
+    val date: String,
+    val text: String,
+    val reposted: RepostedPost?
+) : Likeable, Parcelable
+
+@Parcelize
+data class RepostedPost(
+    val videos: List<VideoExtended>,
+    val photos: List<Photo>,
+    val audios: List<Audio>,
+    val owner: PostOwner?,
+    val group: Group?,
+    val repostedByGroup: Boolean,
+    val id: Long,
+    val text: String,
+) : Parcelable
+
+@Parcelize
+data class Group(
+    val id: Long,
+    val name: String,
+    val photoUrl: String
+) : Parcelable
 
 @Parcelize
 data class PostOwner(
@@ -38,7 +61,7 @@ data class Audio(
     val title: String,
     val duration: Int,
     val url: String,
-) : Parcelable
+) : Attachment, Parcelable
 
 @Parcelize
 data class Photo(
@@ -46,19 +69,20 @@ data class Photo(
     override val id: Long,
     override val ownerId: Long,
     override val likes: Likes?,
-    val sizes: List<Size>
-) : Likeable(), Parcelable
+    val sizes: List<Size>,
+    val accessKey: String
+) : Attachment, Likeable, Parcelable
 
 @Parcelize
 data class VideoExtended(
     val duration: Int = 0,
-    val firstFrame: List<FirstFrame>?,
+    val firstFrame: List<FirstFrame>,
     override val id: Long,
     override val ownerId: Long,
     override val likes: Likes?,
     val title: String,
     val playerUrl: String
-) : Likeable(), Parcelable
+) : Attachment, Likeable, Parcelable
 
 @Parcelize
 data class Likes(

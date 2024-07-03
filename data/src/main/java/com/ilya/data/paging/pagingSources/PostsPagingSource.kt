@@ -7,6 +7,7 @@ import com.ilya.core.appCommon.BaseFactory
 import com.ilya.core.appCommon.enums.AttachmentType
 import com.ilya.core.util.logThrowable
 import com.ilya.data.mappers.toPost
+import com.ilya.data.mappers.toRepostedPost
 import com.ilya.data.paging.PaginationError
 import com.ilya.data.paging.Post
 import com.ilya.data.remote.UserDataRemoteRepository
@@ -14,6 +15,8 @@ import com.ilya.data.remote.VkApiExecutor
 import com.ilya.data.remote.retrofit.api.dto.AdditionalPostData
 import com.ilya.data.remote.retrofit.api.dto.AttachmentDto
 import com.ilya.data.remote.retrofit.api.dto.BaseAttachment
+import com.ilya.data.remote.retrofit.api.dto.HistoryPostDto
+import com.ilya.data.remote.retrofit.api.dto.LikesDto
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import kotlinx.coroutines.delay
 import java.net.SocketTimeoutException
@@ -45,6 +48,36 @@ class PostsPagingSource private constructor(
 
             val postsAdditionalData = getPostsAdditionalData(wall, accessToken)
 
+            val reposted = wall.mapNotNull { it.cotyHistory.firstOrNull() }
+            val ids = wall.mapNotNull {
+                if (it.cotyHistory.isEmpty()) {
+                    null
+                } else {
+                    it.cotyHistory.first().id to it.id
+                }
+            }.toMap()
+            val repostedAdditionalData = getPostsAdditionalData(
+                posts = reposted.map { it.toPostDto() },
+                accessToken = accessToken
+            )
+
+            val repostedPosts = reposted.associate { post ->
+                val videos = repostedAdditionalData[post.id]
+                    ?.videos
+                    ?.items ?: emptyList()
+                val postOwner = repostedAdditionalData[post.id]
+                    ?.postOwner
+                    ?.data
+                val group = repostedAdditionalData[post.id]
+                    ?.postOwner
+                    ?.group
+                val photos = repostedAdditionalData[post.id]
+                    ?.photos
+                    ?.items ?: emptyList()
+                val ownerPostId = ids[post.id] ?: 0
+                ownerPostId to post.toRepostedPost(videos, photos, postOwner, group)
+            }
+
             val posts = wall.mapNotNull { post ->
                 val videos = postsAdditionalData[post.id]
                     ?.videos
@@ -55,7 +88,8 @@ class PostsPagingSource private constructor(
                 val photos = postsAdditionalData[post.id]
                     ?.photos
                     ?.items ?: emptyList()
-                postOwner?.let { post.toPost(videos, photos, it) }
+                val repostedPost = repostedPosts[post.id]
+                postOwner?.let { post.toPost(videos, photos, it, repostedPost) }
             }
 
             return LoadResult.Page(
@@ -74,6 +108,20 @@ class PostsPagingSource private constructor(
             logThrowable(e)
             return LoadResult.Error(e)
         }
+    }
+
+    private fun HistoryPostDto.toPostDto(): PostDto {
+        val fakeLikes = LikesDto(0, 0)
+        val fakeDate = 0L
+
+        return PostDto(
+            id = id,
+            text = text,
+            attachments = attachments,
+            likes = fakeLikes,
+            dateUnixTime = fakeDate,
+            authorId = authorId,
+        )
     }
 
     private fun <T> extractIds(
@@ -120,6 +168,12 @@ class PostsPagingSource private constructor(
         )
 
         return posts.associate { post ->
+            val photoAccessKeys = postPhotoIds[post.id]?.associate {
+                it
+                    .substringAfter("_")
+                    .substringBefore("_")
+                    .toLong() to it.substringAfterLast("_")
+            }
             delay(500)
             val vkScriptRequest = """ 
             ${
@@ -145,8 +199,21 @@ class PostsPagingSource private constructor(
                     ""
                 }
             }
-                var owner = API.users.get({"user_ids": [${post.authorId}], "fields": ["photo_200_orig"]});
-                    
+            ${
+                if (post.authorId < 0) {
+                    """
+                        var owner = API.groups.getById({"group_id": -1 * ${post.authorId}});
+                    """.trimIndent()
+                } else {
+                    """
+                        var owner = API.users.get({
+                            "user_ids": [${post.authorId}],
+                            "fields": ["photo_200_orig"]
+                        });
+                    """.trimIndent()
+                }
+            }
+                
                 return {
             ${
                 if (postVideoIds[post.id] != null) {
@@ -174,13 +241,22 @@ class PostsPagingSource private constructor(
             }
                     "post_owner": {
                         "post_id": ${post.id},
-                        "data": owner[0]
+                        "user": owner[0],
+                        "group": owner.groups[0],
+                        "posted_by_group": ${post.authorId} < 0
                     }
                 };
             """.trimIndent()
-            post.id to vkApiExecutor.execute(
+            val response = vkApiExecutor.execute(
                 accessToken = accessToken,
                 code = vkScriptRequest
+            )
+            post.id to response.copy(
+                photos = response.photos?.copy(
+                    items = response.photos.items.map {
+                        it.copy(accessKey = photoAccessKeys?.get(it.id) ?: "")
+                    }
+                )
             )
         }
     }

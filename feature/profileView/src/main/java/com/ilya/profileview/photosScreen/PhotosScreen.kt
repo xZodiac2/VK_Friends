@@ -1,4 +1,4 @@
-package com.ilya.profileview.presentation.photosScreen
+package com.ilya.profileview.photosScreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

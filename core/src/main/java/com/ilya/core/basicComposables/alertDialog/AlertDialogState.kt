@@ -1,8 +1,10 @@
 package com.ilya.core.basicComposables.alertDialog
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import com.ilya.core.appCommon.StringResource
 
+@Stable
 sealed interface AlertDialogState {
 
     data object Consumed : AlertDialogState

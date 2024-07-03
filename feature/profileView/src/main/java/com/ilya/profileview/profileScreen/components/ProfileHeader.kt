@@ -1,4 +1,4 @@
-package com.ilya.profileview.presentation.profileScreen.components
+package com.ilya.profileview.profileScreen.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement

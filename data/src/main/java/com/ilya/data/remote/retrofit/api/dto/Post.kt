@@ -13,11 +13,19 @@ data class WallResponseData(
 
 data class PostDto(
     @Json(name = "id") val id: Long,
-    @Json(name = "text") val text: String = "",
+    @Json(name = "text") val text: String,
     @Json(name = "attachments") val attachments: List<AttachmentDto>,
     @Json(name = "likes") val likes: LikesDto,
     @Json(name = "date") val dateUnixTime: Long,
-    @Json(name = "from_id") val authorId: String
+    @Json(name = "from_id") val authorId: Long,
+    @Json(name = "copy_history") val cotyHistory: List<HistoryPostDto> = emptyList()
+)
+
+data class HistoryPostDto(
+    @Json(name = "id") val id: Long,
+    @Json(name = "text") val text: String,
+    @Json(name = "attachments") val attachments: List<AttachmentDto> = emptyList(),
+    @Json(name = "from_id") val authorId: Long,
 )
 
 abstract class BaseAttachment {

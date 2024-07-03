@@ -21,7 +21,25 @@ data class Post(
     val text: String,
     val likes: Likes,
     val ownerId: Long = owner.id,
-    val dateUnixTime: Long
+    val dateUnixTime: Long,
+    val reposted: RepostedPost? = null,
+)
+
+data class RepostedPost(
+    val videos: List<Video>,
+    val photos: List<Photo>,
+    val audios: List<Audio>,
+    val owner: User?,
+    val group: Group?,
+    val repostedByGroup: Boolean,
+    val id: Long,
+    val text: String,
+)
+
+data class Group(
+    val id: Long,
+    val name: String,
+    val photoUrl: String
 )
 
 data class Audio(
@@ -38,7 +56,8 @@ data class Photo(
     val id: Long,
     val ownerId: Long,
     val likes: Likes?,
-    val sizes: List<Size>
+    val sizes: List<Size>,
+    val accessKey: String
 )
 
 data class Video(

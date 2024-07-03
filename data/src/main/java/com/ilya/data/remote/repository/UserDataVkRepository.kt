@@ -3,6 +3,7 @@ package com.ilya.data.remote.repository
 import com.ilya.core.appCommon.enums.NameCase
 import com.ilya.data.remote.UserDataRemoteRepository
 import com.ilya.data.remote.retrofit.api.UserDataVkApi
+import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.PhotosResponseData
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
@@ -81,6 +82,15 @@ internal class UserDataVkRepository @Inject constructor(
                 count = count
             )
         }.response
+    }
+
+    override suspend fun getPhotos(accessToken: String, photoIds: List<String>): List<PhotoDto> {
+        return withContext(Dispatchers.IO) {
+            api.getPhotos(
+                accessToken = accessToken,
+                photoIds = photoIds.joinToString(",")
+            ).response
+        }
     }
 
     private fun Boolean.toInt(): Int {

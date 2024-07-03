@@ -8,10 +8,12 @@ import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.SizeDto
 import com.ilya.profileViewDomain.models.Audio
 import com.ilya.profileViewDomain.models.FirstFrame
+import com.ilya.profileViewDomain.models.Group
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileViewDomain.models.Post
 import com.ilya.profileViewDomain.models.PostOwner
+import com.ilya.profileViewDomain.models.RepostedPost
 import com.ilya.profileViewDomain.models.Size
 import com.ilya.profileViewDomain.models.VideoExtended
 import java.text.SimpleDateFormat
@@ -26,7 +28,30 @@ fun com.ilya.data.paging.Post.toPost(): Post {
         photos = photos.map { it.toPhoto() },
         date = parseToString(dateUnixTime),
         likes = likes.toLikes(),
-        owner = owner.toPostOwner()
+        owner = owner.toPostOwner(),
+        text = text,
+        reposted = reposted?.toRepostedPost()
+    )
+}
+
+private fun com.ilya.data.paging.RepostedPost.toRepostedPost(): RepostedPost {
+    return RepostedPost(
+        videos = videos.map { it.toVideoExtended() },
+        photos = photos.map { it.toPhoto() },
+        audios = audios.map { it.toAudio() },
+        owner = owner?.toPostOwner(),
+        group = group?.toGroup(),
+        id = id,
+        text = text,
+        repostedByGroup = repostedByGroup
+    )
+}
+
+private fun com.ilya.data.paging.Group.toGroup(): Group {
+    return Group(
+        id = id,
+        name = name,
+        photoUrl = photoUrl
     )
 }
 
@@ -76,7 +101,8 @@ fun PhotoDto.toPhoto(): Photo {
         id = id,
         ownerId = ownerId,
         sizes = sizes.map { it.toSize() },
-        likes = likes?.toLikes()
+        likes = likes?.toLikes(),
+        accessKey = accessKey
     )
 }
 
@@ -93,7 +119,8 @@ private fun com.ilya.data.paging.Photo.toPhoto(): Photo {
         albumId = albumId,
         id = id,
         sizes = sizes.map { it.toSize() },
-        likes = likes?.toLikes()
+        likes = likes?.toLikes(),
+        accessKey = accessKey
     )
 }
 

@@ -1,4 +1,4 @@
-package com.ilya.profileview.presentation.photosScreen
+package com.ilya.profileview.photosScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

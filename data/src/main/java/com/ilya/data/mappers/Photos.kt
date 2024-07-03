@@ -21,6 +21,7 @@ fun PhotoDto.toPhoto(): Photo {
         id = id,
         ownerId = ownerId,
         likes = likes?.toLikes(),
-        sizes = sizes.map { it.toSize() }
+        sizes = sizes.map { it.toSize() },
+        accessKey = accessKey
     )
 }

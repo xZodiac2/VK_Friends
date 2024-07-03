@@ -32,7 +32,7 @@
         <item quantity="other">%d subscribers</item>
     </plurals>
     <string name="status_not_friend">Subscribe</string>
-    <string name="status_waiting_for_response">Request sended</string>
+    <string name="status_waiting_for_response">Request sent</string>
     <string name="status_friend_request">Accept request</string>
     <string name="status_friends">Delete friend</string>
     <string name="operation_not_completed">Operation failed. Check Internet connection</string>
@@ -40,9 +40,11 @@
     <string name="profile_screen_name">Profile %s</string>
     <string name="photo_number">%d of %d</string>
     <string name="error_cant_like">Failed to like</string>
-    <string name="error_unknown">Unknown erro: %s</string>
+    <string name="error_unknown">Unknown error: %s</string>
     <string name="no_posts">Here is no yet posts</string>
     <string name="photos_screen_name">Photos</string>
     <string name="open_photos">Show all</string>
     <string name="photos_count">%d photos</string>
+    <string name="error_no_internet">Check your Internet connection</string>
+    <string name="error_cant_open_photos">Something went wrong. Try again later</string>
 </resources>

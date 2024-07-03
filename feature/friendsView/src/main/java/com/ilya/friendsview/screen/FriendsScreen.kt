@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,17 +71,17 @@ fun FriendsScreen(
 ) {
     val viewModel: FriendsScreenViewModel = hiltViewModel()
 
-    val pagingItems = viewModel.pagingFlow.collectAsLazyPagingItems()
+    val friends = viewModel.pagingFlow.collectAsLazyPagingItems()
     val alertDialogState = viewModel.alertDialogState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val accountOwner by viewModel.accountOwnerState.collectAsState()
 
     var initialDataLoaded by remember { mutableStateOf(false) }
-    val isRefreshing = pagingItems.loadState.refresh == LoadState.Loading && initialDataLoaded
+    val isRefreshing = friends.loadState.refresh == LoadState.Loading && initialDataLoaded
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = { pagingItems.refresh() }
+        onRefresh = { friends.refresh() }
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -103,13 +104,12 @@ fun FriendsScreen(
         containerColor = LocalColorScheme.current.primary
     ) { paddingValues ->
         Content(
-            friends = pagingItems,
+            friends = friends,
             paddingValues = paddingValues,
             onEmptyAccessToken = onEmptyAccessToken,
             onProfileViewButtonClick = profileOpenRequest,
             pullRefreshState = pullRefreshState,
             isRefreshing = isRefreshing,
-            onDataLoaded = { initialDataLoaded = true }
         )
     }
 
@@ -118,6 +118,13 @@ fun FriendsScreen(
         onConsumed = { viewModel.handleEvent(FriendsScreenEvent.SnackbarConsumed) },
         action = { snackbarHostState.showSnackbar(it) }
     )
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { friends.itemCount }.collect {
+            if (it == 0) return@collect
+            initialDataLoaded = true
+        }
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.handleEvent(FriendsScreenEvent.Start)
@@ -176,7 +183,6 @@ private fun Content(
     onProfileViewButtonClick: (Long) -> Unit,
     pullRefreshState: PullRefreshState,
     isRefreshing: Boolean,
-    onDataLoaded: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -190,7 +196,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = friends.itemCount) { Friend(friends, it, onDataLoaded, onProfileViewButtonClick) }
+            items(count = friends.itemCount) { Friend(friends, it, onProfileViewButtonClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }
@@ -210,7 +216,6 @@ private fun Content(
 private fun Friend(
     friends: LazyPagingItems<User>,
     index: Int,
-    onDataLoaded: () -> Unit,
     onProfileViewButtonClick: (Long) -> Unit
 ) {
     val user = friends[index]
@@ -219,9 +224,6 @@ private fun Friend(
             user = user,
             onCardClick = onProfileViewButtonClick
         )
-        LaunchedEffect(key1 = Unit) {
-            onDataLoaded()
-        }
     }
 }
 

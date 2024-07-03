@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.PostOwner
+import com.ilya.profileViewDomain.models.PostAuthor
 import com.ilya.profileViewDomain.models.RepostedPost
 import com.ilya.profileview.R
 import com.ilya.theme.LocalColorScheme
@@ -52,7 +52,7 @@ internal fun PostCard(
             shape = RoundedCornerShape(12.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                Author(post.owner, post.date)
+                Author(post.author, post.date)
                 if (post.text.isNotBlank()) {
                     val fontSize = when {
                         post.text.length < 40 -> LocalTypography.current.large
@@ -98,7 +98,7 @@ internal fun PostCard(
 }
 
 @Composable
-private fun Author(author: PostOwner, date: String) {
+private fun Author(author: PostAuthor, date: String) {
     Row(
         modifier = Modifier.padding(top = 12.dp, start = 12.dp, end = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),

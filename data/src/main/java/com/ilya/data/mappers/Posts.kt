@@ -34,9 +34,10 @@ fun PostDto.toPost(
                 null
             }
         },
-        owner = owner.toUser(),
+        author = owner.toUser(),
         likes = likes.toLikes(),
-        reposted = reposted
+        reposted = reposted,
+        ownerId = ownerId
     )
 }
 

@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,7 +69,7 @@ fun SearchScreen(
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
 
-    val pagingItems = viewModel.pagingFlow.collectAsLazyPagingItems()
+    val users = viewModel.pagingFlow.collectAsLazyPagingItems()
     val accountOwner by viewModel.accountOwnerStateFlow.collectAsState()
     val snackbarState by viewModel.snackbarStateFlow.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -76,11 +77,11 @@ fun SearchScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     var initialDataLoaded by remember { mutableStateOf(false) }
 
-    val isRefreshing = pagingItems.loadState.refresh == LoadState.Loading && initialDataLoaded
+    val isRefreshing = users.loadState.refresh == LoadState.Loading && initialDataLoaded
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
-        onRefresh = { pagingItems.refresh() }
+        onRefresh = { users.refresh() }
     )
 
     Scaffold(
@@ -107,12 +108,11 @@ fun SearchScreen(
         containerColor = LocalColorScheme.current.primary
     ) { padding ->
         Content(
-            users = pagingItems,
+            users = users,
             onEmptyAccessToken = onEmptyAccessToken,
             onCardClick = openProfileRequest,
             paddingValues = padding,
             isRefreshing = isRefreshing,
-            onDataLoaded = { initialDataLoaded = true },
             pullRefreshState = pullRefreshState
         )
     }
@@ -122,6 +122,13 @@ fun SearchScreen(
         onConsumed = { viewModel.handleEvent(SearchScreenEvent.SnackbarConsumed) },
         action = { snackbarHostState.showSnackbar(it) }
     )
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { users.itemCount }.collect {
+            if (it == 0) return@collect
+            initialDataLoaded = true
+        }
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.handleEvent(SearchScreenEvent.Start)
@@ -179,7 +186,6 @@ private fun Content(
     onCardClick: (Long) -> Unit,
     paddingValues: PaddingValues,
     isRefreshing: Boolean,
-    onDataLoaded: () -> Unit,
     pullRefreshState: PullRefreshState
 ) {
     Box(
@@ -194,7 +200,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = users.itemCount) { User(users, it, onCardClick, onDataLoaded) }
+            items(count = users.itemCount) { User(users, it, onCardClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyUsers(users) }
@@ -215,7 +221,6 @@ private fun User(
     users: LazyPagingItems<User>,
     index: Int,
     onCardClick: (Long) -> Unit,
-    onDataLoaded: () -> Unit
 ) {
     val user = users[index]
     if (user != null) {
@@ -223,9 +228,6 @@ private fun User(
             onCardClick = onCardClick,
             user = user
         )
-        LaunchedEffect(key1 = Unit) {
-            onDataLoaded()
-        }
     }
 }
 

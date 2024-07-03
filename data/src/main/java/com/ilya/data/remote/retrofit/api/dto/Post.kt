@@ -18,6 +18,7 @@ data class PostDto(
     @Json(name = "likes") val likes: LikesDto,
     @Json(name = "date") val dateUnixTime: Long,
     @Json(name = "from_id") val authorId: Long,
+    @Json(name = "owner_id") val ownerId: Long,
     @Json(name = "copy_history") val cotyHistory: List<HistoryPostDto> = emptyList()
 )
 

@@ -113,6 +113,7 @@ class PostsPagingSource private constructor(
     private fun HistoryPostDto.toPostDto(): PostDto {
         val fakeLikes = LikesDto(0, 0)
         val fakeDate = 0L
+        val fakeOwnerId = 0L
 
         return PostDto(
             id = id,
@@ -121,6 +122,7 @@ class PostsPagingSource private constructor(
             likes = fakeLikes,
             dateUnixTime = fakeDate,
             authorId = authorId,
+            ownerId = fakeOwnerId
         )
     }
 

@@ -17,10 +17,10 @@ data class Post(
     val videos: List<VideoExtended>,
     val photos: List<Photo>,
     val audios: List<Audio>,
-    val owner: PostOwner,
+    val author: PostAuthor,
     override val id: Long,
     override val likes: Likes,
-    override val ownerId: Long = owner.id,
+    override val ownerId: Long = author.id,
     val date: String,
     val text: String,
     val reposted: RepostedPost?
@@ -31,7 +31,7 @@ data class RepostedPost(
     val videos: List<VideoExtended>,
     val photos: List<Photo>,
     val audios: List<Audio>,
-    val owner: PostOwner?,
+    val owner: PostAuthor?,
     val group: Group?,
     val repostedByGroup: Boolean,
     val id: Long,
@@ -46,7 +46,7 @@ data class Group(
 ) : Parcelable
 
 @Parcelize
-data class PostOwner(
+data class PostAuthor(
     val id: Long,
     val firstName: String,
     val lastName: String,

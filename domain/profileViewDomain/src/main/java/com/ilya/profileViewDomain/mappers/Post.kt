@@ -12,7 +12,7 @@ import com.ilya.profileViewDomain.models.Group
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.PostOwner
+import com.ilya.profileViewDomain.models.PostAuthor
 import com.ilya.profileViewDomain.models.RepostedPost
 import com.ilya.profileViewDomain.models.Size
 import com.ilya.profileViewDomain.models.VideoExtended
@@ -28,9 +28,10 @@ fun com.ilya.data.paging.Post.toPost(): Post {
         photos = photos.map { it.toPhoto() },
         date = parseToString(dateUnixTime),
         likes = likes.toLikes(),
-        owner = owner.toPostOwner(),
+        author = author.toPostAuthor(),
         text = text,
-        reposted = reposted?.toRepostedPost()
+        reposted = reposted?.toRepostedPost(),
+        ownerId = ownerId,
     )
 }
 
@@ -39,7 +40,7 @@ private fun com.ilya.data.paging.RepostedPost.toRepostedPost(): RepostedPost {
         videos = videos.map { it.toVideoExtended() },
         photos = photos.map { it.toPhoto() },
         audios = audios.map { it.toAudio() },
-        owner = owner?.toPostOwner(),
+        owner = owner?.toPostAuthor(),
         group = group?.toGroup(),
         id = id,
         text = text,
@@ -55,8 +56,8 @@ private fun com.ilya.data.paging.Group.toGroup(): Group {
     )
 }
 
-private fun User.toPostOwner(): PostOwner {
-    return PostOwner(
+private fun User.toPostAuthor(): PostAuthor {
+    return PostAuthor(
         id = id,
         firstName = firstName,
         lastName = lastName,

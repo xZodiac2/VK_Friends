@@ -145,7 +145,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
             val result = resolveLikeUseCase(
                 data = ResolveLikeUseCase.InvokeData(
                     accessToken = accessToken,
-                    likeable = photo.copy(likes = photo.likes?.toggled())
+                    likeable = photo
                 )
             )
 

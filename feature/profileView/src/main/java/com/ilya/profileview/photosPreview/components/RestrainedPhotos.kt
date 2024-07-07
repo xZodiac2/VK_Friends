@@ -8,6 +8,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import coil.compose.SubcomposeAsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
+import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewEvent
@@ -38,17 +41,26 @@ internal fun RestrainedPhotosPreview(
     photoIds: Map<Long, String>
 ) {
     val photosState = viewModel.photosState.collectAsState()
-    val likesState = viewModel.likesState.collectAsState()
+    val likesState by viewModel.likesState.collectAsState()
 
     var currentPage by remember { mutableIntStateOf(targetPhotoIndex) }
     var currentPhoto by remember { mutableStateOf<Photo?>(null) }
     var likes by remember { mutableStateOf<Likes?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarState by viewModel.snackbarState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(PhotosPreviewEvent.RestrainedStart(userId, targetPhotoIndex, photoIds))
     }
 
+    SnackbarEventEffect(
+        state = snackbarState,
+        onConsumed = { viewModel.handleEvent(PhotosPreviewEvent.SnackbarConsumed) },
+        action = { snackbarHostState.showSnackbar(it) }
+    )
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             val stateValue = photosState.value as? RestrainedPhotosState.ShowPhotos
             PreviewTopBar(
@@ -93,7 +105,7 @@ internal fun RestrainedPhotosPreview(
                     snapshotFlow.collect {
                         currentPage = it
                         currentPhoto = stateValue.photos[it]
-                        likes = currentPhoto?.id?.let { likesState.value.likes[it] }
+                        likes = currentPhoto?.id?.let { id -> likesState.likes[id] }
                     }
                 }
             }

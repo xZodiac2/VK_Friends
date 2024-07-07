@@ -50,7 +50,6 @@ class ResolveLikeUseCase @Inject constructor(
         val accessToken: String
     )
 
-
 }
 
 

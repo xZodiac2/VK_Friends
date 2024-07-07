@@ -77,6 +77,10 @@ internal class ProfileScreenViewModel @Inject constructor(
         MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
     val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
 
+    private val _audioIndicatorState =
+        MutableStateFlow<AudioIndicatorState>(AudioIndicatorState.Idle)
+    val audioIndicatorState = _audioIndicatorState.asStateFlow()
+
     fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.Start -> {
@@ -100,6 +104,8 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onAudioClick(audio: Audio) {
         viewModelScope.launch(Dispatchers.IO) {
+            _audioIndicatorState.value = AudioIndicatorState.Loading
+
             if (audio.url.isEmpty()) {
                 showSnackbar(R.string.error_cant_play_audio)
                 return@launch
@@ -108,10 +114,13 @@ internal class ProfileScreenViewModel @Inject constructor(
             if (audio == _currentLoopingAudioState.value.first) {
                 handleCurrentAudioState()
             } else {
-                playNewAudio(audio)
+                val playResult = playNewAudio(audio)
+                playResult.onSuccess {
+                    _currentLoopingAudioState.value = audio to mediaPlayer.isPlaying
+                }
             }
 
-            _currentLoopingAudioState.value = audio to mediaPlayer.isPlaying
+            _audioIndicatorState.value = AudioIndicatorState.Idle
         }
     }
 
@@ -123,13 +132,15 @@ internal class ProfileScreenViewModel @Inject constructor(
         }
     }
 
-    private fun playNewAudio(audio: Audio) {
-        try {
+    private fun playNewAudio(audio: Audio): Result<Unit> {
+        return try {
             mediaPlayer.reset()
             prepareAndStartAudio(audio.url)
+            Result.success(Unit)
         } catch (e: IOException) {
             logThrowable(e)
-            showSnackbar(R.string.error_cant_play_audio)
+            showSnackbar(R.string.error_no_internet)
+            Result.failure(e)
         }
     }
 

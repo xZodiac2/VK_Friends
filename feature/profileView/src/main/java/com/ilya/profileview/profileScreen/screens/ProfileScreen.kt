@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -19,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
@@ -34,6 +38,7 @@ import com.ilya.profileViewDomain.models.User
 import com.ilya.profileViewDomain.models.Video
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
+import com.ilya.profileview.profileScreen.AudioIndicatorState
 import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.profileview.profileScreen.PostsLikesState
 import com.ilya.profileview.profileScreen.ProfileScreenEvent
@@ -73,6 +78,7 @@ fun ProfileScreen(
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val posts = viewModel.postsFlow.collectAsLazyPagingItems()
+    val audioIndicatorState by viewModel.audioIndicatorState.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -87,12 +93,12 @@ fun ProfileScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopBar(
+                userId = userId,
+                contentOffset = scrollBehavior.state.contentOffset,
                 onBackClick = {
                     viewModel.handleEvent(ProfileScreenEvent.Back)
                     onBackClick()
-                },
-                userId = userId,
-                contentOffset = scrollBehavior.state.contentOffset
+                }
             )
         }
     ) { padding ->
@@ -111,21 +117,32 @@ fun ProfileScreen(
             )
 
             is ProfileScreenState.Success -> {
-                Content(
-                    user = state.user,
-                    posts = posts,
-                    isPrivate = isPrivate,
-                    currentLoopingAudio = currentLoopingAudio,
-                    friendRequest = { viewModel.handleEvent(ProfileScreenEvent.FriendRequest(it)) },
-                    paddingValues = padding,
-                    onPhotoClick = onPhotoClick,
-                    onOpenPhotosClick = { onOpenPhotosClick(state.user.id) },
-                    onLikeClick = { viewModel.handleEvent(ProfileScreenEvent.Like(it)) },
-                    likes = likesState,
-                    onPostPhotoClick = onPostPhotoClick,
-                    onAudioClick = { viewModel.handleEvent(ProfileScreenEvent.AudioClick(it)) },
-                    onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) }
-                )
+                Box {
+                    Content(
+                        user = state.user,
+                        posts = posts,
+                        currentLoopingAudio = currentLoopingAudio,
+                        friendRequest = { viewModel.handleEvent(ProfileScreenEvent.FriendRequest(it)) },
+                        paddingValues = padding,
+                        onPhotoClick = onPhotoClick,
+                        onOpenPhotosClick = { onOpenPhotosClick(state.user.id) },
+                        onLikeClick = { viewModel.handleEvent(ProfileScreenEvent.Like(it)) },
+                        likes = likesState,
+                        onPostPhotoClick = onPostPhotoClick,
+                        onAudioClick = { viewModel.handleEvent(ProfileScreenEvent.AudioClick(it)) },
+                        onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) }
+                    )
+                    if (audioIndicatorState == AudioIndicatorState.Loading) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(2.dp)
+                                .align(Alignment.BottomCenter),
+                            color = LocalColorScheme.current.primaryIconTintColor,
+                            trackColor = LocalColorScheme.current.primary
+                        )
+                    }
+                }
 
                 LaunchedEffect(Unit) {
                     snapshotFlow { posts.itemSnapshotList.items }.collect { posts ->
@@ -184,7 +201,6 @@ internal fun OnErrorState(
 @Composable
 private fun Content(
     user: User,
-    isPrivate: Boolean,
     posts: LazyPagingItems<Post>,
     paddingValues: PaddingValues,
     likes: PostsLikesState,
@@ -204,26 +220,22 @@ private fun Content(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item { ProfileHeader(user, friendRequest) }
-        if (!isPrivate) {
-            item { Photos(user.photos, onPhotoClick, onOpenPhotosClick) }
-            items(count = posts.itemCount) {
-                Post(
-                    posts = posts,
-                    index = it,
-                    onLikeClick = onLikeClick,
-                    likesState = likes,
-                    onPhotoClick = onPostPhotoClick,
-                    onAudioClick = onAudioClick,
-                    currentLoopingAudio = currentLoopingAudio,
-                    onVideoClick = onVideoClick
-                )
-            }
-            item { ResolveAppend(posts) }
-            item { ResolveRefresh(posts) }
-            item { OnEmptyPostsMessage(posts) }
-        } else {
-
+        item { Photos(user.photos, onPhotoClick, onOpenPhotosClick) }
+        items(count = posts.itemCount) {
+            Post(
+                posts = posts,
+                index = it,
+                onLikeClick = onLikeClick,
+                likesState = likes,
+                onPhotoClick = onPostPhotoClick,
+                onAudioClick = onAudioClick,
+                currentLoopingAudio = currentLoopingAudio,
+                onVideoClick = onVideoClick
+            )
         }
+        item { ResolveAppend(posts) }
+        item { ResolveRefresh(posts) }
+        item { OnEmptyPostsMessage(posts) }
     }
 }
 

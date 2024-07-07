@@ -61,7 +61,7 @@ internal fun PrivateProfile(
             TopBar(
                 onBackClick = onBackClick,
                 userId = userId,
-                contentOffset = 0f
+                contentOffset = 0f,
             )
         }
     ) { padding ->
@@ -117,7 +117,9 @@ private fun PrivateProfileBanner() {
         ) {
             Icon(
                 imageVector = Icons.Default.Lock,
-                modifier = Modifier.fillMaxSize(0.15f).aspectRatio(1f),
+                modifier = Modifier
+                    .fillMaxSize(0.15f)
+                    .aspectRatio(1f),
                 tint = LocalColorScheme.current.primaryTextColor,
                 contentDescription = "privateProfile"
             )

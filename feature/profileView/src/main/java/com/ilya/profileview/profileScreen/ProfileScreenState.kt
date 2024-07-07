@@ -15,3 +15,8 @@ internal sealed interface ProfileScreenState {
 internal class PostsLikesState(
     val likes: Map<Long, Likes>
 )
+
+internal sealed interface AudioIndicatorState {
+    data object Idle : AudioIndicatorState
+    data object Loading : AudioIndicatorState
+}

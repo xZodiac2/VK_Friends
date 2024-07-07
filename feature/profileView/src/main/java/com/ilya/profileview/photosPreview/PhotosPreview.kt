@@ -1,5 +1,6 @@
 package com.ilya.profileview.photosPreview
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,6 +17,11 @@ fun PhotosPreview(
 ) {
     val viewModel: PhotosPreviewViewModel = hiltViewModel()
     val systemUiController = rememberSystemUiController()
+
+    BackHandler {
+        systemUiController.isStatusBarVisible = true
+        onBackClick()
+    }
 
     if (photoIds.isEmpty()) {
         AllPhotosPreview(

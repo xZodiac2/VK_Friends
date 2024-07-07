@@ -153,7 +153,7 @@ fun OnLoading(modifier: Modifier) {
 
 @Composable
 private fun PhotosCount(photos: LazyPagingItems<Photo>) {
-    if (photos.itemCount != 0) {
+    if (photos.itemCount != 0 && photos.loadState.append is LoadState.NotLoading && photos.loadState.refresh is LoadState.NotLoading) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

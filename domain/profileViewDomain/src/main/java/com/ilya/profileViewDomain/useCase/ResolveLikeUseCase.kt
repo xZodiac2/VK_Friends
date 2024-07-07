@@ -12,8 +12,9 @@ import javax.inject.Inject
 
 class ResolveLikeUseCase @Inject constructor(
     private val repository: LikesRemoteRepository
-) : UseCase<ResolveLikeUseCaseInvokeData, Result<Likes>> {
-    override suspend fun invoke(data: ResolveLikeUseCaseInvokeData): Result<Likes> {
+) : UseCase<ResolveLikeUseCase.InvokeData, Result<Likes>> {
+
+    override suspend fun invoke(data: InvokeData): Result<Likes> {
         val likes = data.likeable.likes ?: return Result.failure(IllegalArgumentException())
         val type = when (data.likeable) {
             is Photo -> ObjectType.PHOTO
@@ -43,10 +44,13 @@ class ResolveLikeUseCase @Inject constructor(
             userLikes = !likes.userLikes
         ))
     }
+
+    data class InvokeData(
+        val likeable: Likeable,
+        val accessToken: String
+    )
+
+
 }
 
-data class ResolveLikeUseCaseInvokeData(
-    val likeable: Likeable,
-    val accessToken: String
-)
 

@@ -10,11 +10,11 @@ interface Likeable {
     val likes: Likes?
 }
 
-interface Attachment
+abstract class Attachment
 
 @Parcelize
 data class Post(
-    val videos: List<VideoExtended>,
+    val videos: List<Video>,
     val photos: List<Photo>,
     val audios: List<Audio>,
     val author: PostAuthor,
@@ -28,7 +28,7 @@ data class Post(
 
 @Parcelize
 data class RepostedPost(
-    val videos: List<VideoExtended>,
+    val videos: List<Video>,
     val photos: List<Photo>,
     val audios: List<Audio>,
     val owner: PostAuthor?,
@@ -61,7 +61,7 @@ data class Audio(
     val title: String,
     val duration: Int,
     val url: String,
-) : Attachment, Parcelable
+) : Attachment(), Parcelable
 
 @Parcelize
 data class Photo(
@@ -71,9 +71,18 @@ data class Photo(
     override val likes: Likes?,
     val sizes: List<Size>,
     val accessKey: String
-) : Attachment, Likeable, Parcelable
+) : Attachment(), Likeable, Parcelable
 
 @Parcelize
+data class Video(
+    val duration: Int = 0,
+    val firstFrame: List<FirstFrame>,
+    val id: Long,
+    val ownerId: Long,
+    val title: String,
+    val accessKey: String
+) : Attachment(), Parcelable
+
 data class VideoExtended(
     val duration: Int = 0,
     val firstFrame: List<FirstFrame>,
@@ -82,7 +91,7 @@ data class VideoExtended(
     override val likes: Likes?,
     val title: String,
     val playerUrl: String
-) : Attachment, Likeable, Parcelable
+) : Likeable
 
 @Parcelize
 data class Likes(
@@ -104,3 +113,11 @@ data class FirstFrame(
     val width: Int,
     val height: Int
 ) : Parcelable
+
+
+fun Likes.toggled(): Likes {
+    return this.copy(
+        userLikes = !this.userLikes,
+        count = if (this.userLikes) this.count - 1 else this.count + 1
+    )
+}

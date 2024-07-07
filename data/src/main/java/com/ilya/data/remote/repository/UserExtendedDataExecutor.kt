@@ -1,4 +1,4 @@
-package com.ilya.data.remote.repository.executor
+package com.ilya.data.remote.repository
 
 import com.ilya.data.remote.VkApiExecutor
 import com.ilya.data.remote.retrofit.api.UserDataExecuteVkApi

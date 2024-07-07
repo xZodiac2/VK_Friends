@@ -84,7 +84,9 @@ private fun OnLoading(modifier: Modifier = Modifier) {
 @Composable
 fun ResolveAppend(users: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) {
     when (val state = users.loadState.append) {
-        LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
+        LoadState.Loading -> {
+            OnLoading(modifier = Modifier.height(if (users.itemCount == 0) 120.dp else 500.dp))
+        }
         is LoadState.Error -> {
             OnPagingError(
                 modifier = Modifier.height(120.dp),

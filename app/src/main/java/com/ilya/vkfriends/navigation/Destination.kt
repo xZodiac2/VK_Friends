@@ -11,7 +11,7 @@ sealed interface Destination {
     data object AuthScreen : Destination
 
     @Serializable
-    data class ProfileScreen(val userId: Long) : Destination
+    data class ProfileScreen(val userId: Long, val isPrivate: Boolean) : Destination
 
     @Serializable
     data object SearchScreen : Destination
@@ -28,6 +28,9 @@ sealed interface Destination {
 
     @Serializable
     data class PhotosScreen(val userId: Long) : Destination
+
+    @Serializable
+    data class VideoPreview(val ownerId: Long, val id: Long, val accessKey: String)
 
 }
 

@@ -28,7 +28,7 @@ internal object LightColorScheme {
     val secondary = Color(245, 245, 245, 255)
 
     val cardContainerColor = Color.White
-    val background = Color.White
+    val background = Color(241, 241, 241, 255)
 
     val primaryTextColor = Color.Black
     val secondaryTextColor = Color(126, 126, 126)

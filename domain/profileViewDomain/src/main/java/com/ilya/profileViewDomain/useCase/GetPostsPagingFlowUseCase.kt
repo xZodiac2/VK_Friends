@@ -14,18 +14,20 @@ import javax.inject.Inject
 
 class GetPostsPagingFlowUseCase @Inject constructor(
     private val postsPagingSourceFactory: PostsPagingSource.Factory
-) : UseCase<GetPostsPagingFlowUseCaseInvokeData, Flow<PagingData<Post>>> {
+) : UseCase<GetPostsPagingFlowUseCase.InvokeData, Flow<PagingData<Post>>> {
 
-    override suspend fun invoke(data: GetPostsPagingFlowUseCaseInvokeData): Flow<PagingData<Post>> {
+    override suspend fun invoke(data: InvokeData): Flow<PagingData<Post>> {
         return Pager(
             config = data.config,
             pagingSourceFactory = { postsPagingSourceFactory.newInstance(data.userId) },
         ).flow.map { it.map { postEntity -> postEntity.toPost() } }
     }
 
+    data class InvokeData(
+        val config: PagingConfig,
+        val userId: Long
+    )
+
+
 }
 
-data class GetPostsPagingFlowUseCaseInvokeData(
-    val config: PagingConfig,
-    val userId: Long
-)

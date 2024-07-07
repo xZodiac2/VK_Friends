@@ -64,7 +64,7 @@ import com.ilya.theme.LocalTypography
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(
-    openProfileRequest: (Long) -> Unit,
+    openProfileRequest: (userId: Long, isPrivate: Boolean) -> Unit,
     onEmptyAccessToken: () -> Unit
 ) {
     val viewModel: SearchViewModel = hiltViewModel()
@@ -91,7 +91,7 @@ fun SearchScreen(
             Column {
                 TopBar(
                     accountOwner = accountOwner,
-                    onAvatarClick = openProfileRequest,
+                    onAvatarClick = { openProfileRequest(it, false) },
                     onPlaceholderClick = { viewModel.handleEvent(SearchScreenEvent.PlugAvatarClick) },
                     scrollBehavior = scrollBehavior
                 )
@@ -183,7 +183,7 @@ private fun TopBar(
 private fun Content(
     users: LazyPagingItems<User>,
     onEmptyAccessToken: () -> Unit,
-    onCardClick: (Long) -> Unit,
+    onCardClick: (userId: Long, isPrivate: Boolean) -> Unit,
     paddingValues: PaddingValues,
     isRefreshing: Boolean,
     pullRefreshState: PullRefreshState
@@ -220,12 +220,12 @@ private fun Content(
 private fun User(
     users: LazyPagingItems<User>,
     index: Int,
-    onCardClick: (Long) -> Unit,
+    onCardClick: (userId: Long, isPrivate: Boolean) -> Unit,
 ) {
     val user = users[index]
     if (user != null) {
         UserCard(
-            onCardClick = onCardClick,
+            onCardClick = { onCardClick(user.id, user.isClosed) },
             user = user
         )
     }

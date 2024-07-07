@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
-import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCaseInvokeData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +28,7 @@ internal class PhotosScreenViewModel @Inject constructor(
             return@flatMapLatest flow { emit(PagingData.empty()) }
         }
         getPhotosPagingFlowUseCase(
-            GetPhotosPagingFlowUseCaseInvokeData(
+            GetPhotosPagingFlowUseCase.InvokeData(
                 pagingConfig = PagingConfig(
                     pageSize = PAGE_SIZE,
                     initialLoadSize = INITIAL_LOAD_SIZE

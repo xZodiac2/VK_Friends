@@ -2,17 +2,13 @@ package com.ilya.search.screen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,41 +36,31 @@ internal fun UserCard(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (user.isClosed) {
-                Icon(
-                    modifier = Modifier.padding(12.dp),
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "lockedProfile",
-                    tint = LocalColorScheme.current.primaryTextColor
-                )
-            }
-            Column(
-                modifier = modifier
-                    .padding(horizontal = 14.dp)
-                    .align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize(0.7f)
-                        .clip(CircleShape)
-                        .aspectRatio(1f),
-                    model = user.photoUrl,
-                    contentDescription = "user_photo",
-                    contentScale = ContentScale.Crop
-                )
-                Text(
-                    text = "${user.firstName} ${user.lastName}",
-                    fontSize = LocalTypography.current.small,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    color = LocalColorScheme.current.primaryTextColor,
-                    textAlign = TextAlign.Center
-                )
-            }
-
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize(0.7f)
+                    .clip(CircleShape)
+                    .aspectRatio(1f),
+                model = user.photoUrl,
+                contentDescription = "user_photo",
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = "${user.firstName} ${user.lastName}",
+                fontSize = LocalTypography.current.small,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                color = LocalColorScheme.current.primaryTextColor,
+                textAlign = TextAlign.Center
+            )
         }
+
     }
 }

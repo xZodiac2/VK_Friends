@@ -1,5 +1,6 @@
 package com.ilya.profileview.profileScreen
 
+import android.media.MediaPlayer
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,17 +11,15 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
+import com.ilya.profileViewDomain.models.Audio
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Post
 import com.ilya.profileViewDomain.models.User
+import com.ilya.profileViewDomain.models.toggled
 import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCase
-import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCaseInvokeData
 import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
-import com.ilya.profileViewDomain.useCase.GetUserUseCaseData
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
-import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCaseData
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
-import com.ilya.profileViewDomain.useCase.ResolveLikeUseCaseInvokeData
 import com.ilya.profileview.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -33,8 +32,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import okio.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +40,8 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
     private val getPostsPagingFlowUseCase: GetPostsPagingFlowUseCase,
-    private val resolveLikeUseCase: ResolveLikeUseCase
+    private val resolveLikeUseCase: ResolveLikeUseCase,
+    private val mediaPlayer: MediaPlayer
 ) : ViewModel() {
 
     private val userId = MutableStateFlow(DEFAULT_USER_ID)
@@ -54,7 +52,7 @@ internal class ProfileScreenViewModel @Inject constructor(
             return@flatMapLatest flow { emit(PagingData.empty()) }
         }
         getPostsPagingFlowUseCase(
-            GetPostsPagingFlowUseCaseInvokeData(
+            GetPostsPagingFlowUseCase.InvokeData(
                 config = PagingConfig(
                     pageSize = PAGE_SIZE,
                     initialLoadSize = INITIAL_LOAD_SIZE
@@ -73,6 +71,11 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val _likesState = MutableStateFlow(PostsLikesState(emptyMap()))
     val likesState = _likesState.asStateFlow()
 
+    // current looping audio to mediaPlayer.isPlaying
+    private val _currentLoopingAudioState =
+        MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
+    val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
+
     fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.Start -> {
@@ -83,9 +86,56 @@ internal class ProfileScreenViewModel @Inject constructor(
             is ProfileScreenEvent.FriendRequest -> onFriendRequest(event.user)
             is ProfileScreenEvent.Like -> onLike(event.post)
             is ProfileScreenEvent.PostsAdded -> onPostsAdded(event.newLikes)
+            is ProfileScreenEvent.AudioClick -> onAudioClick(event.audio)
             ProfileScreenEvent.Retry -> onRetry()
             ProfileScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
+            ProfileScreenEvent.Back -> onBack()
         }
+    }
+
+    private fun onBack() {
+        mediaPlayer.reset()
+    }
+
+    private fun onAudioClick(audio: Audio) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (audio.url.isEmpty()) {
+                showSnackbar(R.string.error_cant_play_audio)
+                return@launch
+            }
+
+            if (audio == _currentLoopingAudioState.value.first) {
+                handleCurrentAudioState()
+            } else {
+                playNewAudio(audio)
+            }
+
+            _currentLoopingAudioState.value = audio to mediaPlayer.isPlaying
+        }
+    }
+
+    private fun handleCurrentAudioState() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+        } else {
+            mediaPlayer.start()
+        }
+    }
+
+    private fun playNewAudio(audio: Audio) {
+        try {
+            mediaPlayer.reset()
+            prepareAndStartAudio(audio.url)
+        } catch (e: IOException) {
+            logThrowable(e)
+            showSnackbar(R.string.error_cant_play_audio)
+        }
+    }
+
+    private fun prepareAndStartAudio(url: String) {
+        mediaPlayer.setDataSource(url)
+        mediaPlayer.prepare()
+        mediaPlayer.start()
     }
 
     private fun onPostsAdded(likes: Map<Long, Likes>) {
@@ -112,7 +162,7 @@ internal class ProfileScreenViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
-                ResolveLikeUseCaseInvokeData(
+                ResolveLikeUseCase.InvokeData(
                     likeable = post,
                     accessToken = accessToken.token
                 )
@@ -123,13 +173,6 @@ internal class ProfileScreenViewModel @Inject constructor(
                 toggleLike(post.id)
             }
         }
-    }
-
-    private fun Likes.toggled(): Likes {
-        return this.copy(
-            userLikes = !this.userLikes,
-            count = if (this.userLikes) this.count - 1 else this.count + 1
-        )
     }
 
     private fun toggleLike(postId: Long): Result<Unit> {
@@ -170,7 +213,7 @@ internal class ProfileScreenViewModel @Inject constructor(
             }
 
             val newFriendStatus = resolveFriendRequestUseCase(
-                ResolveFriendRequestUseCaseData(
+                ResolveFriendRequestUseCase.InvokeData(
                     accessToken = accessToken.token,
                     user = user
                 )
@@ -194,8 +237,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         val getDataExceptionHandler = CoroutineExceptionHandler { _, throwable ->
             logThrowable(throwable)
             _screenState.value = when (throwable) {
-                is UnknownHostException -> ProfileScreenState.Error(ErrorType.NoInternet)
-                is SocketTimeoutException -> ProfileScreenState.Error(ErrorType.NoInternet)
+                is IOException -> ProfileScreenState.Error(ErrorType.NoInternet)
                 else -> ProfileScreenState.Error(ErrorType.Unknown(throwable))
             }
         }
@@ -209,7 +251,7 @@ internal class ProfileScreenViewModel @Inject constructor(
             }
 
             val userData = getUserDataUseCase(
-                GetUserUseCaseData(
+                GetUserDataUseCase.InvokeData(
                     accessToken = accessToken.token,
                     userId = userId.value
                 )

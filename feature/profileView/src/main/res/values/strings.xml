@@ -2,7 +2,6 @@
 <resources>
     <string name="no_able_to_get_data">It is Inpossible to get data. Please check your Internet connection and try again</string>
     <string name="try_again">Try again</string>
-    <string name="unknown_error">Unknown error: %s</string>
     <string name="details">Details</string>
     <string name="birthday_date">Birthday: %s</string>
     <string name="not_married">Not married</string>
@@ -46,5 +45,8 @@
     <string name="open_photos">Show all</string>
     <string name="photos_count">%d photos</string>
     <string name="error_no_internet">Check your Internet connection</string>
-    <string name="error_cant_open_photos">Something went wrong. Try again later</string>
+    <string name="error_try_later">Something went wrong. Try again later</string>
+    <string name="error_cant_play_audio">This audio is unavailable</string>
+    <string name="private_profile">This profile is private</string>
+    <string name="add_user_to_friends_to_see_info">Add this user to friends to see him photos, posts and other information</string>
 </resources>

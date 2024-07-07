@@ -11,9 +11,9 @@ import javax.inject.Inject
 
 class GetUserDataUseCase @Inject constructor(
     private val vkApiExecutor: VkApiExecutor<UserExtendedResponseData>
-) : UseCase<GetUserUseCaseData, User> {
+) : UseCase<GetUserDataUseCase.InvokeData, User> {
 
-    override suspend fun invoke(data: GetUserUseCaseData): User {
+    override suspend fun invoke(data: InvokeData): User {
         val vkScriptRequest = """
             var user = API.users.get({
                 "user_ids": [${data.userId}],
@@ -50,7 +50,7 @@ class GetUserDataUseCase @Inject constructor(
         )
 
         val photos = response.photos
-        val user = response.user.toUser(photos)
+        val user = response.user.toUser(photos ?: emptyList())
         val partner = response.partner?.toPartner() ?: return user
 
         return user.copy(partner = partner)
@@ -69,9 +69,10 @@ class GetUserDataUseCase @Inject constructor(
         )
     }
 
+    data class InvokeData(
+        val accessToken: String,
+        val userId: Long,
+    )
+
 }
 
-data class GetUserUseCaseData(
-    val accessToken: String,
-    val userId: Long,
-)

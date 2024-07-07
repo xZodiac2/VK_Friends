@@ -14,9 +14,9 @@ import javax.inject.Inject
 
 class GetPhotosPagingFlowUseCase @Inject constructor(
     private val photosPagingSourceFactory: PhotosPagingSource.Factory
-) : UseCase<GetPhotosPagingFlowUseCaseInvokeData, Flow<PagingData<Photo>>> {
+) : UseCase<GetPhotosPagingFlowUseCase.InvokeData, Flow<PagingData<Photo>>> {
 
-    override suspend fun invoke(data: GetPhotosPagingFlowUseCaseInvokeData): Flow<PagingData<Photo>> {
+    override suspend fun invoke(data: InvokeData): Flow<PagingData<Photo>> {
         // initialKey calculate example: (targetPhotoIndex = 82, pageSize = 20) -> 4
         val initialKey = (data.targetPhotoIndex?.minus(data.targetPhotoIndex % data.pagingConfig.pageSize))?.div(data.pagingConfig.pageSize)
 
@@ -34,11 +34,12 @@ class GetPhotosPagingFlowUseCase @Inject constructor(
         ).flow.map { it.map { photo -> photo.toPhoto() } }
     }
 
-}
+    data class InvokeData(
+        val pagingConfig: PagingConfig,
+        val userId: Long,
+        val isPreview: Boolean,
+        val targetPhotoIndex: Int? = null
+    )
 
-data class GetPhotosPagingFlowUseCaseInvokeData(
-    val pagingConfig: PagingConfig,
-    val userId: Long,
-    val isPreview: Boolean,
-    val targetPhotoIndex: Int? = null
-)
+
+}

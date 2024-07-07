@@ -2,10 +2,11 @@ package com.ilya.profileViewDomain.mappers
 
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.data.paging.User
-import com.ilya.data.paging.Video
+import com.ilya.data.remote.retrofit.api.dto.FirstFrameDto
 import com.ilya.data.remote.retrofit.api.dto.LikesDto
 import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.SizeDto
+import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDto
 import com.ilya.profileViewDomain.models.Audio
 import com.ilya.profileViewDomain.models.FirstFrame
 import com.ilya.profileViewDomain.models.Group
@@ -15,6 +16,7 @@ import com.ilya.profileViewDomain.models.Post
 import com.ilya.profileViewDomain.models.PostAuthor
 import com.ilya.profileViewDomain.models.RepostedPost
 import com.ilya.profileViewDomain.models.Size
+import com.ilya.profileViewDomain.models.Video
 import com.ilya.profileViewDomain.models.VideoExtended
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,7 +25,7 @@ import java.util.Locale
 fun com.ilya.data.paging.Post.toPost(): Post {
     return Post(
         id = id,
-        videos = videos.map { it.toVideoExtended() },
+        videos = videos.map { it.toVideo() },
         audios = audios.map { it.toAudio() },
         photos = photos.map { it.toPhoto() },
         date = parseToString(dateUnixTime),
@@ -37,7 +39,7 @@ fun com.ilya.data.paging.Post.toPost(): Post {
 
 private fun com.ilya.data.paging.RepostedPost.toRepostedPost(): RepostedPost {
     return RepostedPost(
-        videos = videos.map { it.toVideoExtended() },
+        videos = videos.map { it.toVideo() },
         photos = photos.map { it.toPhoto() },
         audios = audios.map { it.toAudio() },
         owner = owner?.toPostAuthor(),
@@ -76,15 +78,34 @@ private fun com.ilya.data.paging.Audio.toAudio(): Audio {
     )
 }
 
-private fun Video.toVideoExtended(): VideoExtended {
-    return VideoExtended(
+private fun com.ilya.data.paging.Video.toVideo(): Video {
+    return Video(
         duration = duration,
         firstFrame = firstFrame.map { it.toFirstFrame() },
         id = id,
         ownerId = ownerId,
         title = title,
-        playerUrl = playerUrl,
-        likes = likes?.toLikes()
+        accessKey = accessKey
+    )
+}
+
+fun VideoExtendedDto.toVideoExtended(): VideoExtended {
+    return VideoExtended(
+        duration = duration,
+        firstFrame = firstFrame.map { it.toFirstFrame() },
+        id = id,
+        ownerId = ownerId,
+        likes = likes.toLikes(),
+        title = title,
+        playerUrl = playerUrl
+    )
+}
+
+private fun FirstFrameDto.toFirstFrame(): FirstFrame {
+    return FirstFrame(
+        url = url,
+        width = width,
+        height = height
     )
 }
 

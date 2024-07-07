@@ -1,5 +1,6 @@
 package com.ilya.vkfriends
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,7 +35,8 @@ import com.ilya.core.util.logThrowable
 import com.ilya.friendsview.screen.FriendsScreen
 import com.ilya.profileview.photosPreview.PhotosPreview
 import com.ilya.profileview.photosScreen.PhotosScreen
-import com.ilya.profileview.profileScreen.ProfileScreen
+import com.ilya.profileview.profileScreen.screens.ProfileScreen
+import com.ilya.profileview.videoPreview.VideoPreview
 import com.ilya.search.screen.SearchScreen
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
@@ -51,6 +53,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var accessTokenManager: AccessTokenManager
+
+    @Inject
+    lateinit var mediaPlayer: MediaPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -157,11 +162,9 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     profileOpenRequest = { userId ->
-                        navController.navigate(
-                            Destination.ProfileScreen(userId)
-                        )
+                        navController.navigate(Destination.ProfileScreen(userId, false))
                     },
-                    onExitConfirm = { finish() }
+                    onExitConfirm = ::finish
                 )
                 LaunchedEffect(Unit) {
                     showBottomBar()
@@ -171,9 +174,11 @@ class MainActivity : ComponentActivity() {
                 enterTransition = ScreenTransition.ProfileScreen.transition.enterTransition,
                 exitTransition = ScreenTransition.ProfileScreen.transition.exitTransition
             ) { backStackEntry ->
+                val route = backStackEntry.toRoute<Destination.ProfileScreen>()
                 ProfileScreen(
-                    userId = backStackEntry.toRoute<Destination.ProfileScreen>().userId,
-                    onBackClick = { navController.popBackStack() },
+                    userId = route.userId,
+                    isPrivate = route.isPrivate,
+                    onBackClick = navController::popBackStack,
                     onEmptyAccessToken = {
                         navController.navigate(Destination.AuthScreen) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -193,6 +198,10 @@ class MainActivity : ComponentActivity() {
                             targetPhotoIndex = targetIndex,
                             photoIds = ids.toIdsString()
                         ))
+                    },
+                    onVideoClick = { ownerId, id, accessKey ->
+                        val key = accessKey.ifEmpty { BLANK_ACCESS_KEY }
+                        navController.navigate(Destination.VideoPreview(ownerId, id, key))
                     }
                 )
                 LaunchedEffect(Unit) {
@@ -204,10 +213,8 @@ class MainActivity : ComponentActivity() {
                 exitTransition = ScreenTransition.SearchScreen.transition.exitTransition
             ) {
                 SearchScreen(
-                    openProfileRequest = {
-                        navController.navigate(
-                            Destination.ProfileScreen(it)
-                        )
+                    openProfileRequest = { id, isPrivate ->
+                        navController.navigate(Destination.ProfileScreen(id, isPrivate))
                     },
                     onEmptyAccessToken = {
                         navController.navigate(Destination.AuthScreen) {
@@ -231,7 +238,7 @@ class MainActivity : ComponentActivity() {
                     userId = route.userId,
                     targetPhotoIndex = route.targetPhotoIndex,
                     photoIds = route.photoIds.fromIdsString(),
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = navController::popBackStack
                 )
 
                 LaunchedEffect(Unit) {
@@ -246,11 +253,25 @@ class MainActivity : ComponentActivity() {
 
                 PhotosScreen(
                     userId = route.userId,
-                    onBackClick = { navController.popBackStack() },
+                    onBackClick = navController::popBackStack,
                     onPhotoClick = { userId, photoIndex ->
                         navController.navigate(Destination.PhotosPreview(userId, photoIndex))
                     }
                 )
+            }
+            composable<Destination.VideoPreview> {
+                val route = it.toRoute<Destination.VideoPreview>()
+
+                VideoPreview(
+                    ownerId = route.ownerId,
+                    videoId = route.id,
+                    accessKey = route.accessKey.takeIf { it != BLANK_ACCESS_KEY } ?: "",
+                    onBackClick = navController::popBackStack
+                )
+
+                LaunchedEffect(Unit) {
+                    hideBottomBar()
+                }
             }
         }
     }
@@ -285,7 +306,28 @@ class MainActivity : ComponentActivity() {
             logThrowable(e)
             emptyMap()
         }
+    }
 
+    override fun onStop() {
+        super.onStop()
+        try {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            } else {
+                mediaPlayer.reset()
+            }
+        } catch (e: IllegalStateException) {
+            logThrowable(e)
+        }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        try {
+            mediaPlayer.start()
+        } catch (e: IllegalStateException) {
+            logThrowable(e)
+        }
     }
 
     companion object {

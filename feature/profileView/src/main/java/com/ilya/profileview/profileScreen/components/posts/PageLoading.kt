@@ -1,4 +1,4 @@
-package com.ilya.profileview.profileScreen.components
+package com.ilya.profileview.profileScreen.components.posts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -93,7 +93,7 @@ internal fun RestrainedPhotosPreview(
                     snapshotFlow.collect {
                         currentPage = it
                         currentPhoto = stateValue.photos[it]
-                        likes.value = currentPhoto?.likes
+                        likes.value = currentPhoto?.id?.let { likesState.value.likes[it] }
                     }
                 }
             }

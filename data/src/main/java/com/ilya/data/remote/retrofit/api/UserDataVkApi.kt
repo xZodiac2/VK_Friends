@@ -44,11 +44,18 @@ internal interface UserDataVkApi {
         @Query("extended") extended: Int
     ) : PhotosResponse
 
-    @GET("photos.getById?v=$CURRENT_API_VERSION")
+    @GET("photos.getById?v=$CURRENT_API_VERSION&extended=1")
     suspend fun getPhotos(
         @Query("access_token") accessToken: String,
         @Query("photos") photoIds: String
     ): RestrainedPhotosListResponse
+
+    @GET("video.get?v=$CURRENT_API_VERSION")
+    suspend fun getVideo(
+        @Query("access_token") accessToken: String,
+        @Query("owner_id") ownerId: Long,
+        @Query("videos") videoId: String
+    ): VideoExtendedResponse
 
 }
 

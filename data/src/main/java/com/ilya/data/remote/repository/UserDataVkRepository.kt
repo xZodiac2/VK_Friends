@@ -7,7 +7,7 @@ import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.PhotosResponseData
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
-import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
+import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
@@ -56,7 +56,7 @@ internal class UserDataVkRepository @Inject constructor(
         accessToken: String,
         ownerId: Long,
         videoId: String,
-    ): VideoExtendedDataDto {
+    ): VideoExtendedDto {
         return withContext(Dispatchers.IO) {
             api.getVideoData(
                 accessToken = accessToken,
@@ -91,6 +91,14 @@ internal class UserDataVkRepository @Inject constructor(
                 photoIds = photoIds.joinToString(",")
             ).response
         }
+    }
+
+    override suspend fun getVideo(accessToken: String, videoId: String): VideoExtendedDto {
+        val ownerId = videoId.substringBefore("_").toLong()
+
+        return withContext(Dispatchers.IO) {
+            api.getVideo(accessToken, ownerId, videoId)
+        }.response.items.first()
     }
 
     private fun Boolean.toInt(): Int {

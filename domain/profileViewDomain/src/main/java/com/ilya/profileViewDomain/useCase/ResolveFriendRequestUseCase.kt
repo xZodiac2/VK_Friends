@@ -8,9 +8,9 @@ import javax.inject.Inject
 
 class ResolveFriendRequestUseCase @Inject constructor(
     private val friendsManageRepo: FriendsManageRemoteRepository
-) : UseCase<ResolveFriendRequestUseCaseData, FriendStatus> {
+) : UseCase<ResolveFriendRequestUseCase.InvokeData, FriendStatus> {
 
-    override suspend fun invoke(data: ResolveFriendRequestUseCaseData): FriendStatus = with(data) {
+    override suspend fun invoke(data: InvokeData): FriendStatus = with(data) {
         return@with when (user.friendStatus) {
             FriendStatus.FRIENDS -> {
                 friendsManageRepo.deleteFriend(accessToken, user.id)
@@ -34,9 +34,10 @@ class ResolveFriendRequestUseCase @Inject constructor(
         }
     }
 
+    data class InvokeData(
+        val accessToken: String,
+        val user: User
+    )
+
 }
 
-data class ResolveFriendRequestUseCaseData(
-    val accessToken: String,
-    val user: User
-)

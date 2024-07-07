@@ -53,9 +53,9 @@ data class AudioDto(
 
 data class VideoDto(
     @Json(name = "duration") val duration: Int = 0,
-    @Json(name = "first_frame") val firstFrame: List<FirstFrameDto>? = null,
-    @Json(name = "id") override val id: Long = 0,
-    @Json(name = "owner_id") override val ownerId: Long = 0,
+    @Json(name = "image") val firstFrame: List<FirstFrameDto>,
+    @Json(name = "id") override val id: Long,
+    @Json(name = "owner_id") override val ownerId: Long,
     @Json(name = "title") val title: String = "",
     @Json(name = "access_key") override val accessKey: String = ""
 ) : BaseAttachment()
@@ -71,3 +71,16 @@ data class SizeDto(
     @Json(name = "width") val width: Int = 0,
     @Json(name = "url") val url: String = ""
 )
+
+data class PostOwnerResponse(
+    @Json(name = "response") val response: PostOwnerDto
+)
+
+data class PostOwnerDto(
+    @Json(name = "post_id") val postId: Long,
+    @Json(name = "user") val user: UserDto?,
+    @Json(name = "group") val group: GroupDto?,
+    @Json(name = "posted_by_group") val postedByGroup: Boolean
+)
+
+

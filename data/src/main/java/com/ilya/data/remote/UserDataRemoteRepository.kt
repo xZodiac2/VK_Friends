@@ -5,7 +5,7 @@ import com.ilya.data.remote.retrofit.api.dto.PhotoDto
 import com.ilya.data.remote.retrofit.api.dto.PhotosResponseData
 import com.ilya.data.remote.retrofit.api.dto.PostDto
 import com.ilya.data.remote.retrofit.api.dto.UserDto
-import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDataDto
+import com.ilya.data.remote.retrofit.api.dto.VideoExtendedDto
 
 interface UserDataRemoteRepository {
 
@@ -27,7 +27,7 @@ interface UserDataRemoteRepository {
         accessToken: String,
         ownerId: Long,
         videoId: String,
-    ): VideoExtendedDataDto
+    ): VideoExtendedDto
 
     suspend fun getPhotos(
         accessToken: String,
@@ -41,5 +41,10 @@ interface UserDataRemoteRepository {
         accessToken: String,
         photoIds: List<String>
     ): List<PhotoDto>
+
+    suspend fun getVideo(
+        accessToken: String,
+        videoId: String
+    ): VideoExtendedDto
 
 }

@@ -66,9 +66,8 @@ data class Video(
     val firstFrame: List<FirstFrame>,
     val id: Long,
     val ownerId: Long,
-    val likes: Likes?,
     val title: String,
-    val playerUrl: String
+    val accessKey: String
 )
 
 data class Likes(

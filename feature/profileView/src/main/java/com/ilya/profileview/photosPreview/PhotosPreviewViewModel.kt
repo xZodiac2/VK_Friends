@@ -13,10 +13,8 @@ import com.ilya.core.util.logThrowable
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
 import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
-import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCaseInvokeData
 import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
-import com.ilya.profileViewDomain.useCase.ResolveLikeUseCaseInvokeData
 import com.ilya.profileview.R
 import com.ilya.profileview.photosPreview.states.PhotosLikesState
 import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
@@ -47,7 +45,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
         .flatMapLatest { ids ->
             ids ?: return@flatMapLatest flow { emit(PagingData.empty()) }
             getPhotosPagingFlowUseCase(
-                GetPhotosPagingFlowUseCaseInvokeData(
+                GetPhotosPagingFlowUseCase.InvokeData(
                     pagingConfig = PagingConfig(
                         pageSize = PAGE_SIZE,
                         initialLoadSize = INITIAL_LOAD_SIZE,
@@ -83,12 +81,12 @@ internal class PhotosPreviewViewModel @Inject constructor(
             logThrowable(e)
             when (e) {
                 is IOException -> showSnackbar(R.string.error_no_internet)
-                else -> showSnackbar(R.string.error_cant_open_photos)
+                else -> showSnackbar(R.string.error_try_later)
             }
         }
 
         val accessToken = accessTokenManager.accessToken ?: run {
-            showSnackbar(R.string.error_cant_open_photos)
+            showSnackbar(R.string.error_try_later)
             return
         }
 
@@ -140,7 +138,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
         
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
-                data = ResolveLikeUseCaseInvokeData(
+                data = ResolveLikeUseCase.InvokeData(
                     accessToken = accessToken,
                     likeable = photo
                 )

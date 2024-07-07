@@ -2,7 +2,6 @@
 <resources>
     <string name="no_able_to_get_data">Невозможно получить данные. Проверьте подключение к интрентету и попробуйте снова</string>
     <string name="try_again">Попробовать снова</string>
-    <string name="unknown_error">Неизвестная ошибка: %s</string>
     <string name="details">Подробнее</string>
     <string name="birthday_date">День рождения: %s</string>
     <string name="not_married">Не женат</string>
@@ -47,5 +46,8 @@
     <string name="open_photos">Показать все</string>
     <string name="photos_count">%d фото</string>
     <string name="error_no_internet">Проверьте подключение к интеренту</string>
-    <string name="error_cant_open_photos">Что-то пошло не так. Повторите попытку позже</string>
+    <string name="error_try_later">Что-то пошло не так. Повторите попытку позже</string>
+    <string name="error_cant_play_audio">Это аудио недоступно</string>
+    <string name="private_profile">Этот профиль приватный</string>
+    <string name="add_user_to_friends_to_see_info">Добавьте этого пользователя в друзья, чтобы видеть его фотографии, посты и другую информацию</string>
 </resources>

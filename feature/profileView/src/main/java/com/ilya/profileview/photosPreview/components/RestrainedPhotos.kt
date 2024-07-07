@@ -42,7 +42,7 @@ internal fun RestrainedPhotosPreview(
 
     var currentPage by remember { mutableIntStateOf(targetPhotoIndex) }
     var currentPhoto by remember { mutableStateOf<Photo?>(null) }
-    val likes = remember { mutableStateOf<Likes?>(null) }
+    var likes by remember { mutableStateOf<Likes?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(PhotosPreviewEvent.RestrainedStart(userId, targetPhotoIndex, photoIds))
@@ -93,7 +93,7 @@ internal fun RestrainedPhotosPreview(
                     snapshotFlow.collect {
                         currentPage = it
                         currentPhoto = stateValue.photos[it]
-                        likes.value = currentPhoto?.id?.let { likesState.value.likes[it] }
+                        likes = currentPhoto?.id?.let { likesState.value.likes[it] }
                     }
                 }
             }

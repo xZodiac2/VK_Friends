@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +61,7 @@ fun PreviewTopBar(
 
 @Composable
 fun PreviewBottomBar(
-    likes: MutableState<Likes?>,
+    likes: Likes?,
     currentPhoto: Photo?,
     onLikeClick: (Photo?) -> Unit
 ) {
@@ -77,25 +76,17 @@ fun PreviewBottomBar(
     ) {
         IconButton(
             modifier = Modifier.size(32.dp),
-            onClick = {
-                likes.value?.let {
-                    likes.value = it.copy(
-                        userLikes = !it.userLikes,
-                        count = if (it.userLikes) it.count - 1 else it.count + 1
-                    )
-                    onLikeClick(currentPhoto?.copy(likes = it))
-                }
-            }
+            onClick = { onLikeClick(currentPhoto?.copy(likes = likes)) }
         ) {
             Icon(
                 modifier = Modifier.fillMaxSize(),
-                imageVector = if (likes.value?.userLikes == true) {
+                imageVector = if (likes?.userLikes == true) {
                     Icons.Default.Favorite
                 } else {
                     Icons.Default.FavoriteBorder
                 },
                 contentDescription = "like",
-                tint = likes.value?.let {
+                tint = likes?.let {
                     if (it.userLikes) {
                         Color.Red
                     } else {
@@ -104,7 +95,7 @@ fun PreviewBottomBar(
                 } ?: Color.Gray
             )
         }
-        likes.value?.let {
+        likes?.let {
             Text(
                 text = it.count.toString(),
                 color = if (it.userLikes) Color.Red else Color.White,

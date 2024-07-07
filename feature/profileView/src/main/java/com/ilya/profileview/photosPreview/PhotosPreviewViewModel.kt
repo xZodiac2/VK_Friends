@@ -12,6 +12,7 @@ import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.profileViewDomain.models.Likes
 import com.ilya.profileViewDomain.models.Photo
+import com.ilya.profileViewDomain.models.toggled
 import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
 import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
@@ -57,7 +58,8 @@ internal class PhotosPreviewViewModel @Inject constructor(
             )
         }.cachedIn(viewModelScope)
 
-    private val _photosState = MutableStateFlow<RestrainedPhotosState>(RestrainedPhotosState.Loading)
+    private val _photosState =
+        MutableStateFlow<RestrainedPhotosState>(RestrainedPhotosState.Loading)
     val photosState = _photosState.asStateFlow()
 
     private val _likesState = MutableStateFlow(PhotosLikesState(emptyMap()))
@@ -106,7 +108,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
     }
 
     private fun onPhotosAdded(likes: Map<Long, Likes>) {
-        _likesState.value = PhotosLikesState(likes)
+        _likesState.value = PhotosLikesState(_likesState.value.likes + likes)
     }
 
     private fun onStart(userId: Long, targetPhotoIndex: Int) {
@@ -120,52 +122,47 @@ internal class PhotosPreviewViewModel @Inject constructor(
     private fun onLike(photo: Photo?) {
         photo ?: run {
             showSnackbar(R.string.error_cant_like)
-            rollbackLikesState()
             return
         }
 
         val accessToken = accessTokenManager.accessToken?.token ?: run {
             showSnackbar(R.string.error_cant_like)
-            rollbackLikesState()
             return
         }
 
         val likesExceptionHandler = CoroutineExceptionHandler { _, e ->
             logThrowable(e)
             showSnackbar(R.string.error_cant_like)
-            rollbackLikesState()
+            toggleLike(photo.id)
         }
-        
+
+        toggleLike(photo.id).onFailure {
+            showSnackbar(R.string.error_cant_like)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
                 data = ResolveLikeUseCase.InvokeData(
                     accessToken = accessToken,
-                    likeable = photo
+                    likeable = photo.copy(likes = photo.likes?.toggled())
                 )
             )
 
-            result.fold(
-                onFailure = {
-                    showSnackbar(R.string.error_cant_like)
-                    rollbackLikesState()
-                },
-                onSuccess = { updateLikesState(photo.id to it) }
-            )
+            result.onFailure {
+                showSnackbar(R.string.error_cant_like)
+                toggleLike(photo.id)
+            }
         }
     }
 
-    private fun updateLikesState(pair: Pair<Long, Likes>) {
-        val photoId = pair.first
-        val likes = pair.second
-
+    private fun toggleLike(photoId: Long): Result<Unit> {
         val likesMap = _likesState.value.likes.toMutableMap()
-        likesMap[photoId] = likes
-
+        val likes = likesMap[photoId]
+            ?: return Result.failure(IllegalArgumentException())
+        likesMap[photoId] = likes.toggled()
         _likesState.value = PhotosLikesState(likesMap)
-    }
-
-    private fun rollbackLikesState() {
-        _likesState.value = PhotosLikesState(_likesState.value.likes)
+        return Result.success(Unit)
     }
 
     private fun showSnackbar(@StringRes text: Int) {

@@ -51,7 +51,7 @@ internal fun AllPhotosPreview(
         initialPage = targetPhotoIndex,
         pageCount = { photos.itemCount }
     )
-    val likes = remember { mutableStateOf<Likes?>(null) }
+    var likes by remember { mutableStateOf<Likes?>(null) }
     var currentPhoto by remember { mutableStateOf<Photo?>(null) }
 
     Scaffold(
@@ -102,7 +102,7 @@ internal fun AllPhotosPreview(
 
             snapshotFlow.collect {
                 currentPhoto = photos.getOrNull(it)
-                likes.value = currentPhoto?.id?.let { id -> likesState.likes[id] }
+                likes = currentPhoto?.id?.let { id -> likesState.likes[id] }
             }
         }
 
@@ -112,7 +112,7 @@ internal fun AllPhotosPreview(
                     it.likes?.let { likes ->
                         it.id to likes
                     }
-                }.toMap()
+                }.filter { it.second !in likesState.likes.values }.toMap()
                 viewModel.handleEvent(PhotosPreviewEvent.PhotosAdded(likesList))
             }
         }

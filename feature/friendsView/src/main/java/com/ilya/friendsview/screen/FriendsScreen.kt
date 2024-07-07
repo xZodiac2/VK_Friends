@@ -54,10 +54,10 @@ import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.data.paging.User
 import com.ilya.friendsview.FriendsScreenViewModel
 import com.ilya.friendsview.R
+import com.ilya.friendsview.screen.components.FriendCard
 import com.ilya.friendsview.screen.components.OnEmptyFriends
 import com.ilya.friendsview.screen.components.ResolveAppend
 import com.ilya.friendsview.screen.components.ResolveRefresh
-import com.ilya.friendsview.screen.components.UserCard
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -66,7 +66,7 @@ import com.ilya.theme.LocalTypography
 @Composable
 fun FriendsScreen(
     onEmptyAccessToken: () -> Unit,
-    profileOpenRequest: (Long) -> Unit,
+    openProfileRequest: (Long) -> Unit,
     onExitConfirm: () -> Unit,
 ) {
     val viewModel: FriendsScreenViewModel = hiltViewModel()
@@ -96,18 +96,18 @@ fun FriendsScreen(
         topBar = {
             TopBar(
                 accountOwner = accountOwner,
-                onAvatarClick = profileOpenRequest,
+                onAvatarClick = openProfileRequest,
                 onPlaceholderClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
                 scrollBehavior = scrollBehavior
             )
         },
         containerColor = LocalColorScheme.current.primary
-    ) { paddingValues ->
+    ) { padding ->
         Content(
             friends = friends,
-            paddingValues = paddingValues,
+            padding = padding,
             onEmptyAccessToken = onEmptyAccessToken,
-            onProfileViewButtonClick = profileOpenRequest,
+            onFriendClick = openProfileRequest,
             pullRefreshState = pullRefreshState,
             isRefreshing = isRefreshing,
         )
@@ -126,7 +126,7 @@ fun FriendsScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         viewModel.handleEvent(FriendsScreenEvent.Start)
     }
 
@@ -178,16 +178,16 @@ private fun TopBar(
 @Composable
 private fun Content(
     friends: LazyPagingItems<User>,
-    paddingValues: PaddingValues,
-    onEmptyAccessToken: () -> Unit,
-    onProfileViewButtonClick: (Long) -> Unit,
+    padding: PaddingValues,
     pullRefreshState: PullRefreshState,
     isRefreshing: Boolean,
+    onFriendClick: (Long) -> Unit,
+    onEmptyAccessToken: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
+            .padding(padding)
             .pullRefresh(pullRefreshState)
     ) {
         LazyVerticalGrid(
@@ -196,7 +196,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = friends.itemCount) { Friend(friends, it, onProfileViewButtonClick) }
+            items(count = friends.itemCount) { Friend(friends, it, onFriendClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }
@@ -216,13 +216,13 @@ private fun Content(
 private fun Friend(
     friends: LazyPagingItems<User>,
     index: Int,
-    onProfileViewButtonClick: (Long) -> Unit
+    onFriendClick: (Long) -> Unit
 ) {
-    val user = friends[index]
-    if (user != null) {
-        UserCard(
-            user = user,
-            onCardClick = onProfileViewButtonClick
+    val friend = friends[index]
+    if (friend != null) {
+        FriendCard(
+            user = friend,
+            onCardClick = { onFriendClick(friend.id) }
         )
     }
 }

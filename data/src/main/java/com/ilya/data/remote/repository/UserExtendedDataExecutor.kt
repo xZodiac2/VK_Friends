@@ -13,10 +13,10 @@ internal class UserExtendedDataExecutor @Inject constructor(
     retrofit: Retrofit
 ) : VkApiExecutor<UserExtendedResponseData> {
 
-    private val executeVkApi = retrofit.create<UserDataExecuteVkApi>()
+    private val api = retrofit.create<UserDataExecuteVkApi>()
 
     override suspend fun execute(accessToken: String, code: String): UserExtendedResponseData {
-        return withContext(Dispatchers.IO) { executeVkApi.execute(accessToken, code) }.response
+        return withContext(Dispatchers.IO) { api.execute(accessToken, code) }.response
     }
 
 }

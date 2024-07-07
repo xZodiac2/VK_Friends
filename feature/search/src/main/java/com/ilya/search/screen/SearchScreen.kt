@@ -110,8 +110,8 @@ fun SearchScreen(
         Content(
             users = users,
             onEmptyAccessToken = onEmptyAccessToken,
-            onCardClick = openProfileRequest,
-            paddingValues = padding,
+            onUserClick = openProfileRequest,
+            padding = padding,
             isRefreshing = isRefreshing,
             pullRefreshState = pullRefreshState
         )
@@ -130,7 +130,7 @@ fun SearchScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         viewModel.handleEvent(SearchScreenEvent.Start)
     }
 
@@ -183,15 +183,15 @@ private fun TopBar(
 private fun Content(
     users: LazyPagingItems<User>,
     onEmptyAccessToken: () -> Unit,
-    onCardClick: (userId: Long, isPrivate: Boolean) -> Unit,
-    paddingValues: PaddingValues,
+    onUserClick: (userId: Long, isPrivate: Boolean) -> Unit,
+    padding: PaddingValues,
     isRefreshing: Boolean,
     pullRefreshState: PullRefreshState
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
+            .padding(padding)
             .pullRefresh(pullRefreshState)
     ) {
         LazyVerticalGrid(
@@ -200,7 +200,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = users.itemCount) { User(users, it, onCardClick) }
+            items(count = users.itemCount) { User(users, it, onUserClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyUsers(users) }
@@ -220,12 +220,12 @@ private fun Content(
 private fun User(
     users: LazyPagingItems<User>,
     index: Int,
-    onCardClick: (userId: Long, isPrivate: Boolean) -> Unit,
+    onUserClick: (userId: Long, isPrivate: Boolean) -> Unit,
 ) {
     val user = users[index]
     if (user != null) {
         UserCard(
-            onCardClick = { onCardClick(user.id, user.isClosed) },
+            onCardClick = { onUserClick(user.id, user.isClosed) },
             user = user
         )
     }

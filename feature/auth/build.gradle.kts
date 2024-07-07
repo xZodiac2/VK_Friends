@@ -57,6 +57,7 @@ android {
 dependencies {
     // Project
     implementation(project(":core"))
+    implementation(project(":theme"))
 
     // OneTap
     implementation("com.vk.id:onetap-compose:1.0.0")

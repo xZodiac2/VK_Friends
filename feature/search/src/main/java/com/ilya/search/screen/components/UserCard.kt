@@ -26,13 +26,13 @@ import com.ilya.theme.LocalTypography
 @Composable
 internal fun UserCard(
     modifier: Modifier = Modifier,
-    onCardClick: (Long) -> Unit,
+    onCardClick: () -> Unit,
     user: User
 ) {
     Card(
         modifier = Modifier
             .aspectRatio(1f)
-            .clickable { onCardClick(user.id) },
+            .clickable { onCardClick() },
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
     ) {

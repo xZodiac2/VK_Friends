@@ -5,7 +5,7 @@ import com.ilya.data.remote.retrofit.api.dto.LikesResponse
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-interface LikesVkApi {
+internal interface LikesVkApi {
 
     @POST("likes.add?v=$CURRENT_API_VERSION")
     suspend fun addLike(

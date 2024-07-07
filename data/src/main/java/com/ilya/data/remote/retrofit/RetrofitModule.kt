@@ -26,16 +26,14 @@ internal object RetrofitModule {
             .addInterceptor(loggingInterceptor)
             .build()
 
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(
-                MoshiConverterFactory.create(
-                    Moshi.Builder()
-                        .add(KotlinJsonAdapterFactory())
-                        .build()
-                )
-            )
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
         return retrofit

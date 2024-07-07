@@ -14,7 +14,7 @@ internal class UsersVkRepository @Inject constructor(
     retrofit: Retrofit
 ) : UsersRemoteRepository {
 
-    private val usersVkApi = retrofit.create<UsersVkApi>()
+    private val api = retrofit.create<UsersVkApi>()
 
     override suspend fun getFriends(
         accessToken: String,
@@ -23,7 +23,7 @@ internal class UsersVkRepository @Inject constructor(
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            usersVkApi.getFriends(
+            api.getFriends(
                 accessToken = accessToken,
                 fields = fields,
                 count = count,
@@ -40,7 +40,7 @@ internal class UsersVkRepository @Inject constructor(
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            usersVkApi.searchUsers(
+            api.searchUsers(
                 accessToken = accessToken,
                 query = query,
                 fields = fields,
@@ -57,7 +57,7 @@ internal class UsersVkRepository @Inject constructor(
         fields: List<String>
     ): List<UserDto> {
         return withContext(Dispatchers.IO) {
-            usersVkApi.getSuggestions(
+            api.getSuggestions(
                 accessToken = accessToken,
                 fields = fields,
                 count = count,

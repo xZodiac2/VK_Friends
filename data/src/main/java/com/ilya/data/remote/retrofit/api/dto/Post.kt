@@ -71,16 +71,3 @@ data class SizeDto(
     @Json(name = "width") val width: Int = 0,
     @Json(name = "url") val url: String = ""
 )
-
-data class PostOwnerResponse(
-    @Json(name = "response") val response: PostOwnerDto
-)
-
-data class PostOwnerDto(
-    @Json(name = "post_id") val postId: Long,
-    @Json(name = "user") val user: UserDto?,
-    @Json(name = "group") val group: GroupDto?,
-    @Json(name = "posted_by_group") val postedByGroup: Boolean
-)
-
-

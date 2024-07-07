@@ -9,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.enums.toggled
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.profileViewDomain.models.Audio
@@ -148,16 +149,18 @@ internal class ProfileScreenViewModel @Inject constructor(
             return
         }
 
-        val toggleResult = toggleLike(post.id)
-        toggleResult.onFailure {
+        toggleLike(post.id).onFailure {
             showSnackbar(R.string.error_cant_like)
             return
         }
 
         val likesExceptionHandler = CoroutineExceptionHandler { _, throwable ->
             logThrowable(throwable)
-            showSnackbar(R.string.error_cant_like)
             toggleLike(post.id)
+            when (throwable) {
+                is IOException -> showSnackbar(R.string.error_no_internet)
+                else -> showSnackbar(R.string.error_cant_like)
+            }
         }
 
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
@@ -176,13 +179,9 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun toggleLike(postId: Long): Result<Unit> {
-        val likes =
-            _likesState.value.likes[postId] ?: return Result.failure(IllegalArgumentException())
-
-        val newLikes = likes.toggled()
         val likesMap = _likesState.value.likes.toMutableMap()
-        likesMap[postId] = newLikes
-
+        val likes = likesMap[postId] ?: return Result.failure(IllegalArgumentException())
+        likesMap[postId] = likes.toggled()
         _likesState.value = PostsLikesState(likesMap)
         return Result.success(Unit)
     }
@@ -204,15 +203,13 @@ internal class ProfileScreenViewModel @Inject constructor(
             }
         }
 
+        val accessToken = accessTokenManager.accessToken ?: run {
+            _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO + friendRequestExceptionHandler) {
-            val accessToken = accessTokenManager.accessToken
-
-            if (accessToken == null) {
-                _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
-                return@launch
-            }
-
-            val newFriendStatus = resolveFriendRequestUseCase(
+            resolveFriendRequestUseCase(
                 ResolveFriendRequestUseCase.InvokeData(
                     accessToken = accessToken.token,
                     user = user
@@ -221,9 +218,7 @@ internal class ProfileScreenViewModel @Inject constructor(
             val state = _screenState.value as? ProfileScreenState.Success ?: return@launch
 
             _screenState.value = state.copy(
-                user = state.user.copy(
-                    friendStatus = newFriendStatus
-                )
+                user = state.user.copy(friendStatus = state.user.friendStatus.toggled())
             )
         }
     }
@@ -242,14 +237,12 @@ internal class ProfileScreenViewModel @Inject constructor(
             }
         }
 
+        val accessToken = accessTokenManager.accessToken ?: run {
+            _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO + getDataExceptionHandler) {
-            val accessToken = accessTokenManager.accessToken
-
-            if (accessToken == null) {
-                _screenState.value = ProfileScreenState.Error(ErrorType.NoAccessToken)
-                return@launch
-            }
-
             val userData = getUserDataUseCase(
                 GetUserDataUseCase.InvokeData(
                     accessToken = accessToken.token,

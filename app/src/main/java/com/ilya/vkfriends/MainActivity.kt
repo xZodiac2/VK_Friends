@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
                 enterTransition = ScreenTransition.AuthScreen.transition.enterTransition,
                 exitTransition = ScreenTransition.AuthScreen.transition.exitTransition
             ) {
-                AuthorizationScreen(onAuthorize = {
+                AuthorizationScreen(onAuthorized = {
                     navController.navigate(Destination.FriendsScreen) {
                         popUpTo(Destination.AuthScreen) {
                             inclusive = true
@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     },
-                    profileOpenRequest = { userId ->
+                    openProfileRequest = { userId ->
                         navController.navigate(Destination.ProfileScreen(userId, false))
                     },
                     onExitConfirm = ::finish

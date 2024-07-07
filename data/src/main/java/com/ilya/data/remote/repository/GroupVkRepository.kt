@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import javax.inject.Inject
 
-class GroupVkRepository @Inject constructor(
+internal class GroupVkRepository @Inject constructor(
     retrofit: Retrofit
 ) : GroupsRemoteRepository {
 

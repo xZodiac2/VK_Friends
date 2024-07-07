@@ -12,14 +12,14 @@ internal class FriendsManageVkRepository @Inject constructor(
     retrofit: Retrofit
 ) : FriendsManageRemoteRepository {
 
-    private val friendsManageVkApi = retrofit.create<FriendsManageVkApi>()
+    private val api = retrofit.create<FriendsManageVkApi>()
 
     override suspend fun addFriend(accessToken: String, userId: Long) {
-        withContext(Dispatchers.IO) { friendsManageVkApi.addFriend(accessToken, userId) }
+        withContext(Dispatchers.IO) { api.addFriend(accessToken, userId) }
     }
 
     override suspend fun deleteFriend(accessToken: String, userId: Long) {
-        withContext(Dispatchers.IO) { friendsManageVkApi.deleteFriend(accessToken, userId) }
+        withContext(Dispatchers.IO) { api.deleteFriend(accessToken, userId) }
     }
 
 }

@@ -112,7 +112,7 @@ internal fun AllPhotosPreview(
                     it.likes?.let { likes ->
                         it.id to likes
                     }
-                }.filter { it.second !in likesState.likes.values }.toMap()
+                }.filter { it.first !in likesState.likes.keys }.toMap()
                 viewModel.handleEvent(PhotosPreviewEvent.PhotosAdded(likesList))
             }
         }

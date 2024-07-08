@@ -38,7 +38,7 @@ import com.ilya.profileViewDomain.models.User
 import com.ilya.profileViewDomain.models.Video
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
-import com.ilya.profileview.profileScreen.AudioIndicatorState
+import com.ilya.profileview.profileScreen.AudioLoadIndicatorState
 import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.profileview.profileScreen.PostsLikesState
 import com.ilya.profileview.profileScreen.ProfileScreenEvent
@@ -78,7 +78,7 @@ fun ProfileScreen(
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val posts = viewModel.postsFlow.collectAsLazyPagingItems()
-    val audioIndicatorState by viewModel.audioIndicatorState.collectAsState()
+    val audioLoadingState by viewModel.audioIndicatorState.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -132,7 +132,7 @@ fun ProfileScreen(
                         onAudioClick = { viewModel.handleEvent(ProfileScreenEvent.AudioClick(it)) },
                         onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) }
                     )
-                    if (audioIndicatorState == AudioIndicatorState.Loading) {
+                    if (audioLoadingState == AudioLoadIndicatorState.Loading) {
                         LinearProgressIndicator(
                             modifier = Modifier
                                 .fillMaxWidth()

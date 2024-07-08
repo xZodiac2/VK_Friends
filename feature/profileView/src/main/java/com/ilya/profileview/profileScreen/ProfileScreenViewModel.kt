@@ -77,9 +77,9 @@ internal class ProfileScreenViewModel @Inject constructor(
         MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
     val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
 
-    private val _audioIndicatorState =
-        MutableStateFlow<AudioIndicatorState>(AudioIndicatorState.Idle)
-    val audioIndicatorState = _audioIndicatorState.asStateFlow()
+    private val _audioLoadingState =
+        MutableStateFlow<AudioLoadIndicatorState>(AudioLoadIndicatorState.Idle)
+    val audioIndicatorState = _audioLoadingState.asStateFlow()
 
     fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
@@ -104,10 +104,11 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onAudioClick(audio: Audio) {
         viewModelScope.launch(Dispatchers.IO) {
-            _audioIndicatorState.value = AudioIndicatorState.Loading
+            _audioLoadingState.value = AudioLoadIndicatorState.Loading
 
             if (audio.url.isEmpty()) {
                 showSnackbar(R.string.error_cant_play_audio)
+                _audioLoadingState.value = AudioLoadIndicatorState.Idle
                 return@launch
             }
 
@@ -120,7 +121,7 @@ internal class ProfileScreenViewModel @Inject constructor(
                 }
             }
 
-            _audioIndicatorState.value = AudioIndicatorState.Idle
+            _audioLoadingState.value = AudioLoadIndicatorState.Idle
         }
     }
 
@@ -130,6 +131,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         } else {
             mediaPlayer.start()
         }
+        _currentLoopingAudioState.value = _currentLoopingAudioState.value.first to mediaPlayer.isPlaying
     }
 
     private fun playNewAudio(audio: Audio): Result<Unit> {
@@ -207,6 +209,7 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onFriendRequest(user: User) {
         val friendRequestExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+            toggleFriend()
             logThrowable(throwable)
             when (throwable) {
                 is IOException -> showSnackbar(R.string.error_no_internet)
@@ -219,6 +222,11 @@ internal class ProfileScreenViewModel @Inject constructor(
             return
         }
 
+        toggleFriend().onFailure {
+            showSnackbar(R.string.operation_not_completed_try_later)
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO + friendRequestExceptionHandler) {
             resolveFriendRequestUseCase(
                 ResolveFriendRequestUseCase.InvokeData(
@@ -226,12 +234,19 @@ internal class ProfileScreenViewModel @Inject constructor(
                     user = user
                 )
             )
-            val state = _screenState.value as? ProfileScreenState.Success ?: return@launch
 
-            _screenState.value = state.copy(
-                user = state.user.copy(friendStatus = state.user.friendStatus.toggled())
-            )
+
         }
+    }
+
+    private fun toggleFriend(): Result<Unit> {
+        val state = _screenState.value as? ProfileScreenState.Success
+            ?: return Result.failure(IllegalStateException())
+
+        _screenState.value = state.copy(
+            user = state.user.copy(friendStatus = state.user.friendStatus.toggled())
+        )
+        return Result.success(Unit)
     }
 
     private fun onRetry() {

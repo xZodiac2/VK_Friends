@@ -110,7 +110,7 @@ internal fun ProfileHeader(user: User, friendRequest: (User) -> Unit) {
                         tint = LocalColorScheme.current.iconTintColor
                     )
                     Text(
-                        text = stringResource(id = R.string.details),
+                        text = stringResource(R.string.details),
                         color = LocalColorScheme.current.primaryTextColor,
                         fontWeight = FontWeight.W400,
                     )
@@ -157,7 +157,7 @@ internal fun ProfileHeader(user: User, friendRequest: (User) -> Unit) {
             onDismissRequest = { showSheet = false },
             containerColor = LocalColorScheme.current.cardContainerColor,
             dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.iconTintColor) }
-        ) { SheetContent(user = user) }
+        ) { SheetContent(user) }
     }
 }
 

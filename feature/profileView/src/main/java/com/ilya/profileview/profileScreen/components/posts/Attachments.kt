@@ -58,13 +58,13 @@ internal fun Attachments(
             modifier = Modifier
                 .background(Color.Black)
                 .fillMaxWidth()
-                .padding(2.dp),
+                .padding(if (photosAndVideos.size == 1) 0.dp else 2.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             val columns = when {
                 photosAndVideos.size < 4 -> 2
                 photosAndVideos.size in 4..6 -> 4
-                photosAndVideos.size in 6..10 -> 6
+                photosAndVideos.size in 7..10 -> 6
                 else -> 8
             }
 
@@ -180,6 +180,8 @@ private fun Audio(
     isPlaying: Boolean,
     onAudioClick: () -> Unit
 ) {
+    val color = if (audio.url.isBlank()) Color.Gray else LocalColorScheme.current.primaryTextColor
+
     Row(
         modifier = Modifier
             .padding(horizontal = 20.dp)
@@ -205,7 +207,7 @@ private fun Audio(
                     modifier = Modifier.fillMaxSize(0.5f),
                     painter = painterResource(R.drawable.music),
                     contentDescription = "music",
-                    tint = LocalColorScheme.current.primaryTextColor
+                    tint = color
                 )
             }
             Column(
@@ -216,14 +218,14 @@ private fun Audio(
                     modifier = Modifier.fillMaxWidth(0.7f),
                     text = audio.title,
                     fontSize = LocalTypography.current.average,
-                    color = LocalColorScheme.current.primaryTextColor,
+                    color = color,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(0.7f),
                     text = audio.artist,
-                    color = LocalColorScheme.current.secondaryTextColor,
+                    color = color,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -249,7 +251,7 @@ private fun Audio(
                         .fillMaxSize(0.5f)
                         .align(Alignment.CenterVertically),
                     painter = painterResource(iconId),
-                    tint = LocalColorScheme.current.primaryTextColor,
+                    tint = color,
                     contentDescription = "playMusic"
                 )
             }

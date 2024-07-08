@@ -34,7 +34,6 @@
     <string name="status_waiting_for_response">Request sent</string>
     <string name="status_friend_request">Accept request</string>
     <string name="status_friends">Delete friend</string>
-    <string name="operation_not_completed">Operation failed. Check Internet connection</string>
     <string name="operation_not_completed_try_later">Operation failed. Try again later</string>
     <string name="profile_screen_name">Profile %s</string>
     <string name="photo_number">%d of %d</string>

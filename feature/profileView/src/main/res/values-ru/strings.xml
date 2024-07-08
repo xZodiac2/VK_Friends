@@ -35,7 +35,6 @@
     <string name="status_waiting_for_response">Зявка отправлена</string>
     <string name="status_friend_request">Принять заявку</string>
     <string name="status_friends">Удалить друга</string>
-    <string name="operation_not_completed">Операция не удалась. Проверьте подключение к интернету</string>
     <string name="operation_not_completed_try_later">Операция не удалась. Повторите попытку позже</string>
     <string name="profile_screen_name">Профиль %s</string>
     <string name="photo_number">%d из %d</string>

@@ -16,7 +16,7 @@ internal class PostsLikesState(
     val likes: Map<Long, Likes>
 )
 
-internal sealed interface AudioIndicatorState {
-    data object Idle : AudioIndicatorState
-    data object Loading : AudioIndicatorState
+internal sealed interface AudioLoadIndicatorState {
+    data object Idle : AudioLoadIndicatorState
+    data object Loading : AudioLoadIndicatorState
 }

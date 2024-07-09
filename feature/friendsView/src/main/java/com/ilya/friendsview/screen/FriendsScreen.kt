@@ -51,13 +51,13 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ilya.core.basicComposables.alertDialog.AlertDialogStateHandler
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.data.paging.User
 import com.ilya.friendsview.FriendsScreenViewModel
 import com.ilya.friendsview.R
 import com.ilya.friendsview.screen.components.FriendCard
 import com.ilya.friendsview.screen.components.OnEmptyFriends
 import com.ilya.friendsview.screen.components.ResolveAppend
 import com.ilya.friendsview.screen.components.ResolveRefresh
+import com.ilya.paging.User
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

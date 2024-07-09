@@ -32,10 +32,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.profileViewDomain.models.Attachment
-import com.ilya.profileViewDomain.models.Audio
-import com.ilya.profileViewDomain.models.Photo
-import com.ilya.profileViewDomain.models.Video
+import com.ilya.paging.Attachment
+import com.ilya.paging.Audio
+import com.ilya.paging.Photo
+import com.ilya.paging.Video
 import com.ilya.profileview.R
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography

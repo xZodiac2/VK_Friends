@@ -2,11 +2,13 @@ package com.ilya.profileview.photosScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.ilya.profileViewDomain.models.Photo
-import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
+import com.ilya.paging.Photo
+import com.ilya.paging.pagingSources.PhotosPagingSource
+import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class PhotosScreenViewModel @Inject constructor(
-    private val getPhotosPagingFlowUseCase: GetPhotosPagingFlowUseCase,
+    private val photosPagingSourceFactory: PhotosPagingSource.Factory,
 ) : ViewModel() {
 
     private var userId = MutableStateFlow(DEFAULT_USER_ID)
@@ -27,17 +29,25 @@ internal class PhotosScreenViewModel @Inject constructor(
         if (id == DEFAULT_USER_ID) {
             return@flatMapLatest flow { emit(PagingData.empty()) }
         }
-        getPhotosPagingFlowUseCase(
-            GetPhotosPagingFlowUseCase.InvokeData(
-                pagingConfig = PagingConfig(
-                    pageSize = PAGE_SIZE,
-                    initialLoadSize = INITIAL_LOAD_SIZE
-                ),
-                userId = id,
-                isPreview = false
-            )
-        )
+        newPager(id).flow
     }.cachedIn(viewModelScope)
+
+    private fun newPager(userId: Long): Pager<Int, Photo> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PhotosPreviewViewModel.PAGE_SIZE,
+                initialLoadSize = PhotosPreviewViewModel.PAGE_SIZE,
+            ),
+            pagingSourceFactory = {
+                val initData = PhotosPagingSource.InitData(
+                    userId = userId,
+                    isPreview = false
+                )
+
+                photosPagingSourceFactory.newInstance(initData)
+            }
+        )
+    }
 
     fun handleEvent(event: PhotosScreenEvent) {
         when (event) {

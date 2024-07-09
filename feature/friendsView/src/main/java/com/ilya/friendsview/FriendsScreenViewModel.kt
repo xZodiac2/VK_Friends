@@ -5,19 +5,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import androidx.paging.map
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.data.mappers.toUser
-import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.FriendsPagingSource
 import com.ilya.friendsview.screen.FriendsScreenEvent
+import com.ilya.paging.User
+import com.ilya.paging.mappers.toUser
+import com.ilya.paging.pagingSources.FriendsPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,9 +27,7 @@ internal class FriendsScreenViewModel @Inject constructor(
     val pagingFlow = Pager(
         config = PagingConfig(pageSize = PAGE_SIZE),
         pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
-    ).flow
-        .map { it.map { userDto -> userDto.toUser() } }
-        .cachedIn(viewModelScope)
+    ).flow.cachedIn(viewModelScope)
 
     private val _alertDialogState = MutableStateFlow<AlertDialogState>(AlertDialogState.Consumed)
     val alertDialogState = _alertDialogState.asStateFlow()

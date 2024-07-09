@@ -1,7 +1,7 @@
 package com.ilya.profileview.photosPreview.states
 
 import androidx.compose.runtime.Stable
-import com.ilya.profileViewDomain.models.Likes
+import com.ilya.paging.Likes
 
 @Stable
 internal class PhotosLikesState(

@@ -72,7 +72,7 @@ internal fun PrivateProfile(
                     .fillMaxHeight()
             )
 
-            is ProfileScreenState.Success -> {
+            is ProfileScreenState.ViewData -> {
                 Column(
                     modifier = Modifier.padding(padding),
                     verticalArrangement = Arrangement.spacedBy(12.dp)

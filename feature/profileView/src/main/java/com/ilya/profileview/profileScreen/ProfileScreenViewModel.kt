@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -12,12 +13,12 @@ import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.enums.toggled
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
-import com.ilya.profileViewDomain.models.Audio
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.User
-import com.ilya.profileViewDomain.models.toggled
-import com.ilya.profileViewDomain.useCase.GetPostsPagingFlowUseCase
+import com.ilya.paging.Audio
+import com.ilya.paging.Likes
+import com.ilya.paging.Post
+import com.ilya.paging.pagingSources.PostsPagingSource
+import com.ilya.paging.toggled
+import com.ilya.profileViewDomain.User
 import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
@@ -40,7 +41,7 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager,
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
-    private val getPostsPagingFlowUseCase: GetPostsPagingFlowUseCase,
+    private val postsPagingSourceFactory: PostsPagingSource.Factory,
     private val resolveLikeUseCase: ResolveLikeUseCase,
     private val mediaPlayer: MediaPlayer
 ) : ViewModel() {
@@ -52,16 +53,18 @@ internal class ProfileScreenViewModel @Inject constructor(
         if (id == DEFAULT_USER_ID) {
             return@flatMapLatest flow { emit(PagingData.empty()) }
         }
-        getPostsPagingFlowUseCase(
-            GetPostsPagingFlowUseCase.InvokeData(
-                config = PagingConfig(
-                    pageSize = PAGE_SIZE,
-                    initialLoadSize = INITIAL_LOAD_SIZE
-                ),
-                userId = id
-            )
-        )
+        newPager(id).flow
     }.cachedIn(viewModelScope)
+
+    private fun newPager(userId: Long): Pager<Int, Post> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = INITIAL_LOAD_SIZE
+            ),
+            pagingSourceFactory = { postsPagingSourceFactory.newInstance(userId) }
+        )
+    }
 
     private val _screenState = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
     val screenState = _screenState.asStateFlow()
@@ -234,13 +237,11 @@ internal class ProfileScreenViewModel @Inject constructor(
                     user = user
                 )
             )
-
-
         }
     }
 
     private fun toggleFriend(): Result<Unit> {
-        val state = _screenState.value as? ProfileScreenState.Success
+        val state = _screenState.value as? ProfileScreenState.ViewData
             ?: return Result.failure(IllegalStateException())
 
         _screenState.value = state.copy(
@@ -255,6 +256,8 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onStart() {
+        if (_screenState.value is ProfileScreenState.ViewData) return
+
         val getDataExceptionHandler = CoroutineExceptionHandler { _, throwable ->
             logThrowable(throwable)
             _screenState.value = when (throwable) {
@@ -276,7 +279,7 @@ internal class ProfileScreenViewModel @Inject constructor(
                 )
             )
 
-            _screenState.value = ProfileScreenState.Success(
+            _screenState.value = ProfileScreenState.ViewData(
                 user = when {
                     userId.value == accessToken.userID -> userData.copy(isAccountOwner = true)
                     else -> userData

@@ -56,7 +56,7 @@ android {
 
 dependencies {
     // Project
-    implementation(project(":data"))
+    implementation(project(":paging"))
     implementation(project(":core"))
     implementation(project(":theme"))
 

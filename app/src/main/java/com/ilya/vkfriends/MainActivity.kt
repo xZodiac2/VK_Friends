@@ -238,7 +238,14 @@ class MainActivity : ComponentActivity() {
                     userId = route.userId,
                     targetPhotoIndex = route.targetPhotoIndex,
                     photoIds = route.photoIds.fromIdsString(),
-                    onBackClick = navController::popBackStack
+                    onBackClick = navController::popBackStack,
+                    navigateToAuth = {
+                        navController.navigate(Destination.AuthScreen) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 )
 
                 LaunchedEffect(Unit) {
@@ -256,6 +263,13 @@ class MainActivity : ComponentActivity() {
                     onBackClick = navController::popBackStack,
                     onPhotoClick = { userId, photoIndex ->
                         navController.navigate(Destination.PhotosPreview(userId, photoIndex))
+                    },
+                    onEmptyAccessToken = {
+                        navController.navigate(Destination.AuthScreen) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }

@@ -49,14 +49,11 @@ dependencies {
     // Project
     implementation(project(":data"))
     implementation(project(":core"))
+    implementation(project(":paging"))
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.46")
     kapt("com.google.dagger:hilt-android-compiler:2.46")
-
-    // Paging
-    implementation("androidx.paging:paging-runtime:3.2.1")
-    implementation("androidx.paging:paging-compose:3.3.0-alpha05")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")

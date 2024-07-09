@@ -1,9 +1,9 @@
 package com.ilya.profileview.profileScreen
 
-import com.ilya.profileViewDomain.models.Audio
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.User
+import com.ilya.paging.Audio
+import com.ilya.paging.Likes
+import com.ilya.paging.Post
+import com.ilya.profileViewDomain.User
 
 
 internal sealed interface ProfileScreenEvent {

@@ -3,6 +3,7 @@ package com.ilya.profileview.photosPreview
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -10,19 +11,22 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Photo
-import com.ilya.profileViewDomain.models.toggled
-import com.ilya.profileViewDomain.useCase.GetPhotosPagingFlowUseCase
+import com.ilya.paging.Likes
+import com.ilya.paging.PaginationError
+import com.ilya.paging.Photo
+import com.ilya.paging.pagingSources.PhotosPagingSource
+import com.ilya.paging.toggled
 import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileview.R
 import com.ilya.profileview.photosPreview.states.PhotosLikesState
+import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState
 import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -35,28 +39,19 @@ import javax.inject.Inject
 internal class PhotosPreviewViewModel @Inject constructor(
     private val resolveLikeUseCase: ResolveLikeUseCase,
     private val accessTokenManager: AccessTokenManager,
-    private val getPhotosPagingFlowUseCase: GetPhotosPagingFlowUseCase,
+    private val photosPagingSourceFactory: PhotosPagingSource.Factory,
     private val getPhotosUseCase: GetPhotosUseCase
 ) : ViewModel() {
 
     private val idsFlow = MutableStateFlow<IdsState?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val photosFlow = idsFlow
-        .flatMapLatest { ids ->
-            ids ?: return@flatMapLatest flow { emit(PagingData.empty()) }
-            getPhotosPagingFlowUseCase(
-                GetPhotosPagingFlowUseCase.InvokeData(
-                    pagingConfig = PagingConfig(
-                        pageSize = PAGE_SIZE,
-                        initialLoadSize = INITIAL_LOAD_SIZE,
-                    ),
-                    userId = ids.userId,
-                    isPreview = true,
-                    targetPhotoIndex = ids.targetPhotoIndex
-                )
-            )
-        }.cachedIn(viewModelScope)
+    val photosFlow: Flow<PagingData<Photo>> = idsFlow
+        .flatMapLatest {
+            it ?: return@flatMapLatest flow { emit(PagingData.empty()) }
+            newPager(it).flow
+        }
+        .cachedIn(viewModelScope)
 
     private val _photosState =
         MutableStateFlow<RestrainedPhotosState>(RestrainedPhotosState.Loading)
@@ -68,6 +63,27 @@ internal class PhotosPreviewViewModel @Inject constructor(
     private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
     val snackbarState = _snackbarState.asStateFlow()
 
+    private val _navState = MutableStateFlow<PhotosPreviewNavState>(PhotosPreviewNavState.This)
+    val navState = _navState.asStateFlow()
+
+    private fun newPager(ids: IdsState): Pager<Int, Photo> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
+            ),
+            initialKey = (ids.targetPhotoIndex - (ids.targetPhotoIndex % PAGE_SIZE)) / PAGE_SIZE,
+            pagingSourceFactory = {
+                val initData = PhotosPagingSource.InitData(
+                    userId = ids.userId,
+                    isPreview = true
+                )
+
+                photosPagingSourceFactory.newInstance(initData)
+            }
+        )
+    }
+
     fun handleEvent(event: PhotosPreviewEvent) {
         when (event) {
             is PhotosPreviewEvent.Start -> onStart(event.userId, event.targetPhotoIndex)
@@ -75,6 +91,17 @@ internal class PhotosPreviewViewModel @Inject constructor(
             is PhotosPreviewEvent.RestrainedStart -> onRestrainedStart(event.userId, event.photoIds)
             is PhotosPreviewEvent.Like -> onLike(event.photo)
             is PhotosPreviewEvent.PhotosAdded -> onPhotosAdded(event.likes)
+            is PhotosPreviewEvent.Error -> onError(event.error)
+        }
+    }
+
+    private fun onError(error: Throwable?) {
+        error ?: return
+
+        when (error) {
+            is PaginationError.NoInternet -> showSnackbar(R.string.error_no_internet)
+            is PaginationError.NoAccessToken -> _navState.value = PhotosPreviewNavState.AuthScreen
+            else -> showSnackbar(R.string.error_unknown)
         }
     }
 
@@ -88,7 +115,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
         }
 
         val accessToken = accessTokenManager.accessToken ?: run {
-            showSnackbar(R.string.error_try_later)
+            _navState.value = PhotosPreviewNavState.AuthScreen
             return
         }
 
@@ -176,7 +203,6 @@ internal class PhotosPreviewViewModel @Inject constructor(
 
     companion object {
         const val PAGE_SIZE = 20
-        private const val INITIAL_LOAD_SIZE = 20
     }
 
 }

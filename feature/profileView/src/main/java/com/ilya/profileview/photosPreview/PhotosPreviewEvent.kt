@@ -1,7 +1,7 @@
 package com.ilya.profileview.photosPreview
 
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.paging.Likes
+import com.ilya.paging.Photo
 
 
 internal sealed interface PhotosPreviewEvent {
@@ -17,4 +17,5 @@ internal sealed interface PhotosPreviewEvent {
         val photoIds: Map<Long, String>
     ) : PhotosPreviewEvent
     data class Like(val photo: Photo?) : PhotosPreviewEvent
+    data class Error(val error: Throwable?) : PhotosPreviewEvent
 }

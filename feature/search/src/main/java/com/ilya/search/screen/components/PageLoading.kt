@@ -21,8 +21,8 @@ import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.isEmpty
 import com.ilya.core.basicComposables.OnError
-import com.ilya.data.paging.PaginationError
-import com.ilya.data.paging.User
+import com.ilya.paging.PaginationError
+import com.ilya.paging.User
 import com.ilya.search.R
 import com.ilya.search.screen.ErrorType
 import com.ilya.theme.LocalColorScheme

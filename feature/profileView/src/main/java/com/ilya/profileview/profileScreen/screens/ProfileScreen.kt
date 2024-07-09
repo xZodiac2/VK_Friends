@@ -32,10 +32,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.profileViewDomain.models.Audio
-import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.User
-import com.ilya.profileViewDomain.models.Video
+import com.ilya.paging.Audio
+import com.ilya.paging.Post
+import com.ilya.paging.Video
+import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
 import com.ilya.profileview.profileScreen.AudioLoadIndicatorState
@@ -63,7 +63,7 @@ fun ProfileScreen(
     onPhotoClick: (id: Long, targetPhotoIndex: Int) -> Unit,
     onOpenPhotosClick: (Long) -> Unit,
     onPostPhotoClick: (userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onVideoClick: (ownerId: Long, id: Long, accessKey: String) -> Unit
+    onVideoClick: (ownerId: Long, id: Long, accessKey: String) -> Unit,
 ) {
     val viewModel: ProfileScreenViewModel = hiltViewModel()
 
@@ -116,7 +116,7 @@ fun ProfileScreen(
                 padding = padding
             )
 
-            is ProfileScreenState.Success -> {
+            is ProfileScreenState.ViewData -> {
                 Box {
                     Content(
                         user = state.user,
@@ -130,7 +130,8 @@ fun ProfileScreen(
                         likes = likesState,
                         onPostPhotoClick = onPostPhotoClick,
                         onAudioClick = { viewModel.handleEvent(ProfileScreenEvent.AudioClick(it)) },
-                        onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) }
+                        onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) },
+                        onEmptyAccessToken = onEmptyAccessToken
                     )
                     if (audioLoadingState == AudioLoadIndicatorState.Loading) {
                         LinearProgressIndicator(
@@ -211,7 +212,8 @@ private fun Content(
     onLikeClick: (Post) -> Unit,
     onPostPhotoClick: (userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
     onAudioClick: (Audio) -> Unit,
-    onVideoClick: (Video) -> Unit
+    onVideoClick: (Video) -> Unit,
+    onEmptyAccessToken: () -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -233,8 +235,8 @@ private fun Content(
                 onVideoClick = onVideoClick
             )
         }
-        item { ResolveAppend(posts) }
-        item { ResolveRefresh(posts) }
+        item { ResolveAppend(posts, onEmptyAccessToken) }
+        item { ResolveRefresh(posts, onEmptyAccessToken) }
         item { OnEmptyPostsMessage(posts) }
     }
 }

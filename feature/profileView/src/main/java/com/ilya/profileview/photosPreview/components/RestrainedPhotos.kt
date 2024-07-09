@@ -25,20 +25,22 @@ import androidx.compose.ui.graphics.Color
 import coil.compose.SubcomposeAsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.paging.Likes
+import com.ilya.paging.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
+import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState
 import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
 import kotlinx.coroutines.flow.combine
 
 @Composable
 internal fun RestrainedPhotosPreview(
     viewModel: PhotosPreviewViewModel,
-    onBackClick: () -> Unit,
     userId: Long,
     targetPhotoIndex: Int,
-    photoIds: Map<Long, String>
+    photoIds: Map<Long, String>,
+    onBackClick: () -> Unit,
+    navigateToAuth: () -> Unit
 ) {
     val photosState = viewModel.photosState.collectAsState()
     val likesState by viewModel.likesState.collectAsState()
@@ -48,6 +50,11 @@ internal fun RestrainedPhotosPreview(
     var likes by remember { mutableStateOf<Likes?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarState by viewModel.snackbarState.collectAsState()
+    val navState by viewModel.navState.collectAsState()
+
+    if (navState == PhotosPreviewNavState.AuthScreen) {
+        navigateToAuth()
+    }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(PhotosPreviewEvent.RestrainedStart(userId, targetPhotoIndex, photoIds))

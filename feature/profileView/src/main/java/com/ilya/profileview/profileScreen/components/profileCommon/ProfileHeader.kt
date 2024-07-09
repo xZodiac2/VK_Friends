@@ -51,7 +51,7 @@ import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
 import com.ilya.core.basicComposables.BaseButton
-import com.ilya.profileViewDomain.models.User
+import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.theme.LocalColorScheme
 

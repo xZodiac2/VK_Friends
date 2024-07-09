@@ -2,8 +2,8 @@ package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.UseCase
 import com.ilya.core.appCommon.enums.FriendStatus
-import com.ilya.data.remote.FriendsManageRemoteRepository
-import com.ilya.profileViewDomain.models.User
+import com.ilya.data.FriendsManageRemoteRepository
+import com.ilya.profileViewDomain.User
 import javax.inject.Inject
 
 class ResolveFriendRequestUseCase @Inject constructor(

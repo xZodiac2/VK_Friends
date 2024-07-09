@@ -1,8 +1,8 @@
 package com.ilya.profileview.photosPreview.states
 
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.paging.Photo
 
-sealed interface RestrainedPhotosState {
+internal sealed interface RestrainedPhotosState {
     data object Loading : RestrainedPhotosState
     data class ShowPhotos(val photos: List<Photo>) : RestrainedPhotosState
 }

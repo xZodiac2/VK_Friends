@@ -12,8 +12,9 @@ import com.ilya.profileview.photosPreview.components.RestrainedPhotosPreview
 fun PhotosPreview(
     userId: Long,
     targetPhotoIndex: Int,
-    onBackClick: () -> Unit,
     photoIds: Map<Long, String> = emptyMap(),
+    onBackClick: () -> Unit,
+    navigateToAuth: () -> Unit
 ) {
     val viewModel: PhotosPreviewViewModel = hiltViewModel()
     val systemUiController = rememberSystemUiController()
@@ -31,7 +32,8 @@ fun PhotosPreview(
             onBackClick = {
                 systemUiController.isStatusBarVisible = true
                 onBackClick()
-            }
+            },
+            navigateToAuth = navigateToAuth
         )
     } else {
         RestrainedPhotosPreview(
@@ -42,7 +44,8 @@ fun PhotosPreview(
             onBackClick = {
                 systemUiController.isStatusBarVisible = true
                 onBackClick()
-            }
+            },
+            navigateToAuth = navigateToAuth
         )
     }
 

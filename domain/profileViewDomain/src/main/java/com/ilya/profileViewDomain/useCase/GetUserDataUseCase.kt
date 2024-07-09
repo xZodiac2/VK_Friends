@@ -2,11 +2,11 @@ package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.UseCase
 import com.ilya.core.appCommon.enums.NameCase
-import com.ilya.data.remote.VkApiExecutor
-import com.ilya.data.remote.retrofit.api.dto.UserExtendedResponseData
-import com.ilya.profileViewDomain.mappers.toPartner
-import com.ilya.profileViewDomain.mappers.toUser
-import com.ilya.profileViewDomain.models.User
+import com.ilya.data.VkApiExecutor
+import com.ilya.data.retrofit.api.dto.UserExtendedResponseData
+import com.ilya.profileViewDomain.toPartner
+import com.ilya.profileViewDomain.toUser
+import com.ilya.profileViewDomain.User
 import javax.inject.Inject
 
 class GetUserDataUseCase @Inject constructor(

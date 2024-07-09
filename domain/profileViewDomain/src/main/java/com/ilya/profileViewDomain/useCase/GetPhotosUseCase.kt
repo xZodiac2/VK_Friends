@@ -1,9 +1,9 @@
 package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.UseCase
-import com.ilya.data.remote.UserDataRemoteRepository
-import com.ilya.profileViewDomain.mappers.toPhoto
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.data.UserDataRemoteRepository
+import com.ilya.paging.Photo
+import com.ilya.paging.mappers.toPhoto
 import javax.inject.Inject
 
 class GetPhotosUseCase @Inject constructor(

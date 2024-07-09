@@ -5,14 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import androidx.paging.map
 import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.data.mappers.toUser
-import com.ilya.data.paging.User
-import com.ilya.data.paging.pagingSources.UsersPagingSource
-import com.ilya.data.remote.retrofit.api.dto.UserDto
+import com.ilya.paging.User
+import com.ilya.paging.mappers.toUser
+import com.ilya.paging.pagingSources.UsersPagingSource
 import com.ilya.search.screen.SearchScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +35,6 @@ internal class SearchViewModel @Inject constructor(
     val pagingFlow = searchValueSharedFlow
         .map(::newPager)
         .flatMapLatest { it.flow }
-        .map { data -> data.map { userDto -> userDto.toUser() } }
         .cachedIn(viewModelScope)
 
     private val _snackbarStateFlow = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
@@ -53,7 +50,7 @@ internal class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun newPager(query: String): Pager<Int, UserDto> {
+    private fun newPager(query: String): Pager<Int, User> {
         return Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,

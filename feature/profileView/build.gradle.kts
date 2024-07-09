@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":theme"))
     implementation(project(":domain:profileViewDomain"))
+    implementation(project(":paging"))
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.46")

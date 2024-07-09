@@ -2,12 +2,12 @@ package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.UseCase
 import com.ilya.core.appCommon.enums.ObjectType
-import com.ilya.data.remote.LikesRemoteRepository
-import com.ilya.profileViewDomain.models.Likeable
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Photo
-import com.ilya.profileViewDomain.models.Post
-import com.ilya.profileViewDomain.models.VideoExtended
+import com.ilya.data.LikesRemoteRepository
+import com.ilya.paging.Likeable
+import com.ilya.paging.Likes
+import com.ilya.paging.Photo
+import com.ilya.paging.Post
+import com.ilya.paging.VideoExtended
 import javax.inject.Inject
 
 class ResolveLikeUseCase @Inject constructor(

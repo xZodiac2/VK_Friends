@@ -38,8 +38,10 @@ import coil.compose.AsyncImage
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.OnError
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.paging.PaginationError
+import com.ilya.paging.Photo
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -48,7 +50,8 @@ import com.ilya.theme.LocalTypography
 fun PhotosScreen(
     userId: Long,
     onBackClick: () -> Unit,
-    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit
+    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit,
+    onEmptyAccessToken: () -> Unit
 ) {
     val viewModel: PhotosScreenViewModel = hiltViewModel()
 
@@ -75,7 +78,7 @@ fun PhotosScreen(
         },
         containerColor = LocalColorScheme.current.cardContainerColor
     ) { padding ->
-        Content(padding, photos, onPhotoClick)
+        Content(padding, photos, onPhotoClick, onEmptyAccessToken)
     }
 
     LaunchedEffect(Unit) {
@@ -88,7 +91,8 @@ fun PhotosScreen(
 private fun Content(
     padding: PaddingValues,
     photos: LazyPagingItems<Photo>,
-    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit
+    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit,
+    onEmptyAccessToken: () -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(padding),
@@ -98,24 +102,21 @@ private fun Content(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         items(count = photos.itemCount) { Photo(photos, it, onPhotoClick) }
-        item(span = { GridItemSpan(3) }) { ResolveRefresh(photos) }
-        item(span = { GridItemSpan(3) }) { ResolveAppend(photos) }
+        item(span = { GridItemSpan(3) }) { ResolveRefresh(photos, onEmptyAccessToken) }
+        item(span = { GridItemSpan(3) }) { ResolveAppend(photos, onEmptyAccessToken) }
         item(span = { GridItemSpan(3) }) { PhotosCount(photos) }
     }
 }
 
 @Composable
-fun ResolveRefresh(photos: LazyPagingItems<Photo>) {
+fun ResolveRefresh(photos: LazyPagingItems<Photo>, onEmptyAccessToken: () -> Unit) {
     when (val state = photos.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
-        is LoadState.Error -> OnError(
+        is LoadState.Error -> OnPagingError(
             modifier = Modifier.height(500.dp),
-            message = StringResource.FromId(
-                id = R.string.error_unknown,
-                formatArgs = listOf(state.error.message.toString())
-            ),
-            buttonText = StringResource.FromId(R.string.try_again),
-            onButtonClick = { photos.refresh() }
+            errorType = state.error.correspondingErrorType(),
+            onTryAgainClick = { photos.refresh() },
+            onEmptyAccessToken = onEmptyAccessToken
         )
 
         is LoadState.NotLoading -> Unit
@@ -123,20 +124,16 @@ fun ResolveRefresh(photos: LazyPagingItems<Photo>) {
 }
 
 @Composable
-private fun ResolveAppend(photos: LazyPagingItems<Photo>) {
-    when (photos.loadState.append) {
+private fun ResolveAppend(photos: LazyPagingItems<Photo>, onEmptyAccessToken: () -> Unit) {
+    when (val state = photos.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
         is LoadState.Error -> {
-            val state = photos.loadState.append as? LoadState.Error
 
-            OnError(
+            OnPagingError(
                 modifier = Modifier.height(120.dp),
-                message = StringResource.FromId(
-                    id = R.string.error_unknown,
-                    formatArgs = listOf(state?.error?.message.toString())
-                ),
-                buttonText = StringResource.FromId(R.string.try_again),
-                onButtonClick = { photos.retry() }
+                errorType = state.error.correspondingErrorType(),
+                onTryAgainClick = { photos.retry() },
+                onEmptyAccessToken = onEmptyAccessToken
             )
         }
 
@@ -148,6 +145,34 @@ private fun ResolveAppend(photos: LazyPagingItems<Photo>) {
 fun OnLoading(modifier: Modifier) {
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor)
+    }
+}
+
+@Composable
+private fun OnPagingError(
+    modifier: Modifier = Modifier,
+    errorType: ErrorType,
+    onTryAgainClick: () -> Unit,
+    onEmptyAccessToken: () -> Unit,
+) {
+    when (errorType) {
+        ErrorType.NoInternet -> OnError(
+            modifier = modifier,
+            message = StringResource.FromId(R.string.error_no_internet),
+            buttonText = StringResource.FromId(R.string.try_again),
+            onButtonClick = onTryAgainClick
+        )
+
+        ErrorType.NoAccessToken -> onEmptyAccessToken()
+        is ErrorType.Unknown -> OnError(
+            modifier = modifier,
+            message = StringResource.FromId(
+                id = R.string.error_unknown,
+                formatArgs = listOf(errorType.error.message.toString())
+            ),
+            buttonText = StringResource.FromId(id = R.string.try_again),
+            onButtonClick = onTryAgainClick
+        )
     }
 }
 
@@ -187,5 +212,13 @@ private fun Photo(
             contentDescription = "userPhoto",
             contentScale = ContentScale.Crop
         )
+    }
+}
+
+private fun Throwable.correspondingErrorType(): ErrorType {
+    return when (this) {
+        is PaginationError.NoInternet -> ErrorType.NoInternet
+        is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
+        else -> ErrorType.Unknown(this)
     }
 }

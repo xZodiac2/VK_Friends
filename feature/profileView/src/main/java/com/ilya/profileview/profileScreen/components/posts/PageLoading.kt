@@ -23,26 +23,24 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
-import com.ilya.profileViewDomain.models.Post
+import com.ilya.paging.PaginationError
+import com.ilya.paging.Post
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-internal fun ResolveRefresh(posts: LazyPagingItems<Post>) {
-    when (posts.loadState.refresh) {
+internal fun ResolveRefresh(posts: LazyPagingItems<Post>, onEmptyAccessToken: () -> Unit) {
+    when (val state = posts.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
         is LoadState.Error -> {
-            val state = posts.loadState.refresh as? LoadState.Error
-            OnError(
+            OnPagingError(
                 modifier = Modifier.height(120.dp),
-                message = StringResource.FromId(
-                    R.string.error_unknown,
-                    listOf(state?.error?.message.toString())
-                ),
-                buttonText = StringResource.FromId(R.string.try_again),
-                onButtonClick = { posts.refresh() }
+                errorType = state.error.correspondingErrorType(),
+                onTryAgainClick = { posts.refresh() },
+                onEmptyAccessToken = onEmptyAccessToken
             )
         }
 
@@ -51,24 +49,48 @@ internal fun ResolveRefresh(posts: LazyPagingItems<Post>) {
 }
 
 @Composable
-internal fun ResolveAppend(posts: LazyPagingItems<Post>) {
-    when (posts.loadState.append) {
+internal fun ResolveAppend(posts: LazyPagingItems<Post>, onEmptyAccessToken: () -> Unit) {
+    when (val state = posts.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
         is LoadState.Error -> {
-            val state = posts.loadState.append as? LoadState.Error
-            OnError(
+            OnPagingError(
                 modifier = Modifier.height(120.dp),
-                message = StringResource.FromId(
-                    R.string.error_unknown,
-                    listOf(state?.error?.message.toString())
-                ),
-                buttonText = StringResource.FromId(R.string.try_again),
-                onButtonClick = { posts.retry() }
+                errorType = state.error.correspondingErrorType(),
+                onTryAgainClick = { posts.retry() },
+                onEmptyAccessToken = onEmptyAccessToken
             )
         }
 
         else -> Unit
+    }
+}
+
+@Composable
+private fun OnPagingError(
+    modifier: Modifier = Modifier,
+    errorType: ErrorType,
+    onTryAgainClick: () -> Unit,
+    onEmptyAccessToken: () -> Unit,
+) {
+    when (errorType) {
+        ErrorType.NoInternet -> OnError(
+            modifier = modifier,
+            message = StringResource.FromId(R.string.error_no_internet),
+            buttonText = StringResource.FromId(R.string.try_again),
+            onButtonClick = onTryAgainClick
+        )
+
+        ErrorType.NoAccessToken -> onEmptyAccessToken()
+        is ErrorType.Unknown -> OnError(
+            modifier = modifier,
+            message = StringResource.FromId(
+                id = R.string.error_unknown,
+                formatArgs = listOf(errorType.error.message.toString())
+            ),
+            buttonText = StringResource.FromId(id = R.string.try_again),
+            onButtonClick = onTryAgainClick
+        )
     }
 }
 
@@ -112,3 +134,10 @@ internal fun OnEmptyPostsMessage(posts: LazyPagingItems<Post>) {
     }
 }
 
+private fun Throwable.correspondingErrorType(): ErrorType {
+    return when (this) {
+        is PaginationError.NoInternet -> ErrorType.NoInternet
+        is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
+        else -> ErrorType.Unknown(this)
+    }
+}

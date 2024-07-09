@@ -20,28 +20,36 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.Photo
+import com.ilya.paging.Likes
+import com.ilya.paging.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
+import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState
 import kotlinx.coroutines.flow.combine
 
 @Composable
 internal fun AllPhotosPreview(
     viewModel: PhotosPreviewViewModel,
-    onBackClick: () -> Unit,
     userId: Long,
     targetPhotoIndex: Int,
+    onBackClick: () -> Unit,
+    navigateToAuth: () -> Unit
 ) {
     val photos = viewModel.photosFlow.collectAsLazyPagingItems()
     val likesState by viewModel.likesState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val navState by viewModel.navState.collectAsState()
+
+    if (navState == PhotosPreviewNavState.AuthScreen) {
+        navigateToAuth()
+    }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(PhotosPreviewEvent.Start(userId, targetPhotoIndex))
@@ -109,11 +117,24 @@ internal fun AllPhotosPreview(
         LaunchedEffect(Unit) {
             snapshotFlow { photos.itemSnapshotList.items }.collect { items ->
                 val likesList = items.mapNotNull {
-                    it.likes?.let { likes ->
-                        it.id to likes
-                    }
+                    it.likes?.let { likes -> it.id to likes }
                 }.filter { it.first !in likesState.likes.keys }.toMap()
+
                 viewModel.handleEvent(PhotosPreviewEvent.PhotosAdded(likesList))
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            val snapshotFlow = combine(
+                snapshotFlow { photos.loadState.append },
+                snapshotFlow { photos.loadState.refresh }
+            ) { append, refresh -> append to refresh }
+
+            snapshotFlow.collect { (append, refresh) ->
+                if (append is LoadState.Error || refresh is LoadState.Error) {
+                    val error = (append as? LoadState.Error)?.error ?: (refresh as LoadState.Error).error
+                    viewModel.handleEvent(PhotosPreviewEvent.Error(error))
+                }
             }
         }
     }

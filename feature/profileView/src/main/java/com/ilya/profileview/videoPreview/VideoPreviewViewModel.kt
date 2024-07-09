@@ -7,9 +7,9 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
-import com.ilya.profileViewDomain.models.Likes
-import com.ilya.profileViewDomain.models.VideoExtended
-import com.ilya.profileViewDomain.models.toggled
+import com.ilya.paging.Likes
+import com.ilya.paging.VideoExtended
+import com.ilya.paging.toggled
 import com.ilya.profileViewDomain.useCase.GetVideoUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileview.R

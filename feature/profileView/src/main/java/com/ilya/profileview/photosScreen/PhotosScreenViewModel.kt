@@ -8,7 +8,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.paging.Photo
 import com.ilya.paging.pagingSources.PhotosPagingSource
-import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -35,8 +34,8 @@ internal class PhotosScreenViewModel @Inject constructor(
     private fun newPager(userId: Long): Pager<Int, Photo> {
         return Pager(
             config = PagingConfig(
-                pageSize = PhotosPreviewViewModel.PAGE_SIZE,
-                initialLoadSize = PhotosPreviewViewModel.PAGE_SIZE,
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
             ),
             pagingSourceFactory = {
                 val initData = PhotosPagingSource.InitData(
@@ -62,7 +61,6 @@ internal class PhotosScreenViewModel @Inject constructor(
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
         private const val PAGE_SIZE = 50
-        private const val INITIAL_LOAD_SIZE = 50
     }
 
 }

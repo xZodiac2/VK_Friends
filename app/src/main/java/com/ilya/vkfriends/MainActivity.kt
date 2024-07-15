@@ -2,7 +2,6 @@ package com.ilya.vkfriends
 
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.border
@@ -59,7 +58,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("token", accessTokenManager.accessToken?.token ?: "no token")
         setContent {
             VkFriendsAppTheme {
                 val navController = rememberNavController()
@@ -69,7 +67,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     bottomBar = {
                         if (bottomBarVisible) {
-                            BottomBar(navController = navController)
+                            BottomBar(navController)
                         }
                     },
                     containerColor = LocalColorScheme.current.primary

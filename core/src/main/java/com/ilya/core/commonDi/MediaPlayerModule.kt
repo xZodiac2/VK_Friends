@@ -1,7 +1,7 @@
 package com.ilya.core.commonDi
 
-import android.media.AudioAttributes
 import android.media.MediaPlayer
+import com.ilya.core.appCommon.configure
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,13 +15,7 @@ object MediaPlayerModule {
     @Singleton
     @Provides
     fun provideMediaPlayer(): MediaPlayer {
-        val player = MediaPlayer()
-        val audioAttributes = AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        player.setAudioAttributes(audioAttributes)
-        return player
+        return MediaPlayer().configure()
     }
 
 }

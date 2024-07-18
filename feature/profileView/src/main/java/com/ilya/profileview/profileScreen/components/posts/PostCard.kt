@@ -1,5 +1,9 @@
 package com.ilya.profileview.profileScreen.components.posts
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -181,30 +185,44 @@ private fun Likes(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = if (likes?.userLikes == true) {
+                    Icons.Default.Favorite
+                } else {
+                    Icons.Default.FavoriteBorder
+                },
+                tint = if (likes?.userLikes == true) {
+                    Color.Red
+                } else {
+                    LocalColorScheme.current.primaryTextColor
+                },
+                contentDescription = "postLikes"
+            )
             likes?.let {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = if (it.userLikes) {
-                        Icons.Default.Favorite
-                    } else {
-                        Icons.Default.FavoriteBorder
-                    },
-                    tint = if (it.userLikes) {
-                        Color.Red
-                    } else {
-                        LocalColorScheme.current.primaryTextColor
-                    },
-                    contentDescription = "postLikes"
-                )
-                Text(
-                    text = it.count.toString(),
-                    color = if (it.userLikes) {
-                        Color.Red
-                    } else {
-                        LocalColorScheme.current.primaryTextColor
-                    },
-                    fontSize = LocalTypography.current.tiny
-                )
+                if (likes.count > 0) {
+                    AnimatedContent(
+                        targetState = likes.count,
+                        label = "animatedLikesCount",
+                        transitionSpec = {
+                            slideInVertically {
+                                if (likes.userLikes) -it else it
+                            } togetherWith slideOutVertically {
+                                if (likes.userLikes) it else -it
+                            }
+                        }
+                    ) { targetState ->
+                        Text(
+                            text = targetState.coerceAtLeast(0).toString(),
+                            color = if (likes.userLikes) {
+                                Color.Red
+                            } else {
+                                LocalColorScheme.current.primaryTextColor
+                            },
+                            fontSize = LocalTypography.current.tiny
+                        )
+                    }
+                }
             }
         }
     }

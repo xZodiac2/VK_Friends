@@ -3,6 +3,9 @@ package com.ilya.core.appCommon
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.paging.compose.LazyPagingItems
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 fun <T : Any> LazyPagingItems<T>.isEmpty(): Boolean {
     return this.itemCount == 0
@@ -15,3 +18,10 @@ fun MediaPlayer.configure(): MediaPlayer {
     this.setAudioAttributes(audioAttributes)
     return this
 }
+
+fun parseUnixTimeToString(dateUnixTime: Long): String {
+    val date = Date(dateUnixTime * 1000L)
+    val formatter = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+    return formatter.format(date)
+}
+

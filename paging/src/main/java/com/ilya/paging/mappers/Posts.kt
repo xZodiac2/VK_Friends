@@ -1,15 +1,13 @@
 package com.ilya.paging.mappers
 
 import com.ilya.core.appCommon.enums.AttachmentType
+import com.ilya.core.appCommon.parseUnixTimeToString
 import com.ilya.data.retrofit.api.dto.AudioDto
 import com.ilya.data.retrofit.api.dto.GroupDto
 import com.ilya.data.retrofit.api.dto.HistoryPostDto
 import com.ilya.data.retrofit.api.dto.PostDto
 import com.ilya.data.retrofit.api.dto.UserDto
 import com.ilya.paging.Post
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 
 fun PostDto.toPost(
@@ -40,7 +38,7 @@ fun PostDto.toPost(
 
     return Post(
         id = id,
-        date = parseToString(dateUnixTime),
+        date = parseUnixTimeToString(dateUnixTime),
         text = text,
         photos = photos,
         videos = videos,
@@ -48,6 +46,7 @@ fun PostDto.toPost(
         author = owner.toPostAuthor(),
         likes = likes.toLikes(),
         reposted = reposted,
+        ownerId = ownerId
     )
 }
 
@@ -106,11 +105,5 @@ private fun AudioDto.toAudio(): com.ilya.paging.Audio {
         url = url,
         duration = duration
     )
-}
-
-private fun parseToString(dateUnixTime: Long): String {
-    val date = Date(dateUnixTime * 1000L)
-    val formatter = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
-    return formatter.format(date)
 }
 

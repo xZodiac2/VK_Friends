@@ -1,4 +1,4 @@
-package com.ilya.profileview.photosPreview
+package com.ilya.profileview.photosPreview.event
 
 import com.ilya.paging.Likes
 import com.ilya.paging.Photo

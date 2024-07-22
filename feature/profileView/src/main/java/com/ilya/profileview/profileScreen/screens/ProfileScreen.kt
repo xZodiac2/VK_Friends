@@ -29,19 +29,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.Audio
 import com.ilya.paging.Post
-import com.ilya.paging.Video
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
 import com.ilya.profileview.profileScreen.AudioLoadIndicatorState
 import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.profileview.profileScreen.PostsLikesState
-import com.ilya.profileview.profileScreen.ProfileScreenEvent
 import com.ilya.profileview.profileScreen.ProfileScreenState
 import com.ilya.profileview.profileScreen.ProfileScreenViewModel
 import com.ilya.profileview.profileScreen.components.posts.OnEmptyPostsMessage
@@ -51,6 +50,8 @@ import com.ilya.profileview.profileScreen.components.posts.ResolveRefresh
 import com.ilya.profileview.profileScreen.components.profileCommon.Photos
 import com.ilya.profileview.profileScreen.components.profileCommon.ProfileHeader
 import com.ilya.profileview.profileScreen.components.profileCommon.TopBar
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import com.ilya.theme.LocalColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,17 +59,13 @@ import com.ilya.theme.LocalColorScheme
 fun ProfileScreen(
     userId: Long,
     isPrivate: Boolean,
-    onEmptyAccessToken: () -> Unit,
-    onBackClick: () -> Unit,
-    onPhotoClick: (id: Long, targetPhotoIndex: Int) -> Unit,
-    onOpenPhotosClick: (Long) -> Unit,
-    onPostPhotoClick: (userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onVideoClick: (ownerId: Long, id: Long, accessKey: String) -> Unit,
+    handleNavEvent: (ProfileScreenNavEvent) -> Unit
 ) {
-    val viewModel: ProfileScreenViewModel = hiltViewModel()
+    val viewModel = hiltViewModel<ProfileScreenViewModel>()
+    val eventReceiver = EventReceiver(viewModel)
 
     if (isPrivate) {
-        PrivateProfile(viewModel, userId, onBackClick, onEmptyAccessToken)
+        PrivateProfile(viewModel, userId, handleNavEvent)
         return
     }
 
@@ -82,10 +79,7 @@ fun ProfileScreen(
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    BackHandler {
-        viewModel.handleEvent(ProfileScreenEvent.Back)
-        onBackClick()
-    }
+    BackHandler(onBack = eventReceiver::onBackClick)
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -95,10 +89,7 @@ fun ProfileScreen(
             TopBar(
                 userId = userId,
                 contentOffset = scrollBehavior.state.contentOffset,
-                onBackClick = {
-                    viewModel.handleEvent(ProfileScreenEvent.Back)
-                    onBackClick()
-                }
+                onBackClick = eventReceiver::onBackClick
             )
         }
     ) { padding ->
@@ -111,8 +102,10 @@ fun ProfileScreen(
 
             is ProfileScreenState.Error -> OnErrorState(
                 errorType = state.errorType,
-                onEmptyAccessToken = onEmptyAccessToken,
-                onTryAgainClick = { viewModel.handleEvent(ProfileScreenEvent.Retry) },
+                onEmptyAccessToken = {
+                    eventReceiver.onEmptyAccessToken()
+                },
+                onTryAgainClick = { eventReceiver.onRetry() },
                 padding = padding
             )
 
@@ -121,17 +114,10 @@ fun ProfileScreen(
                     Content(
                         user = state.user,
                         posts = posts,
-                        currentLoopingAudio = currentLoopingAudio,
-                        friendRequest = { viewModel.handleEvent(ProfileScreenEvent.FriendRequest(it)) },
                         paddingValues = padding,
-                        onPhotoClick = onPhotoClick,
-                        onOpenPhotosClick = { onOpenPhotosClick(state.user.id) },
-                        onLikeClick = { viewModel.handleEvent(ProfileScreenEvent.Like(it)) },
                         likes = likesState,
-                        onPostPhotoClick = onPostPhotoClick,
-                        onAudioClick = { viewModel.handleEvent(ProfileScreenEvent.AudioClick(it)) },
-                        onVideoClick = { onVideoClick(it.ownerId, it.id, it.accessKey) },
-                        onEmptyAccessToken = onEmptyAccessToken
+                        currentLoopingAudio = currentLoopingAudio,
+                        eventReceiver = eventReceiver
                     )
                     if (audioLoadingState == AudioLoadIndicatorState.Loading) {
                         LinearProgressIndicator(
@@ -150,7 +136,7 @@ fun ProfileScreen(
                         val newLikes = posts.associate { it.id to it.likes }.filterNot {
                             it.key in likesState.likes.keys
                         }
-                        viewModel.handleEvent(ProfileScreenEvent.PostsAdded(newLikes))
+                        eventReceiver.onPostsAdded(newLikes)
                     }
                 }
             }
@@ -159,12 +145,15 @@ fun ProfileScreen(
 
     SnackbarEventEffect(
         state = snackbarState,
-        onConsumed = { viewModel.handleEvent(ProfileScreenEvent.SnackbarConsumed) },
+        onConsumed = eventReceiver::onSnackbarConsumed,
         action = { snackbarHostState.showSnackbar(it) }
     )
 
     LaunchedEffect(Unit) {
-        viewModel.handleEvent(ProfileScreenEvent.Start(userId))
+        eventReceiver.onStart(userId)
+        viewModel.navEventFlow.collect {
+            handleNavEvent(it)
+        }
     }
 
 }
@@ -206,14 +195,7 @@ private fun Content(
     paddingValues: PaddingValues,
     likes: PostsLikesState,
     currentLoopingAudio: Pair<Audio?, Boolean>,
-    friendRequest: (User) -> Unit,
-    onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit,
-    onOpenPhotosClick: () -> Unit,
-    onLikeClick: (Post) -> Unit,
-    onPostPhotoClick: (userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onAudioClick: (Audio) -> Unit,
-    onVideoClick: (Video) -> Unit,
-    onEmptyAccessToken: () -> Unit
+    eventReceiver: EventReceiver
 ) {
     LazyColumn(
         modifier = Modifier
@@ -221,22 +203,27 @@ private fun Content(
             .padding(paddingValues),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item { ProfileHeader(user, friendRequest) }
-        item { Photos(user.photos, onPhotoClick, onOpenPhotosClick) }
-        items(count = posts.itemCount) {
+        item { ProfileHeader(user, eventReceiver) }
+        item {
+            Photos(
+                photos = user.photos,
+                onPhotoClick = { userId, targetPhotoIndex ->
+                    eventReceiver.onPhotoClick(userId, targetPhotoIndex)
+                },
+                onOpenPhotosClick = { eventReceiver.onOpenPhotosClick(user.id) }
+            )
+        }
+        items(count = posts.itemCount, key = posts.itemKey { it.id }) {
             Post(
                 posts = posts,
                 index = it,
-                onLikeClick = onLikeClick,
-                likesState = likes,
-                onPhotoClick = onPostPhotoClick,
-                onAudioClick = onAudioClick,
                 currentLoopingAudio = currentLoopingAudio,
-                onVideoClick = onVideoClick
+                likesState = likes,
+                eventReceiver = eventReceiver
             )
         }
-        item { ResolveAppend(posts, onEmptyAccessToken) }
-        item { ResolveRefresh(posts, onEmptyAccessToken) }
+        item { ResolveAppend(posts, eventReceiver) }
+        item { ResolveRefresh(posts, eventReceiver) }
         item { OnEmptyPostsMessage(posts) }
     }
 }
@@ -246,23 +233,17 @@ private fun Post(
     posts: LazyPagingItems<Post>,
     index: Int,
     currentLoopingAudio: Pair<Audio?, Boolean>,
-    onLikeClick: (Post) -> Unit,
     likesState: PostsLikesState,
-    onPhotoClick: (userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onAudioClick: (Audio) -> Unit,
-    onVideoClick: (Video) -> Unit
+    eventReceiver: EventReceiver
 ) {
     val post = posts[index]
 
     post?.let {
         PostCard(
             post = it,
-            currentLoopingAudio = currentLoopingAudio,
-            onLikeClick = { post -> onLikeClick(post) },
             likes = likesState.likes[post.id],
-            onPhotoClick = onPhotoClick,
-            onAudioClick = onAudioClick,
-            onVideoClick = onVideoClick
+            currentLoopingAudio = currentLoopingAudio,
+            eventReceiver = eventReceiver,
         )
     }
 }

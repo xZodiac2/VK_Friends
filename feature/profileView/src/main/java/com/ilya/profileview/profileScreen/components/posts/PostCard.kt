@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,8 +36,8 @@ import com.ilya.paging.Likes
 import com.ilya.paging.Post
 import com.ilya.paging.PostAuthor
 import com.ilya.paging.RepostedPost
-import com.ilya.paging.Video
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -47,10 +46,7 @@ internal fun PostCard(
     post: Post,
     likes: Likes?,
     currentLoopingAudio: Pair<Audio?, Boolean>,
-    onLikeClick: (Post) -> Unit,
-    onPhotoClick: (ownerId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onAudioClick: (Audio) -> Unit,
-    onVideoClick: (Video) -> Unit,
+    eventReceiver: EventReceiver
 ) {
     Box(contentAlignment = Alignment.Center) {
         Card(
@@ -64,13 +60,13 @@ internal fun PostCard(
             val attachments = post.photos + post.audios + post.videos
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Author(post.author, post.date)
+                Author(post.author, post.date, eventReceiver)
                 PostText(post, attachments.isEmpty())
-                Attachments(attachments, onPhotoClick, onAudioClick, currentLoopingAudio, onVideoClick)
-                OptionalRepostedPost(post, onPhotoClick, onAudioClick, currentLoopingAudio, onVideoClick)
+                Attachments(attachments, currentLoopingAudio, eventReceiver)
+                OptionalRepostedPost(post, currentLoopingAudio, eventReceiver)
                 Likes(
                     likes = likes,
-                    onLikeClick = { onLikeClick(post.copy(likes = it)) }
+                    onLikeClick = { eventReceiver.onLikeClick(post.copy(likes = it)) }
                 )
             }
         }
@@ -98,25 +94,17 @@ private fun PostText(post: Post, isAttachmentsEmpty: Boolean) {
 @Composable
 private fun OptionalRepostedPost(
     post: Post,
-    onPhotoClick: (ownerId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) -> Unit,
-    onAudioClick: (Audio) -> Unit,
     currentLoopingAudio: Pair<Audio?, Boolean>,
-    onVideoClick: (Video) -> Unit,
+    eventReceiver: EventReceiver
 ) {
     post.reposted?.let {
         val attachments = post.photos + post.videos + post.audios
-
-        if (post.text.isNotBlank() || attachments.isNotEmpty()) {
-            HorizontalDivider(color = LocalColorScheme.current.secondaryTextColor)
-        }
         RepostedAuthor(it)
         RepostedText(it, attachments.isEmpty())
         Attachments(
             attachments = it.photos + it.videos + it.audios,
-            onPhotoClick = onPhotoClick,
-            onAudioClick = onAudioClick,
             currentLoopingAudio = currentLoopingAudio,
-            onVideoClick = onVideoClick
+            eventReceiver = eventReceiver
         )
     }
 }
@@ -139,9 +127,11 @@ private fun RepostedText(post: RepostedPost, isAttachmentsEmpty: Boolean) {
 }
 
 @Composable
-private fun Author(author: PostAuthor, date: String) {
+private fun Author(author: PostAuthor, date: String, eventReceiver: EventReceiver) {
     Row(
-        modifier = Modifier.padding(top = 12.dp, start = 20.dp, end = 20.dp),
+        modifier = Modifier
+            .padding(top = 12.dp, start = 20.dp, end = 20.dp)
+            .clickable { eventReceiver.onPostAuthorClick(author.id, author.isPrivate) },
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -168,10 +158,7 @@ private fun Author(author: PostAuthor, date: String) {
 }
 
 @Composable
-private fun Likes(
-    likes: Likes?,
-    onLikeClick: (Likes) -> Unit
-) {
+private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
     Box(
         modifier = Modifier
             .padding(bottom = 8.dp, start = 12.dp)

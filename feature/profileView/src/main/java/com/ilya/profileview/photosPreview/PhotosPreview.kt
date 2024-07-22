@@ -7,21 +7,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.profileview.photosPreview.components.AllPhotosPreview
 import com.ilya.profileview.photosPreview.components.RestrainedPhotosPreview
+import com.ilya.profileview.photosPreview.event.PhotosPreviewNavEvent
 
 @Composable
 fun PhotosPreview(
     userId: Long,
     targetPhotoIndex: Int,
     photoIds: Map<Long, String> = emptyMap(),
-    onBackClick: () -> Unit,
-    navigateToAuth: () -> Unit
+    handleNavEvent: (PhotosPreviewNavEvent) -> Unit
 ) {
     val viewModel: PhotosPreviewViewModel = hiltViewModel()
     val systemUiController = rememberSystemUiController()
 
     BackHandler {
         systemUiController.isStatusBarVisible = true
-        onBackClick()
+        handleNavEvent(PhotosPreviewNavEvent.BackClick)
     }
 
     if (photoIds.isEmpty()) {
@@ -31,9 +31,9 @@ fun PhotosPreview(
             targetPhotoIndex = targetPhotoIndex,
             onBackClick = {
                 systemUiController.isStatusBarVisible = true
-                onBackClick()
+                handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
-            navigateToAuth = navigateToAuth
+            navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
         )
     } else {
         RestrainedPhotosPreview(
@@ -43,9 +43,9 @@ fun PhotosPreview(
             photoIds = photoIds,
             onBackClick = {
                 systemUiController.isStatusBarVisible = true
-                onBackClick()
+                handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
-            navigateToAuth = navigateToAuth
+            navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
         )
     }
 

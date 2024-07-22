@@ -51,11 +51,11 @@ internal object LightColorScheme {
 }
 
 internal object DarkColorScheme {
-    val primary = Color(48, 48, 48, 255)
-    val secondary = Color(52, 52, 52, 255)
+    val primary = Color(24, 24, 24, 255)
+    val secondary = Color(30, 30, 30, 255)
 
-    val cardContainerColor = Color(58, 58, 58, 255)
-    val background = Color(48, 48, 48, 255)
+    val cardContainerColor = Color(34, 34, 34, 255)
+    val background = Color(24, 24, 24, 255)
 
     val primaryTextColor = Color.White
     val secondaryTextColor = Color(170, 170, 170, 255)
@@ -71,7 +71,7 @@ internal object DarkColorScheme {
     val selectedIconColor = Color.White
     val unselectedIconColor = Color(226, 226, 226, 255)
 
-    val bottomNavSelectedIndicatorColor = Color(70, 70, 70, 255)
+    val bottomNavSelectedIndicatorColor = Color(40, 40, 40, 255)
 
     val primaryIconTintColor = Color(77, 157, 255, 255)
     val iconTintColor = Color.White

@@ -9,6 +9,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.core.appCommon.AccessTokenManager
+import com.ilya.core.appCommon.EventHandler
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.enums.toggled
 import com.ilya.core.basicComposables.snackbar.SnackbarState
@@ -23,12 +24,16 @@ import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.screens.event.ProfileScreenEvent
+import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -44,7 +49,7 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val postsPagingSourceFactory: PostsPagingSource.Factory,
     private val resolveLikeUseCase: ResolveLikeUseCase,
     private val mediaPlayer: MediaPlayer
-) : ViewModel() {
+) : ViewModel(), EventHandler<ProfileScreenEvent> {
 
     private val userId = MutableStateFlow(DEFAULT_USER_ID)
 
@@ -84,7 +89,10 @@ internal class ProfileScreenViewModel @Inject constructor(
         MutableStateFlow<AudioLoadIndicatorState>(AudioLoadIndicatorState.Idle)
     val audioIndicatorState = _audioLoadingState.asStateFlow()
 
-    fun handleEvent(event: ProfileScreenEvent) {
+    private val _navEventFlow = MutableSharedFlow<ProfileScreenNavEvent>()
+    val navEventFlow = _navEventFlow.asSharedFlow()
+
+    override fun handleEvent(event: ProfileScreenEvent) {
         when (event) {
             is ProfileScreenEvent.Start -> {
                 userId.value = event.userId
@@ -95,10 +103,20 @@ internal class ProfileScreenViewModel @Inject constructor(
             is ProfileScreenEvent.Like -> onLike(event.post)
             is ProfileScreenEvent.PostsAdded -> onPostsAdded(event.newLikes)
             is ProfileScreenEvent.AudioClick -> onAudioClick(event.audio)
+            is ProfileScreenEvent.NewNavEvent -> onNewNavEvent(event.navEvent)
             ProfileScreenEvent.Retry -> onRetry()
             ProfileScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
             ProfileScreenEvent.Back -> onBack()
         }
+    }
+
+    private fun onNewNavEvent(event: ProfileScreenNavEvent) {
+        if (event is ProfileScreenNavEvent.PostAuthorClick && userId.value == event.id) {
+            showSnackbar(R.string.you_already_on_reqiered_profile)
+            return
+        }
+
+        viewModelScope.launch { _navEventFlow.emit(event) }
     }
 
     private fun onBack() {

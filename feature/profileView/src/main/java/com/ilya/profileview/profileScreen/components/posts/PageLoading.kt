@@ -27,11 +27,12 @@ import com.ilya.paging.PaginationError
 import com.ilya.paging.Post
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.ErrorType
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-internal fun ResolveRefresh(posts: LazyPagingItems<Post>, onEmptyAccessToken: () -> Unit) {
+internal fun ResolveRefresh(posts: LazyPagingItems<Post>, eventReceiver: EventReceiver) {
     when (val state = posts.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
@@ -40,7 +41,7 @@ internal fun ResolveRefresh(posts: LazyPagingItems<Post>, onEmptyAccessToken: ()
                 modifier = Modifier.height(120.dp),
                 errorType = state.error.correspondingErrorType(),
                 onTryAgainClick = { posts.refresh() },
-                onEmptyAccessToken = onEmptyAccessToken
+                onEmptyAccessToken = eventReceiver::onEmptyAccessToken
             )
         }
 
@@ -49,7 +50,7 @@ internal fun ResolveRefresh(posts: LazyPagingItems<Post>, onEmptyAccessToken: ()
 }
 
 @Composable
-internal fun ResolveAppend(posts: LazyPagingItems<Post>, onEmptyAccessToken: () -> Unit) {
+internal fun ResolveAppend(posts: LazyPagingItems<Post>, eventReceiver: EventReceiver) {
     when (val state = posts.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
@@ -58,7 +59,7 @@ internal fun ResolveAppend(posts: LazyPagingItems<Post>, onEmptyAccessToken: () 
                 modifier = Modifier.height(120.dp),
                 errorType = state.error.correspondingErrorType(),
                 onTryAgainClick = { posts.retry() },
-                onEmptyAccessToken = onEmptyAccessToken
+                onEmptyAccessToken = eventReceiver::onEmptyAccessToken
             )
         }
 

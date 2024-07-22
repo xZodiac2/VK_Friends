@@ -37,16 +37,15 @@ import com.ilya.paging.Audio
 import com.ilya.paging.Photo
 import com.ilya.paging.Video
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
 internal fun Attachments(
     attachments: List<Attachment>,
-    onPhotoClick: (ownerId: Long, targetPhotoIndex: Int, photoUrls: Map<Long, String>) -> Unit,
-    onAudioClick: (Audio) -> Unit,
     currentLoopingAudio: Pair<Audio?, Boolean>,
-    onVideoClick: (Video) -> Unit,
+    eventReceiver: EventReceiver
 ) {
     val photos = attachments.mapNotNull { it as? Photo }
     val videos = attachments.mapNotNull { it as? Video }
@@ -90,7 +89,7 @@ internal fun Attachments(
                                 modifier = modifier,
                                 photo = attachment,
                                 onClick = {
-                                    onPhotoClick(
+                                    eventReceiver.onPostPhotoClick(
                                         attachment.ownerId,
                                         photos.indexOf(attachment),
                                         photos.associate { it.id to it.accessKey }
@@ -101,7 +100,7 @@ internal fun Attachments(
 
                             is Video -> Video(
                                 video = attachment,
-                                onVideoClick = { onVideoClick(attachment) },
+                                onVideoClick = { eventReceiver.onVideoClick(attachment) },
                                 modifier = modifier,
                                 contentScale = contentScale
                             )
@@ -116,7 +115,7 @@ internal fun Attachments(
         for (audio in audios) {
             Audio(
                 audio = audio,
-                onAudioClick = { onAudioClick(audio) },
+                onAudioClick = { eventReceiver.onAudioClick(audio) },
                 isPlaying = currentLoopingAudio.second && currentLoopingAudio.first == audio
             )
         }

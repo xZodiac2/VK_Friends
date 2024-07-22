@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ilya.core.basicComposables.alertDialog.AlertDialogStateHandler
@@ -57,6 +58,8 @@ import com.ilya.friendsview.screen.components.FriendCard
 import com.ilya.friendsview.screen.components.OnEmptyFriends
 import com.ilya.friendsview.screen.components.ResolveAppend
 import com.ilya.friendsview.screen.components.ResolveRefresh
+import com.ilya.friendsview.screen.event.FriendsScreenEvent
+import com.ilya.friendsview.screen.event.FriendsScreenNavEvent
 import com.ilya.paging.User
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
@@ -65,8 +68,7 @@ import com.ilya.theme.LocalTypography
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun FriendsScreen(
-    onEmptyAccessToken: () -> Unit,
-    openProfileRequest: (Long) -> Unit,
+    handleNavEvent: (FriendsScreenNavEvent) -> Unit,
     onExitConfirm: () -> Unit,
 ) {
     val viewModel: FriendsScreenViewModel = hiltViewModel()
@@ -96,7 +98,11 @@ fun FriendsScreen(
         topBar = {
             TopBar(
                 accountOwner = accountOwner,
-                onAvatarClick = openProfileRequest,
+                onAvatarClick = {
+                    accountOwner?.id?.let { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) } ?: run {
+                        viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick)
+                    }
+                },
                 onPlaceholderClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
                 scrollBehavior = scrollBehavior
             )
@@ -106,8 +112,8 @@ fun FriendsScreen(
         Content(
             friends = friends,
             padding = padding,
-            onEmptyAccessToken = onEmptyAccessToken,
-            onFriendClick = openProfileRequest,
+            onEmptyAccessToken = { handleNavEvent(FriendsScreenNavEvent.EmptyAccessToken) },
+            onFriendClick = { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) },
             pullRefreshState = pullRefreshState,
             isRefreshing = isRefreshing,
         )
@@ -196,7 +202,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = friends.itemCount) { Friend(friends, it, onFriendClick) }
+            items(count = friends.itemCount, key = friends.itemKey { it.id }) { Friend(friends, it, onFriendClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }

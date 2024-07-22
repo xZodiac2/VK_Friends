@@ -41,20 +41,16 @@ import com.ilya.core.basicComposables.OnError
 import com.ilya.paging.PaginationError
 import com.ilya.paging.Photo
 import com.ilya.profileview.R
+import com.ilya.profileview.photosScreen.event.PhotosScreenEvent
+import com.ilya.profileview.photosScreen.event.PhotosScreenNavEvent
 import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotosScreen(
-    userId: Long,
-    onBackClick: () -> Unit,
-    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit,
-    onEmptyAccessToken: () -> Unit
-) {
+fun PhotosScreen(userId: Long, handleNavEvent: (PhotosScreenNavEvent) -> Unit) {
     val viewModel: PhotosScreenViewModel = hiltViewModel()
-
     val photos = viewModel.photosFlow.collectAsLazyPagingItems()
 
     Scaffold(
@@ -62,7 +58,7 @@ fun PhotosScreen(
             TopAppBar(
                 title = { Text(text = stringResource(R.string.photos_screen_name)) },
                 navigationIcon = {
-                    IconButton(onBackClick) {
+                    IconButton(onClick = { handleNavEvent(PhotosScreenNavEvent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "back"
@@ -76,9 +72,9 @@ fun PhotosScreen(
                 )
             )
         },
-        containerColor = LocalColorScheme.current.cardContainerColor
+        containerColor = LocalColorScheme.current.background
     ) { padding ->
-        Content(padding, photos, onPhotoClick, onEmptyAccessToken)
+        Content(padding, photos, handleNavEvent)
     }
 
     LaunchedEffect(Unit) {
@@ -91,8 +87,7 @@ fun PhotosScreen(
 private fun Content(
     padding: PaddingValues,
     photos: LazyPagingItems<Photo>,
-    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit,
-    onEmptyAccessToken: () -> Unit
+    handleNavEvent: (PhotosScreenNavEvent) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(padding),
@@ -101,22 +96,22 @@ private fun Content(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(count = photos.itemCount) { Photo(photos, it, onPhotoClick) }
-        item(span = { GridItemSpan(3) }) { ResolveRefresh(photos, onEmptyAccessToken) }
-        item(span = { GridItemSpan(3) }) { ResolveAppend(photos, onEmptyAccessToken) }
+        items(count = photos.itemCount) { Photo(photos, it, handleNavEvent) }
+        item(span = { GridItemSpan(3) }) { ResolveRefresh(photos, handleNavEvent) }
+        item(span = { GridItemSpan(3) }) { ResolveAppend(photos, handleNavEvent) }
         item(span = { GridItemSpan(3) }) { PhotosCount(photos) }
     }
 }
 
 @Composable
-fun ResolveRefresh(photos: LazyPagingItems<Photo>, onEmptyAccessToken: () -> Unit) {
+fun ResolveRefresh(photos: LazyPagingItems<Photo>, handleNavEvent: (PhotosScreenNavEvent) -> Unit) {
     when (val state = photos.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
         is LoadState.Error -> OnPagingError(
             modifier = Modifier.height(500.dp),
             errorType = state.error.correspondingErrorType(),
             onTryAgainClick = { photos.refresh() },
-            onEmptyAccessToken = onEmptyAccessToken
+            onEmptyAccessToken = { handleNavEvent(PhotosScreenNavEvent.EmptyAccessToken) }
         )
 
         is LoadState.NotLoading -> Unit
@@ -124,7 +119,7 @@ fun ResolveRefresh(photos: LazyPagingItems<Photo>, onEmptyAccessToken: () -> Uni
 }
 
 @Composable
-private fun ResolveAppend(photos: LazyPagingItems<Photo>, onEmptyAccessToken: () -> Unit) {
+private fun ResolveAppend(photos: LazyPagingItems<Photo>, handleNavEvent: (PhotosScreenNavEvent) -> Unit) {
     when (val state = photos.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
         is LoadState.Error -> {
@@ -133,7 +128,7 @@ private fun ResolveAppend(photos: LazyPagingItems<Photo>, onEmptyAccessToken: ()
                 modifier = Modifier.height(120.dp),
                 errorType = state.error.correspondingErrorType(),
                 onTryAgainClick = { photos.retry() },
-                onEmptyAccessToken = onEmptyAccessToken
+                onEmptyAccessToken = { handleNavEvent(PhotosScreenNavEvent.EmptyAccessToken) }
             )
         }
 
@@ -198,7 +193,7 @@ private fun PhotosCount(photos: LazyPagingItems<Photo>) {
 private fun Photo(
     photos: LazyPagingItems<Photo>,
     index: Int,
-    onPhotoClick: (userId: Long, photoIndex: Int) -> Unit
+    handleNavEvent: (PhotosScreenNavEvent) -> Unit
 ) {
     val photo = photos[index]
     if (photo != null) {
@@ -207,7 +202,7 @@ private fun Photo(
                 .aspectRatio(1f)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(6.dp))
-                .clickable { onPhotoClick(photo.ownerId, index) },
+                .clickable { handleNavEvent(PhotosScreenNavEvent.OpenPhoto(photo.ownerId, index)) },
             model = photo.sizes.find { it.type == PhotoSize.X }?.url,
             contentDescription = "userPhoto",
             contentScale = ContentScale.Crop

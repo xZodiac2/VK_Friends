@@ -1,4 +1,4 @@
-package com.ilya.friendsview.screen
+package com.ilya.friendsview.screen.event
 
 
 internal sealed interface FriendsScreenEvent {

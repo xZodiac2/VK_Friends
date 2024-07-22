@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
@@ -58,15 +59,14 @@ import com.ilya.search.screen.components.ResolveAppend
 import com.ilya.search.screen.components.ResolveRefresh
 import com.ilya.search.screen.components.SearchBar
 import com.ilya.search.screen.components.UserCard
+import com.ilya.search.screen.event.SearchScreenEvent
+import com.ilya.search.screen.event.SearchScreenNavEvent
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun SearchScreen(
-    openProfileRequest: (userId: Long, isPrivate: Boolean) -> Unit,
-    onEmptyAccessToken: () -> Unit
-) {
+fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
     val viewModel: SearchViewModel = hiltViewModel()
 
     val users = viewModel.pagingFlow.collectAsLazyPagingItems()
@@ -91,7 +91,7 @@ fun SearchScreen(
             Column {
                 TopBar(
                     accountOwner = accountOwner,
-                    onAvatarClick = { openProfileRequest(it, false) },
+                    onAvatarClick = { handleNavEvent(SearchScreenNavEvent.ProfileClick(it, false)) },
                     onPlaceholderClick = { viewModel.handleEvent(SearchScreenEvent.PlugAvatarClick) },
                     scrollBehavior = scrollBehavior
                 )
@@ -109,8 +109,8 @@ fun SearchScreen(
     ) { padding ->
         Content(
             users = users,
-            onEmptyAccessToken = onEmptyAccessToken,
-            onUserClick = openProfileRequest,
+            onEmptyAccessToken = { handleNavEvent(SearchScreenNavEvent.EmptyAccessToken) },
+            onUserClick = { id, isPrivate -> handleNavEvent(SearchScreenNavEvent.ProfileClick(id, isPrivate)) },
             padding = padding,
             isRefreshing = isRefreshing,
             pullRefreshState = pullRefreshState
@@ -200,7 +200,7 @@ private fun Content(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(count = users.itemCount) { User(users, it, onUserClick) }
+            items(count = users.itemCount, key = users.itemKey { it.id }) { User(users, it, onUserClick) }
             item(span = { GridItemSpan(2) }) { ResolveRefresh(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { ResolveAppend(users, onEmptyAccessToken) }
             item(span = { GridItemSpan(2) }) { OnEmptyUsers(users) }

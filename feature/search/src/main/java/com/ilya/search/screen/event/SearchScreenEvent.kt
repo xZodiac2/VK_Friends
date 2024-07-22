@@ -1,4 +1,4 @@
-package com.ilya.search.screen
+package com.ilya.search.screen.event
 
 internal sealed interface SearchScreenEvent {
     data object PlugAvatarClick : SearchScreenEvent

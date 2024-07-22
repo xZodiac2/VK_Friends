@@ -11,7 +11,7 @@ import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.paging.User
 import com.ilya.paging.mappers.toUser
 import com.ilya.paging.pagingSources.UsersPagingSource
-import com.ilya.search.screen.SearchScreenEvent
+import com.ilya.search.screen.event.SearchScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay

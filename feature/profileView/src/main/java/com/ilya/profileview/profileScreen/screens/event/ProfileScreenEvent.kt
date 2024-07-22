@@ -1,4 +1,4 @@
-package com.ilya.profileview.profileScreen
+package com.ilya.profileview.profileScreen.screens.event
 
 import com.ilya.paging.Audio
 import com.ilya.paging.Likes
@@ -15,4 +15,5 @@ internal sealed interface ProfileScreenEvent {
     data class Like(val post: Post) : ProfileScreenEvent
     data class PostsAdded(val newLikes: Map<Long, Likes>) : ProfileScreenEvent
     data class AudioClick(val audio: Audio) : ProfileScreenEvent
+    data class NewNavEvent(val navEvent: ProfileScreenNavEvent) : ProfileScreenEvent
 }

@@ -31,6 +31,7 @@ fun UserDto.toPostAuthor(): PostAuthor {
         id = id,
         firstName = firstName,
         lastName = lastName,
-        photoUrl = photoUrl
+        photoUrl = photoUrl,
+        isPrivate = isClosed
     )
 }

@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.paging.Photo
 import com.ilya.paging.pagingSources.PhotosPagingSource
+import com.ilya.profileview.photosScreen.event.PhotosScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

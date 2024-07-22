@@ -9,7 +9,7 @@ import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
-import com.ilya.friendsview.screen.FriendsScreenEvent
+import com.ilya.friendsview.screen.event.FriendsScreenEvent
 import com.ilya.paging.User
 import com.ilya.paging.mappers.toUser
 import com.ilya.paging.pagingSources.FriendsPagingSource

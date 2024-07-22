@@ -2,9 +2,9 @@ package com.ilya.vkfriends
 
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -45,6 +45,12 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
 import com.ilya.vkfriends.navigation.Destination
 import com.ilya.vkfriends.navigation.NavigationBarItem
+import com.ilya.vkfriends.navigation.eventHandlers.FriendsScreenNavEventHandler
+import com.ilya.vkfriends.navigation.eventHandlers.PhotosPreviewNavEventHandler
+import com.ilya.vkfriends.navigation.eventHandlers.PhotosScreenNavEventHandler
+import com.ilya.vkfriends.navigation.eventHandlers.ProfileScreenNavEventHandler
+import com.ilya.vkfriends.navigation.eventHandlers.ProfileScreenNavEventHandler.Companion.BLANK_ACCESS_KEY
+import com.ilya.vkfriends.navigation.eventHandlers.SearchScreenNavEventHandler
 import com.ilya.vkfriends.navigation.lastDestinationName
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -93,8 +99,6 @@ class MainActivity : ComponentActivity() {
         val currentDestination = currentBackStackEntry?.destination
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
 
-        Log.d("mytag", currentBackStackEntry?.destination?.route.toString())
-
         NavigationBar(
             containerColor = LocalColorScheme.current.primary,
             modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
@@ -131,150 +135,85 @@ class MainActivity : ComponentActivity() {
         hideBottomBar: () -> Unit,
         showBottomBar: () -> Unit,
     ) {
+        val startDestination = when (accessTokenManager.accessToken) {
+            null -> Destination.AuthScreen
+            else -> Destination.FriendsScreen
+        }
+
         NavHost(
+            modifier = Modifier.padding(paddingValues),
             navController = navController,
-            startDestination = if (accessTokenManager.accessToken == null) {
-                Destination.AuthScreen
-            } else {
-                Destination.FriendsScreen
-            },
-            modifier = Modifier.padding(paddingValues)
+            startDestination = startDestination
         ) {
             composable<Destination.AuthScreen>(
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
-                AuthorizationScreen(onAuthorized = {
+                AuthorizationScreen {
                     navController.navigate(Destination.FriendsScreen) {
-                        popUpTo(Destination.AuthScreen) {
-                            inclusive = true
-                        }
+                        popUpTo(Destination.AuthScreen) { inclusive = true }
                     }
-                })
+                }
             }
             composable<Destination.FriendsScreen>(
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
+                val eventHandler = FriendsScreenNavEventHandler(navController)
+
                 FriendsScreen(
-                    onEmptyAccessToken = {
-                        navController.navigate(Destination.AuthScreen) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    openProfileRequest = { userId ->
-                        navController.navigate(Destination.ProfileScreen(userId, false))
-                    },
-                    onExitConfirm = ::finish
+                    onExitConfirm = ::finish,
+                    handleNavEvent = eventHandler::handleEvent
                 )
-                LaunchedEffect(Unit) {
-                    showBottomBar()
-                }
+                LaunchedEffect(Unit) { showBottomBar() }
             }
             composable<Destination.ProfileScreen>(
-                enterTransition = { fadeIn(tween(0)) },
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+                popEnterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<Destination.ProfileScreen>()
+                val eventHandler = ProfileScreenNavEventHandler(navController)
+
                 ProfileScreen(
                     userId = route.userId,
                     isPrivate = route.isPrivate,
-                    onBackClick = navController::popBackStack,
-                    onEmptyAccessToken = {
-                        navController.navigate(Destination.AuthScreen) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    },
-                    onPhotoClick = { userId, targetIndex ->
-                        navController.navigate(Destination.PhotosPreview(userId, targetIndex))
-                    },
-                    onOpenPhotosClick = {
-                        navController.navigate(Destination.PhotosScreen(it))
-                    },
-                    onPostPhotoClick = { userId, targetIndex, ids ->
-                        navController.navigate(Destination.PhotosPreview(
-                            userId = userId,
-                            targetPhotoIndex = targetIndex,
-                            photoIds = ids.toIdsString()
-                        ))
-                    },
-                    onVideoClick = { ownerId, id, accessKey ->
-                        val key = accessKey.ifEmpty { BLANK_ACCESS_KEY }
-                        navController.navigate(Destination.VideoPreview(ownerId, id, key))
-                    }
+                    handleNavEvent = eventHandler::handleEvent
                 )
-                LaunchedEffect(Unit) {
-                    showBottomBar()
-                }
+                LaunchedEffect(Unit) { showBottomBar() }
             }
             composable<Destination.SearchScreen>(
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
-                SearchScreen(
-                    openProfileRequest = { id, isPrivate ->
-                        navController.navigate(Destination.ProfileScreen(id, isPrivate))
-                    },
-                    onEmptyAccessToken = {
-                        navController.navigate(Destination.AuthScreen) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    }
-                )
-                LaunchedEffect(Unit) {
-                    showBottomBar()
-                }
+                val eventHandler = SearchScreenNavEventHandler(navController)
+                SearchScreen(eventHandler::handleEvent)
+                LaunchedEffect(Unit) { showBottomBar() }
             }
             composable<Destination.PhotosPreview>(
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
                 val route = it.toRoute<Destination.PhotosPreview>()
+                val eventHandler = PhotosPreviewNavEventHandler(navController)
 
                 PhotosPreview(
                     userId = route.userId,
                     targetPhotoIndex = route.targetPhotoIndex,
                     photoIds = route.photoIds.fromIdsString(),
-                    onBackClick = navController::popBackStack,
-                    navigateToAuth = {
-                        navController.navigate(Destination.AuthScreen) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    }
+                    handleNavEvent = eventHandler::handleEvent
                 )
-
-                LaunchedEffect(Unit) {
-                    hideBottomBar()
-                }
+                LaunchedEffect(Unit) { hideBottomBar() }
             }
             composable<Destination.PhotosScreen>(
-                enterTransition = { fadeIn(tween(0)) },
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+                popEnterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
                 val route = it.toRoute<Destination.PhotosScreen>()
+                val eventHandler = PhotosScreenNavEventHandler(navController)
 
-                PhotosScreen(
-                    userId = route.userId,
-                    onBackClick = navController::popBackStack,
-                    onPhotoClick = { userId, photoIndex ->
-                        navController.navigate(Destination.PhotosPreview(userId, photoIndex))
-                    },
-                    onEmptyAccessToken = {
-                        navController.navigate(Destination.AuthScreen) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
-                    }
-                )
+                PhotosScreen(route.userId, eventHandler::handleEvent)
             }
             composable<Destination.VideoPreview>(
                 enterTransition = { fadeIn(tween(0)) },
@@ -294,18 +233,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun Map<Long, String>.toIdsString(): String {
-        val ids = keys.map {
-            val accessKey = this[it] ?: ""
-            if (accessKey.isNotBlank()) {
-                "${it}_${accessKey}"
-            } else {
-                "${it}_$BLANK_ACCESS_KEY"
-            }
-        }
-        return ids.joinToString(",")
     }
 
     private fun String.fromIdsString(): Map<Long, String> {
@@ -350,8 +277,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    companion object {
-        private const val BLANK_ACCESS_KEY = "blankAccessKey"
-    }
 
 }

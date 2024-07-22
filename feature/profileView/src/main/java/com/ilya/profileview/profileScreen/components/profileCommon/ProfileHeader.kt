@@ -53,11 +53,12 @@ import com.ilya.core.appCommon.enums.Sex
 import com.ilya.core.basicComposables.BaseButton
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ProfileHeader(user: User, friendRequest: (User) -> Unit) {
+internal fun ProfileHeader(user: User, eventReceiver: EventReceiver) {
     var showSheet by remember { mutableStateOf(false) }
 
     Card(
@@ -121,7 +122,7 @@ internal fun ProfileHeader(user: User, friendRequest: (User) -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp),
-                    onClick = { friendRequest(user) }
+                    onClick = { eventReceiver.onFriendRequest(user) }
                 ) {
                     Icon(
                         modifier = Modifier

@@ -19,6 +19,7 @@ import com.ilya.paging.toggled
 import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileview.R
+import com.ilya.profileview.photosPreview.event.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.states.PhotosLikesState
 import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState
 import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
@@ -101,7 +102,7 @@ internal class PhotosPreviewViewModel @Inject constructor(
         when (error) {
             is PaginationError.NoInternet -> showSnackbar(R.string.error_no_internet)
             is PaginationError.NoAccessToken -> _navState.value = PhotosPreviewNavState.AuthScreen
-            else -> showSnackbar(R.string.error_unknown)
+            else -> showSnackbar(R.string.error_unknown, error.toString())
         }
     }
 
@@ -192,8 +193,8 @@ internal class PhotosPreviewViewModel @Inject constructor(
         return Result.success(Unit)
     }
 
-    private fun showSnackbar(@StringRes text: Int) {
-        _snackbarState.value = SnackbarState.Triggered(StringResource.FromId(text))
+    private fun showSnackbar(@StringRes text: Int, vararg formatArgs: Any) {
+        _snackbarState.value = SnackbarState.Triggered(StringResource.FromId(text, formatArgs.toList()))
     }
 
     private data class IdsState(

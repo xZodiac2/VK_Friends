@@ -27,8 +27,8 @@ import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.Likes
 import com.ilya.paging.Photo
-import com.ilya.profileview.photosPreview.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
+import com.ilya.profileview.photosPreview.event.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState
 import com.ilya.profileview.photosPreview.states.RestrainedPhotosState
 import kotlinx.coroutines.flow.combine

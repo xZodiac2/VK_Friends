@@ -29,11 +29,12 @@ import androidx.compose.ui.unit.dp
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
-import com.ilya.profileview.profileScreen.ProfileScreenEvent
 import com.ilya.profileview.profileScreen.ProfileScreenState
 import com.ilya.profileview.profileScreen.ProfileScreenViewModel
 import com.ilya.profileview.profileScreen.components.profileCommon.ProfileHeader
 import com.ilya.profileview.profileScreen.components.profileCommon.TopBar
+import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -41,16 +42,16 @@ import com.ilya.theme.LocalTypography
 internal fun PrivateProfile(
     viewModel: ProfileScreenViewModel,
     userId: Long,
-    onBackClick: () -> Unit,
-    onEmptyAccessToken: () -> Unit
+    handleNavEvent: (ProfileScreenNavEvent) -> Unit
 ) {
     val screenState = viewModel.screenState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val eventReceiver = EventReceiver(viewModel)
 
     SnackbarEventEffect(
         state = snackbarState,
-        onConsumed = { viewModel.handleEvent(ProfileScreenEvent.SnackbarConsumed) },
+        onConsumed = eventReceiver::onSnackbarConsumed,
         action = { snackbarHostState.showSnackbar(it) }
     )
 
@@ -59,7 +60,7 @@ internal fun PrivateProfile(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopBar(
-                onBackClick = onBackClick,
+                onBackClick = eventReceiver::onBackClick,
                 userId = userId,
                 contentOffset = 0f,
             )
@@ -79,9 +80,7 @@ internal fun PrivateProfile(
                 ) {
                     ProfileHeader(
                         user = stateValue.user,
-                        friendRequest = {
-                            viewModel.handleEvent(ProfileScreenEvent.FriendRequest(stateValue.user))
-                        }
+                        eventReceiver = eventReceiver
                     )
                     PrivateProfileBanner()
                 }
@@ -89,15 +88,16 @@ internal fun PrivateProfile(
 
             is ProfileScreenState.Error -> OnErrorState(
                 errorType = stateValue.errorType,
-                onEmptyAccessToken = onEmptyAccessToken,
-                onTryAgainClick = { viewModel.handleEvent(ProfileScreenEvent.Retry) },
+                onEmptyAccessToken = eventReceiver::onEmptyAccessToken,
+                onTryAgainClick = eventReceiver::onRetry,
                 padding = padding
             )
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.handleEvent(ProfileScreenEvent.Start(userId))
+        eventReceiver.onStart(userId)
+        viewModel.navEventFlow.collect(handleNavEvent)
     }
 
 }

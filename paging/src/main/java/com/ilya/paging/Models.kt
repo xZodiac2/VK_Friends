@@ -29,7 +29,7 @@ data class Post(
     val author: PostAuthor,
     override val id: Long,
     override val likes: Likes,
-    override val ownerId: Long = author.id,
+    override val ownerId: Long,
     val date: String,
     val text: String,
     val reposted: RepostedPost?
@@ -59,7 +59,8 @@ data class PostAuthor(
     val id: Long,
     val firstName: String,
     val lastName: String,
-    val photoUrl: String
+    val photoUrl: String,
+    val isPrivate: Boolean
 ) : Parcelable
 
 @Parcelize

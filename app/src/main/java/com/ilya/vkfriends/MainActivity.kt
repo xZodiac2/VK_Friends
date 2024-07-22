@@ -2,8 +2,12 @@ package com.ilya.vkfriends
 
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -41,7 +45,6 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.VkFriendsAppTheme
 import com.ilya.vkfriends.navigation.Destination
 import com.ilya.vkfriends.navigation.NavigationBarItem
-import com.ilya.vkfriends.navigation.ScreenTransition
 import com.ilya.vkfriends.navigation.lastDestinationName
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -90,6 +93,8 @@ class MainActivity : ComponentActivity() {
         val currentDestination = currentBackStackEntry?.destination
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
 
+        Log.d("mytag", currentBackStackEntry?.destination?.route.toString())
+
         NavigationBar(
             containerColor = LocalColorScheme.current.primary,
             modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
@@ -136,8 +141,8 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable<Destination.AuthScreen>(
-                enterTransition = ScreenTransition.AuthScreen.transition.enterTransition,
-                exitTransition = ScreenTransition.AuthScreen.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) {
                 AuthorizationScreen(onAuthorized = {
                     navController.navigate(Destination.FriendsScreen) {
@@ -148,8 +153,8 @@ class MainActivity : ComponentActivity() {
                 })
             }
             composable<Destination.FriendsScreen>(
-                enterTransition = ScreenTransition.FriendsScreen.transition.enterTransition,
-                exitTransition = ScreenTransition.FriendsScreen.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) {
                 FriendsScreen(
                     onEmptyAccessToken = {
@@ -169,8 +174,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable<Destination.ProfileScreen>(
-                enterTransition = ScreenTransition.ProfileScreen.transition.enterTransition,
-                exitTransition = ScreenTransition.ProfileScreen.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<Destination.ProfileScreen>()
                 ProfileScreen(
@@ -207,8 +212,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable<Destination.SearchScreen>(
-                enterTransition = ScreenTransition.SearchScreen.transition.enterTransition,
-                exitTransition = ScreenTransition.SearchScreen.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) {
                 SearchScreen(
                     openProfileRequest = { id, isPrivate ->
@@ -227,8 +232,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable<Destination.PhotosPreview>(
-                enterTransition = ScreenTransition.PhotosPreview.transition.enterTransition,
-                exitTransition = ScreenTransition.PhotosPreview.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) {
                 val route = it.toRoute<Destination.PhotosPreview>()
 
@@ -251,8 +256,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable<Destination.PhotosScreen>(
-                enterTransition = ScreenTransition.PhotosScreen.transition.enterTransition,
-                exitTransition = ScreenTransition.PhotosScreen.transition.exitTransition
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
             ) {
                 val route = it.toRoute<Destination.PhotosScreen>()
 
@@ -271,7 +276,10 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
-            composable<Destination.VideoPreview> {
+            composable<Destination.VideoPreview>(
+                enterTransition = { fadeIn(tween(0)) },
+                exitTransition = { fadeOut(tween(0)) }
+            ) {
                 val route = it.toRoute<Destination.VideoPreview>()
 
                 VideoPreview(

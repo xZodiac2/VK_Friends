@@ -8,9 +8,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.ilya.core.appCommon.AccessTokenManager
-import com.ilya.core.appCommon.EventHandler
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
+import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.core.appCommon.enums.toggled
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable

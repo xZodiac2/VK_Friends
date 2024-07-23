@@ -17,9 +17,16 @@ data class RestrainedPhotosListResponse(
 
 data class PhotoDto(
     @Json(name = "album_id") val albumId: Int,
-    @Json(name = "id") override val id: Long,
-    @Json(name = "owner_id") override val ownerId: Long,
+    @Json(name = "id") val id: Long,
+    @Json(name = "owner_id") val ownerId: Long,
     @Json(name = "sizes") val sizes: List<SizeDto>,
     @Json(name = "likes") val likes: LikesDto? = null,
-    @Json(name = "access_key") override val accessKey: String = ""
-) : BaseAttachment()
+    @Json(name = "access_key") val accessKey: String = ""
+)
+
+data class SizeDto(
+    @Json(name = "type") val type: String = "",
+    @Json(name = "height") val height: Int = 0,
+    @Json(name = "width") val width: Int = 0,
+    @Json(name = "url") val url: String = ""
+)

@@ -3,8 +3,8 @@ package com.ilya.profileview.videoPreview
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.Likes

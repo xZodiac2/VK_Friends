@@ -26,3 +26,12 @@ data class FirstFrameDto(
     @Json(name = "width") val width: Int,
     @Json(name = "height") val height: Int
 )
+
+data class VideoDto(
+    @Json(name = "duration") val duration: Int = 0,
+    @Json(name = "image") val firstFrame: List<FirstFrameDto>,
+    @Json(name = "id") val id: Long,
+    @Json(name = "owner_id") val ownerId: Long,
+    @Json(name = "title") val title: String = "",
+    @Json(name = "access_key") val accessKey: String = ""
+)

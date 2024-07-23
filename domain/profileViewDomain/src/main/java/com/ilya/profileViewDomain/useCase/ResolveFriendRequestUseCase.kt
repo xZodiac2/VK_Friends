@@ -1,6 +1,6 @@
 package com.ilya.profileViewDomain.useCase
 
-import com.ilya.core.appCommon.UseCase
+import com.ilya.core.appCommon.base.UseCase
 import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.data.FriendsManageRemoteRepository
 import com.ilya.profileViewDomain.User

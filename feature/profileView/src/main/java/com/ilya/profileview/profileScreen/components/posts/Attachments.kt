@@ -69,19 +69,16 @@ internal fun Attachments(
 
             for (row in photosAndVideos.chunked(columns)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    val modifier = if (row.size == 1) {
-                        Modifier.fillMaxWidth()
-                    } else {
-                        Modifier
+                    val modifier = when (row.size) {
+                        1 -> Modifier.fillMaxWidth()
+                        else -> Modifier
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(4.dp))
                     }
-                    val contentScale = if (row.size == 1) {
-                        ContentScale.Fit
-                    } else {
-                        ContentScale.Crop
+                    val contentScale = when (row.size) {
+                        1 -> ContentScale.Fit
+                        else -> ContentScale.Crop
                     }
-
 
                     for (attachment in row) {
                         when (attachment) {
@@ -179,7 +176,10 @@ private fun Audio(
     isPlaying: Boolean,
     onAudioClick: () -> Unit
 ) {
-    val color = if (audio.url.isBlank()) Color.Gray else LocalColorScheme.current.primaryTextColor
+    val color = when {
+        audio.url.isBlank() -> Color.Gray
+        else -> LocalColorScheme.current.primaryTextColor
+    }
 
     Row(
         modifier = Modifier

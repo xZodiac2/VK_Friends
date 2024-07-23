@@ -124,14 +124,11 @@ fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
     )
 
     LaunchedEffect(Unit) {
+        viewModel.handleEvent(SearchScreenEvent.Start)
         snapshotFlow { users.itemCount }.collect {
             if (it == 0) return@collect
             initialDataLoaded = true
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(SearchScreenEvent.Start)
     }
 
 }

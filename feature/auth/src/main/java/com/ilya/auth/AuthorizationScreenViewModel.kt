@@ -3,8 +3,8 @@ package com.ilya.auth
 import androidx.lifecycle.ViewModel
 import com.ilya.auth.screen.AuthorizationScreenEvent
 import com.ilya.auth.screen.AuthorizationScreenState
-import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.vk.id.AccessToken
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -48,8 +48,8 @@ import com.ilya.profileview.profileScreen.components.posts.PostCard
 import com.ilya.profileview.profileScreen.components.posts.ResolveAppend
 import com.ilya.profileview.profileScreen.components.posts.ResolveRefresh
 import com.ilya.profileview.profileScreen.components.profileCommon.Photos
-import com.ilya.profileview.profileScreen.components.profileCommon.ProfileHeader
 import com.ilya.profileview.profileScreen.components.profileCommon.TopBar
+import com.ilya.profileview.profileScreen.components.profileCommon.profileHeader.ProfileHeader
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import com.ilya.theme.LocalColorScheme
@@ -86,10 +86,15 @@ fun ProfileScreen(
         containerColor = LocalColorScheme.current.primary,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
+            /**
+             * Using `eventReceiver::onBackClick` without `remember` causes many unnecessary recompositions of `IconButton` inside the `TopBar`
+             */
+            val onBackClick = remember { eventReceiver::onBackClick }
+
             TopBar(
                 userId = userId,
                 contentOffset = scrollBehavior.state.contentOffset,
-                onBackClick = eventReceiver::onBackClick
+                onBackClick = onBackClick
             )
         }
     ) { padding ->

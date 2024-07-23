@@ -2,8 +2,8 @@ package com.ilya.paging.pagingSources
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.ilya.core.appCommon.AccessTokenManager
-import com.ilya.core.appCommon.BaseFactory
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
+import com.ilya.core.appCommon.base.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.UserDataRemoteRepository
 import com.ilya.paging.PaginationError

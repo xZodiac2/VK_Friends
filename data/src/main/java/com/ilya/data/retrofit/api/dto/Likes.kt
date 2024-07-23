@@ -10,3 +10,9 @@ data class LikesResponse(
 data class LikesResponseData(
     @Json(name = "likes") val count: Int
 )
+
+
+data class LikesDto(
+    @Json(name = "count") val count: Int = 0,
+    @Json(name = "user_likes") val userLikes: Int = 0
+)

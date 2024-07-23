@@ -2,7 +2,6 @@ package com.ilya.data.retrofit
 
 import android.util.Log
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,16 +17,12 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 internal object RetrofitModule {
 
     @Provides
-    fun provideRetrofit(): Retrofit {
+    fun provideRetrofit(moshi: Moshi): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor { Log.d("okhttptag", it) }
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .build()
-
-        val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
             .build()
 
         val retrofit = Retrofit.Builder()

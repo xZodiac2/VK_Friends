@@ -1,7 +1,7 @@
 package com.ilya.data.retrofit.api
 
 import com.ilya.data.retrofit.CURRENT_API_VERSION
-import com.ilya.data.retrofit.api.dto.Response
+import com.ilya.data.retrofit.api.dto.GetUsersResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -14,7 +14,7 @@ internal interface UsersVkApi {
         @Query("fields") fields: List<String>,
         @Query("count") count: Int,
         @Query("offset") offset: Int,
-    ): Response
+    ): GetUsersResponse
 
     @GET("users.search?v=$CURRENT_API_VERSION")
     suspend fun searchUsers(
@@ -23,7 +23,7 @@ internal interface UsersVkApi {
         @Query("count") count: Int,
         @Query("offset") offset: Int,
         @Query("fields") fields: List<String>
-    ): Response
+    ): GetUsersResponse
 
     @GET("friends.getSuggestions?v=$CURRENT_API_VERSION")
     suspend fun getSuggestions(
@@ -31,7 +31,7 @@ internal interface UsersVkApi {
         @Query("count") count: Int,
         @Query("offset") offset: Int,
         @Query("fields") fields: List<String>
-    ): Response
+    ): GetUsersResponse
 
 }
 

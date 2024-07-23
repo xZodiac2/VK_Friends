@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -67,6 +69,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             VkFriendsAppTheme {
                 val navController = rememberNavController()
@@ -74,6 +77,7 @@ class MainActivity : ComponentActivity() {
                 var bottomBarVisible by remember { mutableStateOf(false) }
 
                 Scaffold(
+                    modifier = Modifier.safeDrawingPadding(),
                     bottomBar = {
                         if (bottomBarVisible) {
                             BottomBar(navController)

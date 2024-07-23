@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun VkFriendsAppTheme(content: @Composable () -> Unit) {
@@ -33,9 +32,6 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
     } else {
         ColorScheme()
     }
-
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(colorScheme.secondary)
 
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,

@@ -29,12 +29,6 @@ data class HistoryPostDto(
     @Json(name = "from_id") val authorId: Long,
 )
 
-abstract class BaseAttachment {
-    abstract val id: Long
-    abstract val ownerId: Long
-    open val accessKey: String = ""
-}
-
 data class AttachmentDto(
     @Json(name = "type") val type: String,
     @Json(name = "photo") val photo: PhotoDto? = null,
@@ -44,30 +38,10 @@ data class AttachmentDto(
 
 data class AudioDto(
     @Json(name = "artist") val artist: String = "",
-    @Json(name = "id") override val id: Long = 0,
-    @Json(name = "owner_id") override val ownerId: Long = 0,
+    @Json(name = "id") val id: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
     @Json(name = "title") val title: String = "",
     @Json(name = "duration") val duration: Int = 0,
     @Json(name = "url") val url: String = "",
-) : BaseAttachment()
-
-data class VideoDto(
-    @Json(name = "duration") val duration: Int = 0,
-    @Json(name = "image") val firstFrame: List<FirstFrameDto>,
-    @Json(name = "id") override val id: Long,
-    @Json(name = "owner_id") override val ownerId: Long,
-    @Json(name = "title") val title: String = "",
-    @Json(name = "access_key") override val accessKey: String = ""
-) : BaseAttachment()
-
-data class LikesDto(
-    @Json(name = "count") val count: Int = 0,
-    @Json(name = "user_likes") val userLikes: Int = 0
 )
 
-data class SizeDto(
-    @Json(name = "type") val type: String = "",
-    @Json(name = "height") val height: Int = 0,
-    @Json(name = "width") val width: Int = 0,
-    @Json(name = "url") val url: String = ""
-)

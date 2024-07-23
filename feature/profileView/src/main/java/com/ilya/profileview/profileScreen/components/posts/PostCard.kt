@@ -218,7 +218,7 @@ private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
 @Composable
 private fun RepostedAuthor(reposted: RepostedPost) {
     Row(
-        modifier = Modifier.padding(horizontal = 20.dp),
+        modifier = Modifier.padding(horizontal = 36.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

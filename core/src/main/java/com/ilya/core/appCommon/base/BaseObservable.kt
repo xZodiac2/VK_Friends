@@ -1,4 +1,4 @@
-package com.ilya.core.appCommon
+package com.ilya.core.appCommon.base
 
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.synchronized

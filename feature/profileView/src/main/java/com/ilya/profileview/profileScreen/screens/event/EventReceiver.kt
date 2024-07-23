@@ -1,6 +1,6 @@
 package com.ilya.profileview.profileScreen.screens.event
 
-import com.ilya.core.appCommon.EventHandler
+import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.paging.Audio
 import com.ilya.paging.Likes
 import com.ilya.paging.Post

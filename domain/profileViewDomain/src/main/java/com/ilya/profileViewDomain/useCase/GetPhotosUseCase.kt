@@ -1,6 +1,6 @@
 package com.ilya.profileViewDomain.useCase
 
-import com.ilya.core.appCommon.UseCase
+import com.ilya.core.appCommon.base.UseCase
 import com.ilya.data.UserDataRemoteRepository
 import com.ilya.paging.Photo
 import com.ilya.paging.mappers.toPhoto

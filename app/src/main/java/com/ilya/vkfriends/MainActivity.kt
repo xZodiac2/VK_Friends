@@ -35,7 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ilya.auth.screen.AuthorizationScreen
-import com.ilya.core.appCommon.AccessTokenManager
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.util.logThrowable
 import com.ilya.friendsview.screen.FriendsScreen
 import com.ilya.profileview.photosPreview.PhotosPreview
@@ -92,7 +92,6 @@ class MainActivity : ComponentActivity() {
                         showBottomBar = { bottomBarVisible = true }
                     )
                 }
-
             }
         }
     }
@@ -280,6 +279,5 @@ class MainActivity : ComponentActivity() {
             logThrowable(e)
         }
     }
-
 
 }

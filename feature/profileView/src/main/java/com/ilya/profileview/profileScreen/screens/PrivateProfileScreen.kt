@@ -31,8 +31,8 @@ import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
 import com.ilya.profileview.profileScreen.ProfileScreenState
 import com.ilya.profileview.profileScreen.ProfileScreenViewModel
-import com.ilya.profileview.profileScreen.components.profileCommon.ProfileHeader
 import com.ilya.profileview.profileScreen.components.profileCommon.TopBar
+import com.ilya.profileview.profileScreen.components.profileCommon.profileHeader.ProfileHeader
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import com.ilya.theme.LocalColorScheme

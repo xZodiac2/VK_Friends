@@ -1,8 +1,8 @@
-package com.ilya.core.appCommon
+package com.ilya.core.appCommon.accessToken
 
 import android.content.SharedPreferences
+import com.ilya.core.appCommon.base.BaseObservable
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vk.id.AccessToken
 import okio.IOException
 import javax.inject.Inject

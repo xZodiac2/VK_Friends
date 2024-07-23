@@ -1,4 +1,4 @@
-package com.ilya.core.appCommon
+package com.ilya.core.appCommon.accessToken
 
 import com.vk.id.AccessToken
 

@@ -2,7 +2,7 @@ package com.ilya.vkfriends.navigation.eventHandlers
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import com.ilya.core.appCommon.EventHandler
+import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.friendsview.screen.event.FriendsScreenNavEvent
 import com.ilya.vkfriends.navigation.Destination
 

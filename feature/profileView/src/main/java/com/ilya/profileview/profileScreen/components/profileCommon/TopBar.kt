@@ -25,7 +25,7 @@ internal fun TopBar(
     val contentScrolled = contentOffset < -50f
     val animatedBackgroundColor = animateColorAsState(
         targetValue = if (contentScrolled) {
-            LocalColorScheme.current.secondary
+            LocalColorScheme.current.background
         } else {
             LocalColorScheme.current.cardContainerColor
         },
@@ -52,9 +52,7 @@ internal fun TopBar(
                     )
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = animatedBackgroundColor.value
-            )
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = animatedBackgroundColor.value)
         )
     }
 }

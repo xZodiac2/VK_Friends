@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.ilya.core.appCommon.AccessTokenManager
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.friendsview.screen.event.FriendsScreenEvent

@@ -117,8 +117,6 @@ internal fun RestrainedPhotosPreview(
                 }
             }
         }
-
-
     }
 
 }

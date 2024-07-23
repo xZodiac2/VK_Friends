@@ -116,11 +116,14 @@ internal fun AllPhotosPreview(
 
         LaunchedEffect(Unit) {
             snapshotFlow { photos.itemSnapshotList.items }.collect { items ->
-                val likesList = items.mapNotNull {
-                    it.likes?.let { likes -> it.id to likes }
-                }.filter { it.first !in likesState.likes.keys }.toMap()
+                val likesMap = items
+                    .mapNotNull { photo ->
+                        photo.likes?.let { likes -> photo.id to likes }
+                    }
+                    .filterNot { (photoId, _) -> photoId in likesState.likes.keys }
+                    .toMap()
 
-                viewModel.handleEvent(PhotosPreviewEvent.PhotosAdded(likesList))
+                viewModel.handleEvent(PhotosPreviewEvent.PhotosAdded(likesMap))
             }
         }
 

@@ -7,6 +7,7 @@ import com.ilya.profileview.photosPreview.event.PhotosPreviewNavEvent
 import com.ilya.vkfriends.navigation.Destination
 
 class PhotosPreviewNavEventHandler(private val navController: NavController) : EventHandler<PhotosPreviewNavEvent> {
+
     override fun handleEvent(event: PhotosPreviewNavEvent) {
         when (event) {
             PhotosPreviewNavEvent.BackClick -> onBackClick()

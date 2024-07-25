@@ -2,10 +2,11 @@ package com.ilya.paging.mappers
 
 import com.ilya.data.retrofit.api.dto.VideoDto
 import com.ilya.data.retrofit.api.dto.VideoExtendedDto
-import com.ilya.paging.VideoExtended
+import com.ilya.paging.models.Video
+import com.ilya.paging.models.VideoExtended
 
-fun VideoDto.toVideo(): com.ilya.paging.Video {
-    return com.ilya.paging.Video(
+fun VideoDto.toVideo(): Video {
+    return Video(
         duration = duration,
         id = id,
         ownerId = ownerId,

@@ -7,8 +7,8 @@ import com.ilya.core.appCommon.base.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.UserDataRemoteRepository
 import com.ilya.paging.PaginationError
-import com.ilya.paging.Photo
 import com.ilya.paging.mappers.toPhoto
+import com.ilya.paging.models.Photo
 import java.io.IOException
 import javax.inject.Inject
 
@@ -24,9 +24,7 @@ class PhotosPagingSource private constructor(
             val key = params.key ?: 0
             val offset = key * params.loadSize
 
-            val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(
-                PaginationError.NoAccessToken
-            )
+            val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(PaginationError.NoAccessToken)
 
             val photos = remoteRepository.getPhotos(
                 accessToken = accessToken.token,

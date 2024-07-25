@@ -3,11 +3,11 @@ package com.ilya.profileViewDomain.useCase
 import com.ilya.core.appCommon.base.UseCase
 import com.ilya.core.appCommon.enums.ObjectType
 import com.ilya.data.LikesRemoteRepository
-import com.ilya.paging.Likeable
-import com.ilya.paging.Likes
-import com.ilya.paging.Photo
-import com.ilya.paging.Post
-import com.ilya.paging.VideoExtended
+import com.ilya.paging.models.Likeable
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Photo
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.VideoExtended
 import javax.inject.Inject
 
 class ResolveLikeUseCase @Inject constructor(

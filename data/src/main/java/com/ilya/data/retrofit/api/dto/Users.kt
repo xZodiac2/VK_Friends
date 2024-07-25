@@ -40,7 +40,7 @@ data class UserDto(
     @Json(name = "relation_partner") val partner: PartnerDto? = null,
     @Json(name = "friend_status") val friendStatus: Int = 0,
     @Json(name = "counters") val counters: CountersDto? = null,
-    @Json(name = "is_closed") val isClosed: Boolean
+    @Json(name = "is_closed") val isClosed: Boolean = true
 )
 
 data class PartnerDto(

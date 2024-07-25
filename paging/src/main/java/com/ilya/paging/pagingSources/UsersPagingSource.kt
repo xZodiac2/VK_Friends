@@ -8,8 +8,8 @@ import com.ilya.core.util.logThrowable
 import com.ilya.data.UsersRemoteRepository
 import com.ilya.data.retrofit.api.dto.UserDto
 import com.ilya.paging.PaginationError
-import com.ilya.paging.User
 import com.ilya.paging.mappers.toUser
+import com.ilya.paging.models.User
 import java.io.IOException
 import javax.inject.Inject
 
@@ -37,15 +37,13 @@ class UsersPagingSource private constructor(
 
             val offset = key * params.loadSize
 
-            val accessToken = accessTokenManager.accessToken?.token ?: return LoadResult.Error(
-                PaginationError.NoAccessToken
-            )
+            val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(PaginationError.NoAccessToken)
 
             val users = if (query.isEmpty()) {
-                val response = getSuggestions(accessToken, params.loadSize, offset)
-                response.ifEmpty { searchUsers(accessToken, params.loadSize, offset) }
+                val response = getSuggestions(accessToken.token, params.loadSize, offset)
+                response.ifEmpty { searchUsers(accessToken.token, params.loadSize, offset) }
             } else {
-                searchUsers(accessToken, params.loadSize, offset)
+                searchUsers(accessToken.token, params.loadSize, offset)
             }
 
             return LoadResult.Page(

@@ -7,20 +7,22 @@ import com.ilya.core.appCommon.base.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.GroupsRemoteRepository
 import com.ilya.data.UserDataRemoteRepository
+import com.ilya.data.WallRemoteRepository
 import com.ilya.data.retrofit.api.dto.HistoryPostDto
 import com.ilya.data.retrofit.api.dto.PostDto
 import com.ilya.paging.PaginationError
-import com.ilya.paging.Post
-import com.ilya.paging.RepostedPost
 import com.ilya.paging.mappers.toPost
 import com.ilya.paging.mappers.toRepostedPost
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.RepostedPost
 import kotlinx.coroutines.delay
 import java.io.IOException
 import javax.inject.Inject
 
 class PostsPagingSource private constructor(
-    private val userDataRemoteRepository: UserDataRemoteRepository,
+    private val wallRemoteRepository: WallRemoteRepository,
     private val groupsRemoteRepository: GroupsRemoteRepository,
+    private val userDataRemoteRepository: UserDataRemoteRepository,
     private val accessTokenManager: AccessTokenManager,
     private val userId: Long
 ) : PagingSource<Int, Post>() {
@@ -30,12 +32,10 @@ class PostsPagingSource private constructor(
             val key = params.key ?: 0
             val offset = key * params.loadSize
 
-            val accessToken = accessTokenManager.accessToken?.token ?: return LoadResult.Error(
-                PaginationError.NoAccessToken
-            )
+            val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(PaginationError.NoAccessToken)
 
-            val wall = userDataRemoteRepository.getWall(
-                accessToken = accessToken,
+            val wall = wallRemoteRepository.getWall(
+                accessToken = accessToken.token,
                 ownerId = userId,
                 count = params.loadSize,
                 offset = offset
@@ -45,8 +45,8 @@ class PostsPagingSource private constructor(
                 post.cotyHistory.firstOrNull()?.let { post.id to it }
             }.toMap()
 
-            val repostedWithOwners = reposted.injectPostOwners(accessToken)
-            val postsWithOwners = wall.injectPostOwners(accessToken)
+            val repostedWithOwners = reposted.injectPostOwners(accessToken.token)
+            val postsWithOwners = wall.injectPostOwners(accessToken.token)
 
             val posts = postsWithOwners.map {
                 it.copy(reposted = repostedWithOwners[it.id])
@@ -111,17 +111,18 @@ class PostsPagingSource private constructor(
     class Factory @Inject constructor(
         private val userDataRemoteRepository: UserDataRemoteRepository,
         private val accessTokenManager: AccessTokenManager,
-        private val groupsRemoteRepository: GroupsRemoteRepository
+        private val groupsRemoteRepository: GroupsRemoteRepository,
+        private val wallRemoteRepository: WallRemoteRepository
     ) : BaseFactory<Long, PostsPagingSource> {
         override fun newInstance(initializationData: Long): PostsPagingSource {
             return PostsPagingSource(
                 userDataRemoteRepository = userDataRemoteRepository,
                 groupsRemoteRepository = groupsRemoteRepository,
                 accessTokenManager = accessTokenManager,
+                wallRemoteRepository = wallRemoteRepository,
                 userId = initializationData
             )
         }
-
     }
 
 }

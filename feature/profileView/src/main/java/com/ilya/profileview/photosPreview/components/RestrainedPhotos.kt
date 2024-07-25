@@ -25,8 +25,8 @@ import androidx.compose.ui.graphics.Color
 import coil.compose.SubcomposeAsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.paging.Likes
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel
 import com.ilya.profileview.photosPreview.event.PhotosPreviewEvent
 import com.ilya.profileview.photosPreview.states.PhotosPreviewNavState

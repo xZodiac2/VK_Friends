@@ -14,11 +14,13 @@ import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.core.appCommon.enums.toggled
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
-import com.ilya.paging.Audio
-import com.ilya.paging.Likes
-import com.ilya.paging.Post
+import com.ilya.paging.models.Audio
+import com.ilya.paging.models.Comment
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.toggled
+import com.ilya.paging.pagingSources.CommentsPagingSource
 import com.ilya.paging.pagingSources.PostsPagingSource
-import com.ilya.paging.toggled
 import com.ilya.profileViewDomain.User
 import com.ilya.profileViewDomain.useCase.GetUserDataUseCase
 import com.ilya.profileViewDomain.useCase.ResolveFriendRequestUseCase
@@ -30,13 +32,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okio.IOException
 import javax.inject.Inject
@@ -46,30 +50,60 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager,
     private val getUserDataUseCase: GetUserDataUseCase,
     private val resolveFriendRequestUseCase: ResolveFriendRequestUseCase,
-    private val postsPagingSourceFactory: PostsPagingSource.Factory,
     private val resolveLikeUseCase: ResolveLikeUseCase,
+    private val postsPagingSourceFactory: PostsPagingSource.Factory,
+    private val commentsPagingSourceFactory: CommentsPagingSource.Factory,
     private val mediaPlayer: MediaPlayer
 ) : ViewModel(), EventHandler<ProfileScreenEvent> {
 
     private val userId = MutableStateFlow(DEFAULT_USER_ID)
+    private val postId = MutableStateFlow(DEFAULT_POST_ID)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val postsFlow: Flow<PagingData<Post>> = userId.flatMapLatest { id ->
-        if (id == DEFAULT_USER_ID) {
-            return@flatMapLatest flow { emit(PagingData.empty()) }
-        }
-        newPager(id).flow
+    val postsFlow = userId.flatMapLatest { id ->
+        if (id == DEFAULT_USER_ID) return@flatMapLatest flow { emit(PagingData.empty()) }
+        newPostsPager(id).flow
     }.cachedIn(viewModelScope)
 
-    private fun newPager(userId: Long): Pager<Int, Post> {
+    private fun newPostsPager(userId: Long): Pager<Int, Post> {
         return Pager(
             config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                initialLoadSize = INITIAL_LOAD_SIZE
+                pageSize = POSTS_PAGE_SIZE,
+                initialLoadSize = INITIAL_POSTS_LOAD_SIZE
             ),
             pagingSourceFactory = { postsPagingSourceFactory.newInstance(userId) }
         )
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val commentsFlow = postId.flatMapLatest { id ->
+        if (id == DEFAULT_POST_ID) return@flatMapLatest flow { emit(PagingData.empty()) }
+        newCommentsPager(id).flow
+    }.cachedIn(viewModelScope)
+
+    private fun newCommentsPager(postId: Long): Pager<Int, Comment> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = COMMENTS_PAGE_SIZE,
+                initialLoadSize = INITIAL_COMMENTS_LOAD_SIZE
+            ),
+            pagingSourceFactory = {
+                val initData = CommentsPagingSource.InitData(
+                    ownerId = userId.value,
+                    postId = postId
+                )
+                commentsPagingSourceFactory.newInstance(initData)
+            }
+        )
+    }
+
+    val bottomSheetState = postId.map {
+        CommentsBottomSheetState(it != DEFAULT_POST_ID, commentsFlow)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = CommentsBottomSheetState(false, flow { emit(PagingData.empty()) })
+    )
 
     private val _screenState = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
     val screenState = _screenState.asStateFlow()
@@ -81,8 +115,7 @@ internal class ProfileScreenViewModel @Inject constructor(
     val likesState = _likesState.asStateFlow()
 
     // current looping audio to mediaPlayer.isPlaying
-    private val _currentLoopingAudioState =
-        MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
+    private val _currentLoopingAudioState = MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
     val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
 
     private val _audioLoadingState =
@@ -104,10 +137,20 @@ internal class ProfileScreenViewModel @Inject constructor(
             is ProfileScreenEvent.PostsAdded -> onPostsAdded(event.newLikes)
             is ProfileScreenEvent.AudioClick -> onAudioClick(event.audio)
             is ProfileScreenEvent.NewNavEvent -> onNewNavEvent(event.navEvent)
+            is ProfileScreenEvent.CommentsClick -> onCommentsClick(event.postId)
             ProfileScreenEvent.Retry -> onRetry()
             ProfileScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
             ProfileScreenEvent.Back -> onBack()
+            ProfileScreenEvent.DismissBottomSheet -> onDismissBottomSheet()
         }
+    }
+
+    private fun onDismissBottomSheet() {
+        this.postId.value = DEFAULT_POST_ID
+    }
+
+    private fun onCommentsClick(postId: Long) {
+        this.postId.value = postId
     }
 
     private fun onNewNavEvent(event: ProfileScreenNavEvent) {
@@ -308,8 +351,11 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     companion object {
         private const val DEFAULT_USER_ID: Long = -1
-        private const val PAGE_SIZE = 3
-        private const val INITIAL_LOAD_SIZE = 3
+        private const val DEFAULT_POST_ID: Long = -1
+        private const val POSTS_PAGE_SIZE = 3
+        private const val INITIAL_POSTS_LOAD_SIZE = 3
+        private const val COMMENTS_PAGE_SIZE = 10
+        private const val INITIAL_COMMENTS_LOAD_SIZE = 10
     }
 
 }

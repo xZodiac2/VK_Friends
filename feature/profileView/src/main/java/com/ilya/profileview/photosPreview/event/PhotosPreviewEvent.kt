@@ -1,7 +1,7 @@
 package com.ilya.profileview.photosPreview.event
 
-import com.ilya.paging.Likes
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Photo
 
 
 internal sealed interface PhotosPreviewEvent {

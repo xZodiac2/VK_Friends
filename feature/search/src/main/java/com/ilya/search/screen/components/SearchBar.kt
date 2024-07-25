@@ -1,5 +1,6 @@
 package com.ilya.search.screen.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,21 +31,24 @@ import com.ilya.theme.LocalColorScheme
 @Composable
 internal fun SearchBar(
     onSearch: (String) -> Unit,
-    heightOffset: Float,
-    heightOffsetLimit: Float,
+    topBarCollapsed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var inputStateValue by rememberSaveable { mutableStateOf("") }
 
+    val background = animateColorAsState(
+        targetValue = if (topBarCollapsed) {
+            LocalColorScheme.current.secondary
+        } else {
+            LocalColorScheme.current.primary
+        },
+        label = "searchBarBackground"
+    )
+
     Box(
         modifier = modifier
-            .background(
-                when (heightOffset) {
-                    heightOffsetLimit -> LocalColorScheme.current.secondary
-                    else -> LocalColorScheme.current.primary
-                }
-            )
+            .background(background.value)
             .fillMaxWidth()
             .padding(16.dp),
     ) {

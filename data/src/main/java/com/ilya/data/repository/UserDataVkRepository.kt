@@ -5,7 +5,6 @@ import com.ilya.data.UserDataRemoteRepository
 import com.ilya.data.retrofit.api.UserDataVkApi
 import com.ilya.data.retrofit.api.dto.PhotoDto
 import com.ilya.data.retrofit.api.dto.PhotosResponseData
-import com.ilya.data.retrofit.api.dto.PostDto
 import com.ilya.data.retrofit.api.dto.UserDto
 import com.ilya.data.retrofit.api.dto.VideoExtendedDto
 import kotlinx.coroutines.Dispatchers
@@ -34,22 +33,6 @@ internal class UserDataVkRepository @Inject constructor(
                 nameCase = nameCase.value
             )
         }.response.first()
-    }
-
-    override suspend fun getWall(
-        accessToken: String,
-        ownerId: Long,
-        count: Int,
-        offset: Int
-    ): List<PostDto> {
-        return withContext(Dispatchers.IO) {
-            api.getWall(
-                accessToken = accessToken,
-                ownerId = ownerId,
-                offset = offset,
-                count = count
-            )
-        }.response.items
     }
 
     override suspend fun getVideoData(

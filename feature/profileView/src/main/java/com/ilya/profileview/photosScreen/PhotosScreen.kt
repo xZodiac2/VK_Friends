@@ -39,7 +39,7 @@ import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.core.basicComposables.OnError
 import com.ilya.paging.PaginationError
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Photo
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.event.PhotosScreenEvent
 import com.ilya.profileview.photosScreen.event.PhotosScreenNavEvent

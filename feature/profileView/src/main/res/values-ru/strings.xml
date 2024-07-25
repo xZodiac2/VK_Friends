@@ -50,4 +50,7 @@
     <string name="private_profile">Этот профиль приватный</string>
     <string name="add_user_to_friends_to_see_info">Добавьте этого пользователя в друзья, чтобы видеть его фотографии, посты и другую информацию</string>
     <string name="you_already_on_reqiered_profile">Вы уже на этом профиле</string>
+    <string name="comments">Комментарии</string>
+    <string name="user_not_supports">Этот тип пользователя не поддерживается</string>
+    <string name="this_type_of_comment_is_not_supports">Этот тип комментария не поддерживается</string>
 </resources>

@@ -1,8 +1,8 @@
 package com.ilya.paging.mappers
 
 import com.ilya.data.retrofit.api.dto.UserDto
-import com.ilya.paging.PostAuthor
-import com.ilya.paging.User
+import com.ilya.paging.models.PostAuthor
+import com.ilya.paging.models.User
 import com.vk.id.AccessToken
 import com.vk.id.VKIDUser
 

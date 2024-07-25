@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Photo
 import com.ilya.profileview.R
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography

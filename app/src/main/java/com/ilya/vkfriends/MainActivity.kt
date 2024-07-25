@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -77,7 +76,6 @@ class MainActivity : ComponentActivity() {
                 var bottomBarVisible by remember { mutableStateOf(false) }
 
                 Scaffold(
-                    modifier = Modifier.safeDrawingPadding(),
                     bottomBar = {
                         if (bottomBarVisible) {
                             BottomBar(navController)
@@ -103,7 +101,7 @@ class MainActivity : ComponentActivity() {
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
 
         NavigationBar(
-            containerColor = LocalColorScheme.current.primary,
+            containerColor = LocalColorScheme.current.secondary,
             modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
         ) {
             navigationBarItems.forEach { item ->
@@ -159,8 +157,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable<Destination.FriendsScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }
             ) {
                 val eventHandler = FriendsScreenNavEventHandler(navController)
 
@@ -173,7 +171,8 @@ class MainActivity : ComponentActivity() {
             composable<Destination.ProfileScreen>(
                 enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
                 popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
+                exitTransition = { fadeOut(tween(0)) },
+                popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(1000))}
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<Destination.ProfileScreen>()
                 val eventHandler = ProfileScreenNavEventHandler(navController)
@@ -211,7 +210,7 @@ class MainActivity : ComponentActivity() {
             composable<Destination.PhotosScreen>(
                 enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
                 popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
+                exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right) }
             ) {
                 val route = it.toRoute<Destination.PhotosScreen>()
                 val eventHandler = PhotosScreenNavEventHandler(navController)

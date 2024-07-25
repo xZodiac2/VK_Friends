@@ -1,18 +1,23 @@
 package com.ilya.paging.mappers
 
 import com.ilya.core.appCommon.enums.AttachmentType
-import com.ilya.core.appCommon.parseUnixTimeToString
+import com.ilya.core.appCommon.parseUnixTime
 import com.ilya.data.retrofit.api.dto.AudioDto
+import com.ilya.data.retrofit.api.dto.CommentsInfoDto
 import com.ilya.data.retrofit.api.dto.GroupDto
 import com.ilya.data.retrofit.api.dto.HistoryPostDto
 import com.ilya.data.retrofit.api.dto.PostDto
 import com.ilya.data.retrofit.api.dto.UserDto
-import com.ilya.paging.Post
+import com.ilya.paging.models.Audio
+import com.ilya.paging.models.CommentsInfo
+import com.ilya.paging.models.Group
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.RepostedPost
 
 
 fun PostDto.toPost(
     owner: UserDto,
-    reposted: com.ilya.paging.RepostedPost? = null
+    reposted: RepostedPost? = null
 ): Post {
     val videos = attachments.mapNotNull { attachment ->
         if (attachment.type == AttachmentType.VIDEO.value) {
@@ -38,7 +43,7 @@ fun PostDto.toPost(
 
     return Post(
         id = id,
-        date = parseUnixTimeToString(dateUnixTime),
+        date = parseUnixTime(dateUnixTime),
         text = text,
         photos = photos,
         videos = videos,
@@ -46,14 +51,23 @@ fun PostDto.toPost(
         author = owner.toPostAuthor(),
         likes = likes.toLikes(),
         reposted = reposted,
-        ownerId = ownerId
+        ownerId = ownerId,
+        commentsInfo = commentsInfo.toCommentInfo()
+    )
+}
+
+private fun CommentsInfoDto.toCommentInfo(): CommentsInfo {
+    return CommentsInfo(
+        count = count,
+        canComment = canPost == 1,
+        canView = canView == 1
     )
 }
 
 fun HistoryPostDto.toRepostedPost(
     owner: UserDto?,
     group: GroupDto?,
-): com.ilya.paging.RepostedPost {
+): RepostedPost {
     val videos = attachments.mapNotNull { attachment ->
         if (attachment.type == AttachmentType.VIDEO.value) {
             attachment.video?.toVideo()
@@ -76,7 +90,7 @@ fun HistoryPostDto.toRepostedPost(
         }
     }
 
-    return com.ilya.paging.RepostedPost(
+    return RepostedPost(
         videos = videos,
         photos = photos,
         audios = audios,
@@ -88,16 +102,16 @@ fun HistoryPostDto.toRepostedPost(
     )
 }
 
-private fun GroupDto.toGroup(): com.ilya.paging.Group {
-    return com.ilya.paging.Group(
+private fun GroupDto.toGroup(): Group {
+    return Group(
         id = id,
         name = name,
         photoUrl = photoUrl
     )
 }
 
-private fun AudioDto.toAudio(): com.ilya.paging.Audio {
-    return com.ilya.paging.Audio(
+private fun AudioDto.toAudio(): Audio {
+    return Audio(
         id = id,
         artist = artist,
         ownerId = ownerId,

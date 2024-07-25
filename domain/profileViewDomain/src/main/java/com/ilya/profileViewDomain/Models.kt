@@ -3,7 +3,7 @@ package com.ilya.profileViewDomain
 import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.appCommon.enums.Relation
 import com.ilya.core.appCommon.enums.Sex
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Photo
 
 data class User(
     val id: Long,

@@ -3,7 +3,6 @@ package com.ilya.data
 import com.ilya.core.appCommon.enums.NameCase
 import com.ilya.data.retrofit.api.dto.PhotoDto
 import com.ilya.data.retrofit.api.dto.PhotosResponseData
-import com.ilya.data.retrofit.api.dto.PostDto
 import com.ilya.data.retrofit.api.dto.UserDto
 import com.ilya.data.retrofit.api.dto.VideoExtendedDto
 
@@ -15,13 +14,6 @@ interface UserDataRemoteRepository {
         nameCase: NameCase = NameCase.NOMINATIVE,
         fields: List<String>
     ): UserDto
-
-    suspend fun getWall(
-        accessToken: String,
-        ownerId: Long,
-        count: Int,
-        offset: Int
-    ): List<PostDto>
 
     suspend fun getVideoData(
         accessToken: String,

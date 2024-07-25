@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ilya.paging.Likes
-import com.ilya.paging.Photo
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Photo
 import com.ilya.profileview.R
 import com.ilya.theme.LocalTypography
 

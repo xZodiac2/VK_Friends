@@ -1,10 +1,10 @@
 package com.ilya.profileview.profileScreen.screens.event
 
 import com.ilya.core.appCommon.base.EventHandler
-import com.ilya.paging.Audio
-import com.ilya.paging.Likes
-import com.ilya.paging.Post
-import com.ilya.paging.Video
+import com.ilya.paging.models.Audio
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.Video
 import com.ilya.profileViewDomain.User
 
 internal class EventReceiver(private val eventHandler: EventHandler<ProfileScreenEvent>) {
@@ -72,6 +72,14 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
 
     fun onStart(userId: Long) {
         eventHandler.handleEvent(ProfileScreenEvent.Start(userId))
+    }
+
+    fun onCommentsClick(ownerId: Long) {
+        eventHandler.handleEvent(ProfileScreenEvent.CommentsClick(ownerId))
+    }
+
+    fun onDismissCommentsSheet() {
+        eventHandler.handleEvent(ProfileScreenEvent.DismissBottomSheet)
     }
 
 }

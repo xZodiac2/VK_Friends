@@ -1,8 +1,11 @@
 package com.ilya.profileview.profileScreen
 
 import androidx.compose.runtime.Stable
-import com.ilya.paging.Likes
+import androidx.paging.PagingData
+import com.ilya.paging.models.Comment
+import com.ilya.paging.models.Likes
 import com.ilya.profileViewDomain.User
+import kotlinx.coroutines.flow.Flow
 
 @Stable
 internal sealed interface ProfileScreenState {
@@ -20,3 +23,9 @@ internal sealed interface AudioLoadIndicatorState {
     data object Idle : AudioLoadIndicatorState
     data object Loading : AudioLoadIndicatorState
 }
+
+@Stable
+internal data class CommentsBottomSheetState(
+    val showSheet: Boolean,
+    val commentsFlow: Flow<PagingData<Comment>>
+)

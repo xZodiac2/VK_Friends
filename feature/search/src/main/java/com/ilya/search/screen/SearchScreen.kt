@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +52,7 @@ import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.paging.User
+import com.ilya.paging.models.User
 import com.ilya.search.R
 import com.ilya.search.SearchViewModel
 import com.ilya.search.screen.components.OnEmptyUsers
@@ -95,13 +96,15 @@ fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
                     onPlaceholderClick = { viewModel.handleEvent(SearchScreenEvent.PlugAvatarClick) },
                     scrollBehavior = scrollBehavior
                 )
+                val topBarCollapsed by remember {
+                    derivedStateOf { scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit }
+                }
                 SearchBar(
                     onSearch = {
                         initialDataLoaded = false
                         viewModel.handleEvent(SearchScreenEvent.Search(it))
                     },
-                    heightOffset = scrollBehavior.state.heightOffset,
-                    heightOffsetLimit = scrollBehavior.state.heightOffsetLimit
+                    topBarCollapsed = topBarCollapsed
                 )
             }
         },

@@ -1,6 +1,7 @@
 package com.ilya.profileview.profileScreen.components.posts
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -31,11 +32,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.ilya.paging.Audio
-import com.ilya.paging.Likes
-import com.ilya.paging.Post
-import com.ilya.paging.PostAuthor
-import com.ilya.paging.RepostedPost
+import com.ilya.paging.models.Audio
+import com.ilya.paging.models.CommentsInfo
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.Post
+import com.ilya.paging.models.PostAuthor
+import com.ilya.paging.models.RepostedPost
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
@@ -64,9 +66,11 @@ internal fun PostCard(
                 PostText(post, attachments.isEmpty())
                 Attachments(attachments, currentLoopingAudio, eventReceiver)
                 OptionalRepostedPost(post, currentLoopingAudio, eventReceiver)
-                Likes(
+                BottomPostRow(
                     likes = likes,
-                    onLikeClick = { eventReceiver.onLikeClick(post.copy(likes = it)) }
+                    commentsInfo = post.commentsInfo,
+                    onLikeClick = { eventReceiver.onLikeClick(post.copy(likes = it)) },
+                    onCommentsClick = { eventReceiver.onCommentsClick(post.id) }
                 )
             }
         }
@@ -158,10 +162,61 @@ private fun Author(author: PostAuthor, date: String, eventReceiver: EventReceive
 }
 
 @Composable
+private fun BottomPostRow(
+    likes: Likes?,
+    commentsInfo: CommentsInfo,
+    onLikeClick: (Likes) -> Unit,
+    onCommentsClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Likes(likes, onLikeClick)
+        Comments(commentsInfo, onCommentsClick)
+    }
+}
+
+@Composable
+private fun Comments(commentsInfo: CommentsInfo, onCommentsClick: () -> Unit) {
+    if (commentsInfo.canView) {
+        Box(
+            modifier = Modifier
+                .padding()
+                .clickable { onCommentsClick() }
+                .clip(RoundedCornerShape(20.dp))
+                .background(LocalColorScheme.current.background)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                modifier = Modifier.animateContentSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(R.drawable.comment),
+                    tint = LocalColorScheme.current.primaryTextColor,
+                    contentDescription = "postComments"
+                )
+                if (commentsInfo.count > 0) {
+                    Text(
+                        text = commentsInfo.count.coerceAtLeast(0).toString(),
+                        color = LocalColorScheme.current.primaryTextColor,
+                        fontSize = LocalTypography.current.average
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
     Box(
         modifier = Modifier
-            .padding(bottom = 8.dp, start = 12.dp)
             .clickable { likes?.let(onLikeClick) }
             .clip(RoundedCornerShape(20.dp))
             .background(LocalColorScheme.current.background)
@@ -169,6 +224,7 @@ private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Row(
+            modifier = Modifier.animateContentSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -206,8 +262,9 @@ private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
                             } else {
                                 LocalColorScheme.current.primaryTextColor
                             },
-                            fontSize = LocalTypography.current.tiny
+                            fontSize = LocalTypography.current.average
                         )
+
                     }
                 }
             }

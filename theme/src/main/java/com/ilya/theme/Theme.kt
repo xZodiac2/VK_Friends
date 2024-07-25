@@ -3,6 +3,9 @@ package com.ilya.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -27,7 +30,8 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
             unselectedIconColor = DarkColorScheme.unselectedIconColor,
             bottomNavSelectedIndicatorColor = DarkColorScheme.bottomNavSelectedIndicatorColor,
             iconTintColor = DarkColorScheme.iconTintColor,
-            primaryIconTintColor = DarkColorScheme.primaryIconTintColor
+            primaryIconTintColor = DarkColorScheme.primaryIconTintColor,
+            faded = DarkColorScheme.faded
         )
     } else {
         ColorScheme()
@@ -37,6 +41,10 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
         LocalColorScheme provides colorScheme,
         LocalTypography provides Typography
     ) {
-        Box(modifier = Modifier.background(colorScheme.primary)) { content() }
+        Box(
+            modifier = Modifier
+                .background(LocalColorScheme.current.secondary)
+                .windowInsetsPadding(WindowInsets.systemBars)
+        ) { content() }
     }
 }

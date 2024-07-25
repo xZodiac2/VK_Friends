@@ -6,12 +6,14 @@ import com.ilya.data.LikesRemoteRepository
 import com.ilya.data.UserDataRemoteRepository
 import com.ilya.data.UsersRemoteRepository
 import com.ilya.data.VkApiExecutor
+import com.ilya.data.WallRemoteRepository
 import com.ilya.data.repository.FriendsManageVkRepository
 import com.ilya.data.repository.GroupVkRepository
 import com.ilya.data.repository.LikesVkRepository
 import com.ilya.data.repository.UserDataVkRepository
 import com.ilya.data.repository.UserExtendedDataExecutor
 import com.ilya.data.repository.UsersVkRepository
+import com.ilya.data.repository.WallVkRepository
 import com.ilya.data.retrofit.api.dto.UserExtendedResponseData
 import dagger.Binds
 import dagger.Module
@@ -39,5 +41,8 @@ internal interface RemoteRepositoryModule {
 
     @Binds
     fun bindGroupsRemoteRepository(impl: GroupVkRepository): GroupsRemoteRepository
+
+    @Binds
+    fun bindWallRemoteRepository(impl: WallVkRepository): WallRemoteRepository
 
 }

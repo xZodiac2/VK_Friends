@@ -4,8 +4,9 @@ import com.ilya.core.appCommon.enums.PhotoSize
 import com.ilya.data.retrofit.api.dto.FirstFrameDto
 import com.ilya.data.retrofit.api.dto.PhotoDto
 import com.ilya.data.retrofit.api.dto.SizeDto
-import com.ilya.paging.FirstFrame
-import com.ilya.paging.Photo
+import com.ilya.paging.models.FirstFrame
+import com.ilya.paging.models.Photo
+import com.ilya.paging.models.Size
 
 
 fun FirstFrameDto.toFirstFrame(): FirstFrame {
@@ -27,8 +28,8 @@ fun PhotoDto.toPhoto(): Photo {
     )
 }
 
-fun SizeDto.toSize(): com.ilya.paging.Size {
-    return com.ilya.paging.Size(
+fun SizeDto.toSize(): Size {
+    return Size(
         type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
         height = height,
         width = width,

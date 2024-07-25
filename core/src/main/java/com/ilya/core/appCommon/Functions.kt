@@ -19,7 +19,7 @@ fun MediaPlayer.configure(): MediaPlayer {
     return this
 }
 
-fun parseUnixTimeToString(dateUnixTime: Long): String {
+fun parseUnixTime(dateUnixTime: Long): String {
     val date = Date(dateUnixTime * 1000L)
     val formatter = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
     return formatter.format(date)

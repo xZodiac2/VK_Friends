@@ -42,8 +42,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
-import com.ilya.paging.Likes
-import com.ilya.paging.VideoExtended
+import com.ilya.paging.models.Likes
+import com.ilya.paging.models.VideoExtended
 import com.ilya.theme.LocalTypography
 
 @Composable

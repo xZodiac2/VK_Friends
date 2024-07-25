@@ -62,7 +62,7 @@ internal fun PrivateProfile(
             TopBar(
                 onBackClick = eventReceiver::onBackClick,
                 userId = userId,
-                contentOffset = 0f,
+                contentScrolled = false,
             )
         }
     ) { padding ->

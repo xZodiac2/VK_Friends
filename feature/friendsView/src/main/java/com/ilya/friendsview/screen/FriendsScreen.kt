@@ -60,17 +60,14 @@ import com.ilya.friendsview.screen.components.ResolveAppend
 import com.ilya.friendsview.screen.components.ResolveRefresh
 import com.ilya.friendsview.screen.event.FriendsScreenEvent
 import com.ilya.friendsview.screen.event.FriendsScreenNavEvent
-import com.ilya.paging.User
+import com.ilya.paging.models.User
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun FriendsScreen(
-    handleNavEvent: (FriendsScreenNavEvent) -> Unit,
-    onExitConfirm: () -> Unit,
-) {
+fun FriendsScreen(handleNavEvent: (FriendsScreenNavEvent) -> Unit, onExitConfirm: () -> Unit) {
     val viewModel: FriendsScreenViewModel = hiltViewModel()
 
     val friends = viewModel.pagingFlow.collectAsLazyPagingItems()
@@ -126,14 +123,11 @@ fun FriendsScreen(
     )
 
     LaunchedEffect(Unit) {
+        viewModel.handleEvent(FriendsScreenEvent.Start)
         snapshotFlow { friends.itemCount }.collect {
             if (it == 0) return@collect
             initialDataLoaded = true
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(FriendsScreenEvent.Start)
     }
 
 }

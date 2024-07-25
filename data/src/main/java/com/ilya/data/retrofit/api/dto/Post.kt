@@ -19,7 +19,14 @@ data class PostDto(
     @Json(name = "date") val dateUnixTime: Long,
     @Json(name = "from_id") val authorId: Long,
     @Json(name = "owner_id") val ownerId: Long,
-    @Json(name = "copy_history") val cotyHistory: List<HistoryPostDto> = emptyList()
+    @Json(name = "copy_history") val cotyHistory: List<HistoryPostDto> = emptyList(),
+    @Json(name = "comments") val commentsInfo: CommentsInfoDto
+)
+
+data class CommentsInfoDto(
+    @Json(name = "can_view") val canView: Int,
+    @Json(name = "can_post") val canPost: Int,
+    @Json(name = "count") val count: Int
 )
 
 data class HistoryPostDto(

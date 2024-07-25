@@ -2,8 +2,8 @@ package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.base.UseCase
 import com.ilya.data.UserDataRemoteRepository
-import com.ilya.paging.VideoExtended
 import com.ilya.paging.mappers.toVideoExtended
+import com.ilya.paging.models.VideoExtended
 import javax.inject.Inject
 
 class GetVideoUseCase @Inject constructor(

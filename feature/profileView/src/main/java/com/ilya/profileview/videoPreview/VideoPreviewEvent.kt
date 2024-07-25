@@ -1,6 +1,7 @@
 package com.ilya.profileview.videoPreview
 
-import com.ilya.paging.VideoExtended
+import com.ilya.paging.models.VideoExtended
+
 
 internal sealed interface VideoPreviewEvent {
     data object SnackbarConsumed : VideoPreviewEvent

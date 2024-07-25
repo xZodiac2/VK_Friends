@@ -10,8 +10,8 @@ import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.basicComposables.alertDialog.AlertDialogState
 import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.friendsview.screen.event.FriendsScreenEvent
-import com.ilya.paging.User
 import com.ilya.paging.mappers.toUser
+import com.ilya.paging.models.User
 import com.ilya.paging.pagingSources.FriendsPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

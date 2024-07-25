@@ -7,8 +7,8 @@ import com.ilya.core.appCommon.base.BaseFactory
 import com.ilya.core.util.logThrowable
 import com.ilya.data.UsersRemoteRepository
 import com.ilya.paging.PaginationError
-import com.ilya.paging.User
 import com.ilya.paging.mappers.toUser
+import com.ilya.paging.models.User
 import java.io.IOException
 import javax.inject.Inject
 
@@ -22,12 +22,10 @@ class FriendsPagingSource private constructor(
             val key = params.key ?: 0
             val offset = key * params.loadSize
 
-            val accessToken = accessTokenManager.accessToken?.token ?: return LoadResult.Error(
-                PaginationError.NoAccessToken
-            )
+            val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(PaginationError.NoAccessToken)
 
             val friends = usersRemoteRepository.getFriends(
-                accessToken = accessToken,
+                accessToken = accessToken.token,
                 offset = offset,
                 count = params.loadSize,
                 fields = DEFAULT_FIELDS

@@ -24,7 +24,7 @@ import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.basicComposables.OnError
 import com.ilya.paging.PaginationError
-import com.ilya.paging.Post
+import com.ilya.paging.models.Post
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.ErrorType
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver

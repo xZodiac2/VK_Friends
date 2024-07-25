@@ -41,9 +41,7 @@ class ProfileScreenNavEventHandler(private val navController: NavController) : E
         navController.navigate(Destination.PhotosPreview(userId, targetIndex))
     }
 
-
     private fun onOpenPhotosClick(userId: Long) = navController.navigate(Destination.PhotosScreen(userId))
-
 
     private fun onEmptyAccessToken() {
         navController.navigate(Destination.AuthScreen) {
@@ -53,9 +51,7 @@ class ProfileScreenNavEventHandler(private val navController: NavController) : E
         }
     }
 
-    private fun onBackClick() {
-        navController.popBackStack()
-    }
+    private fun onBackClick() = navController.popBackStack()
 
     private fun Map<Long, String>.toIdsString(): String {
         val ids = keys.map {

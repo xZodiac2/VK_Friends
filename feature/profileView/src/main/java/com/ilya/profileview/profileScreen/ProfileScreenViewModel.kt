@@ -154,9 +154,11 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onNewNavEvent(event: ProfileScreenNavEvent) {
-        if (event is ProfileScreenNavEvent.PostAuthorClick && userId.value == event.id) {
-            showSnackbar(R.string.you_already_on_reqiered_profile)
-            return
+        if (event is ProfileScreenNavEvent.AnotherProfileClick) {
+            if (userId.value == event.id) {
+                showSnackbar(R.string.you_already_on_reqiered_profile)
+                return
+            }
         }
 
         viewModelScope.launch { _navEventFlow.emit(event) }

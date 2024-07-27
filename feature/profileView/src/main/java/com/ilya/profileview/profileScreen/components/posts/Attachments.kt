@@ -22,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +45,7 @@ import com.ilya.theme.LocalTypography
 @Composable
 internal fun Attachments(
     attachments: List<Attachment>,
-    currentLoopingAudio: Pair<Audio?, Boolean>,
+    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
     eventReceiver: EventReceiver
 ) {
     val photos = attachments.mapNotNull { it as? Photo }
@@ -113,7 +114,7 @@ internal fun Attachments(
             Audio(
                 audio = audio,
                 onAudioClick = { eventReceiver.onAudioClick(audio) },
-                isPlaying = currentLoopingAudio.second && currentLoopingAudio.first == audio
+                currentLoopingAudio = currentLoopingAudio
             )
         }
     }
@@ -173,8 +174,8 @@ private fun RowScope.Video(
 @Composable
 private fun Audio(
     audio: Audio,
-    isPlaying: Boolean,
-    onAudioClick: () -> Unit
+    onAudioClick: () -> Unit,
+    currentLoopingAudio: State<Pair<Audio?, Boolean>>
 ) {
     val color = when {
         audio.url.isBlank() -> Color.Gray
@@ -244,6 +245,8 @@ private fun Audio(
                 colors = ButtonDefaults.buttonColors(containerColor = LocalColorScheme.current.background),
                 contentPadding = PaddingValues(0.dp)
             ) {
+                val isPlaying = currentLoopingAudio.value.second && currentLoopingAudio.value.first == audio
+
                 val iconId = if (isPlaying) R.drawable.stop else R.drawable.play
                 Icon(
                     modifier = Modifier

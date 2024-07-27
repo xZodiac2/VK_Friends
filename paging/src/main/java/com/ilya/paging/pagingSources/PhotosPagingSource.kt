@@ -34,6 +34,7 @@ class PhotosPagingSource private constructor(
                 count = params.loadSize
             )
 
+
             val prevKey = if (key == 0) {
                 null
             } else {

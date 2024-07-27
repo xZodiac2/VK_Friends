@@ -19,6 +19,7 @@ internal class PostsLikesState(
     val likes: Map<Long, Likes>
 )
 
+@Stable
 internal sealed interface AudioLoadIndicatorState {
     data object Idle : AudioLoadIndicatorState
     data object Loading : AudioLoadIndicatorState

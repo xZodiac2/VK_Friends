@@ -104,7 +104,7 @@ private fun Content(
 }
 
 @Composable
-fun ResolveRefresh(photos: LazyPagingItems<Photo>, handleNavEvent: (PhotosScreenNavEvent) -> Unit) {
+private fun ResolveRefresh(photos: LazyPagingItems<Photo>, handleNavEvent: (PhotosScreenNavEvent) -> Unit) {
     when (val state = photos.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
         is LoadState.Error -> OnPagingError(

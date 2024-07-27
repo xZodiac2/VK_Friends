@@ -17,12 +17,13 @@ data class CommentsResponseData(
 data class CommentDto(
     @Json(name = "date") val date: Long,
     @Json(name = "from_id") val fromId: Long,
-    @Json(name = "post_id") val postId: Long,
-    @Json(name = "owner_id") val ownerId: Long,
+    @Json(name = "post_id") val postId: Long = 0,
+    @Json(name = "owner_id") val ownerId: Long = 0,
     @Json(name = "id") val id: Long,
     @Json(name = "text") val text: String,
     @Json(name = "thread") val thread: CommentsThreadDto,
-    @Json(name = "likes") val likes: LikesDto
+    @Json(name = "likes") val likes: LikesDto? = null,
+    @Json(name = "deleted") val deleted: Boolean = false
 )
 
 data class CommentsThreadDto(

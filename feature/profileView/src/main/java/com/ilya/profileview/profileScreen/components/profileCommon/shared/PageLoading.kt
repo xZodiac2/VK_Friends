@@ -1,4 +1,4 @@
-package com.ilya.profileview.profileScreen.components.posts
+package com.ilya.profileview.profileScreen.components.profileCommon.shared
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,15 +32,15 @@ import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-internal fun ResolveRefresh(posts: LazyPagingItems<Post>, eventReceiver: EventReceiver) {
-    when (val state = posts.loadState.refresh) {
+internal fun <T : Any> ResolveRefresh(items: LazyPagingItems<T>, eventReceiver: EventReceiver) {
+    when (val state = items.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
         is LoadState.Error -> {
             OnPagingError(
                 modifier = Modifier.height(120.dp),
                 errorType = state.error.correspondingErrorType(),
-                onTryAgainClick = { posts.refresh() },
+                onTryAgainClick = { items.refresh() },
                 onEmptyAccessToken = eventReceiver::onEmptyAccessToken
             )
         }
@@ -50,15 +50,15 @@ internal fun ResolveRefresh(posts: LazyPagingItems<Post>, eventReceiver: EventRe
 }
 
 @Composable
-internal fun ResolveAppend(posts: LazyPagingItems<Post>, eventReceiver: EventReceiver) {
-    when (val state = posts.loadState.append) {
+internal fun <T : Any> ResolveAppend(items: LazyPagingItems<T>, eventReceiver: EventReceiver) {
+    when (val state = items.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
         is LoadState.Error -> {
             OnPagingError(
                 modifier = Modifier.height(120.dp),
                 errorType = state.error.correspondingErrorType(),
-                onTryAgainClick = { posts.retry() },
+                onTryAgainClick = { items.retry() },
                 onEmptyAccessToken = eventReceiver::onEmptyAccessToken
             )
         }

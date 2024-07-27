@@ -57,7 +57,6 @@ class PostsPagingSource private constructor(
                 nextKey = if (posts.isEmpty()) null else key + 1,
                 prevKey = null,
             )
-
         } catch (e: IOException) {
             logThrowable(e)
             return LoadResult.Error(PaginationError.NoInternet)

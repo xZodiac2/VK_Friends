@@ -24,6 +24,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +42,7 @@ import com.ilya.paging.models.Post
 import com.ilya.paging.models.PostAuthor
 import com.ilya.paging.models.RepostedPost
 import com.ilya.profileview.R
+import com.ilya.profileview.profileScreen.PostsLikesState
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
@@ -46,8 +50,8 @@ import com.ilya.theme.LocalTypography
 @Composable
 internal fun PostCard(
     post: Post,
-    likes: Likes?,
-    currentLoopingAudio: Pair<Audio?, Boolean>,
+    likes: State<PostsLikesState>,
+    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
     eventReceiver: EventReceiver
 ) {
     Box(contentAlignment = Alignment.Center) {
@@ -59,7 +63,7 @@ internal fun PostCard(
             ),
             shape = RoundedCornerShape(12.dp),
         ) {
-            val attachments = post.photos + post.audios + post.videos
+            val attachments = remember { post.photos + post.audios + post.videos }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Author(post.author, post.date, eventReceiver)
@@ -68,6 +72,7 @@ internal fun PostCard(
                 OptionalRepostedPost(post, currentLoopingAudio, eventReceiver)
                 BottomPostRow(
                     likes = likes,
+                    postId = post.id,
                     commentsInfo = post.commentsInfo,
                     onLikeClick = { eventReceiver.onLikeClick(post.copy(likes = it)) },
                     onCommentsClick = { eventReceiver.onCommentsClick(post.id) }
@@ -98,7 +103,7 @@ private fun PostText(post: Post, isAttachmentsEmpty: Boolean) {
 @Composable
 private fun OptionalRepostedPost(
     post: Post,
-    currentLoopingAudio: Pair<Audio?, Boolean>,
+    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
     eventReceiver: EventReceiver
 ) {
     post.reposted?.let {
@@ -135,7 +140,7 @@ private fun Author(author: PostAuthor, date: String, eventReceiver: EventReceive
     Row(
         modifier = Modifier
             .padding(top = 12.dp, start = 20.dp, end = 20.dp)
-            .clickable { eventReceiver.onPostAuthorClick(author.id, author.isPrivate) },
+            .clickable { eventReceiver.onAnotherProfileClick(author.id, author.isPrivate) },
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -163,7 +168,8 @@ private fun Author(author: PostAuthor, date: String, eventReceiver: EventReceive
 
 @Composable
 private fun BottomPostRow(
-    likes: Likes?,
+    likes: State<PostsLikesState>,
+    postId: Long,
     commentsInfo: CommentsInfo,
     onLikeClick: (Likes) -> Unit,
     onCommentsClick: () -> Unit
@@ -173,7 +179,7 @@ private fun BottomPostRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Likes(likes, onLikeClick)
+        Likes(likes, onLikeClick, postId)
         Comments(commentsInfo, onCommentsClick)
     }
 }
@@ -191,7 +197,9 @@ private fun Comments(commentsInfo: CommentsInfo, onCommentsClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Row(
-                modifier = Modifier.animateContentSize(),
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .animateContentSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -214,57 +222,60 @@ private fun Comments(commentsInfo: CommentsInfo, onCommentsClick: () -> Unit) {
 }
 
 @Composable
-private fun Likes(likes: Likes?, onLikeClick: (Likes) -> Unit) {
+private fun Likes(likesState: State<PostsLikesState>, onLikeClick: (Likes) -> Unit, postId: Long) {
+    val likes = rememberUpdatedState(likesState.value.likes[postId])
+
     Box(
         modifier = Modifier
-            .clickable { likes?.let(onLikeClick) }
+            .clickable { likes.value?.let(onLikeClick) }
             .clip(RoundedCornerShape(20.dp))
             .background(LocalColorScheme.current.background)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.animateContentSize(),
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
+                .animateContentSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
-                imageVector = if (likes?.userLikes == true) {
+                imageVector = if (likes.value?.userLikes == true) {
                     Icons.Default.Favorite
                 } else {
                     Icons.Default.FavoriteBorder
                 },
-                tint = if (likes?.userLikes == true) {
+                tint = if (likes.value?.userLikes == true) {
                     Color.Red
                 } else {
                     LocalColorScheme.current.primaryTextColor
                 },
                 contentDescription = "postLikes"
             )
-            likes?.let {
-                if (likes.count > 0) {
+            likes.value?.let { likesValue ->
+                if (likesValue.count > 0) {
                     AnimatedContent(
-                        targetState = likes.count,
+                        targetState = likesValue.count,
                         label = "animatedLikesCount",
                         transitionSpec = {
                             slideInVertically {
-                                if (likes.userLikes) -it else it
+                                if (likesValue.userLikes) -it else it
                             } togetherWith slideOutVertically {
-                                if (likes.userLikes) it else -it
+                                if (likesValue.userLikes) it else -it
                             }
                         }
                     ) { targetState ->
                         Text(
                             text = targetState.coerceAtLeast(0).toString(),
-                            color = if (likes.userLikes) {
+                            color = if (likesValue.userLikes) {
                                 Color.Red
                             } else {
                                 LocalColorScheme.current.primaryTextColor
                             },
                             fontSize = LocalTypography.current.average
                         )
-
                     }
                 }
             }

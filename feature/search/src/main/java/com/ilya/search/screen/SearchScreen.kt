@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -64,26 +60,18 @@ import com.ilya.search.screen.event.SearchScreenEvent
 import com.ilya.search.screen.event.SearchScreenNavEvent
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
     val viewModel: SearchViewModel = hiltViewModel()
 
-    val users = viewModel.pagingFlow.collectAsLazyPagingItems()
-    val accountOwner by viewModel.accountOwnerStateFlow.collectAsState()
-    val snackbarState by viewModel.snackbarStateFlow.collectAsState()
+    val snackbarState = viewModel.snackbarStateFlow.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    var initialDataLoaded by remember { mutableStateOf(false) }
-
-    val isRefreshing = users.loadState.refresh == LoadState.Loading && initialDataLoaded
-
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = { users.refresh() }
-    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -91,47 +79,38 @@ fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
         topBar = {
             Column {
                 TopBar(
-                    accountOwner = accountOwner,
+                    accountOwnerStateFlow = viewModel.accountOwnerStateFlow,
                     onAvatarClick = { handleNavEvent(SearchScreenNavEvent.ProfileClick(it, false)) },
                     onPlaceholderClick = { viewModel.handleEvent(SearchScreenEvent.PlugAvatarClick) },
                     scrollBehavior = scrollBehavior
                 )
-                val topBarCollapsed by remember {
+                val topBarCollapsed = remember {
                     derivedStateOf { scrollBehavior.state.heightOffset == scrollBehavior.state.heightOffsetLimit }
                 }
                 SearchBar(
-                    onSearch = {
-                        initialDataLoaded = false
-                        viewModel.handleEvent(SearchScreenEvent.Search(it))
-                    },
-                    topBarCollapsed = topBarCollapsed
+                    onSearch = { viewModel.handleEvent(SearchScreenEvent.Search(it)) },
+                    topBarCollapsed = topBarCollapsed.value
                 )
             }
         },
         containerColor = LocalColorScheme.current.primary
     ) { padding ->
         Content(
-            users = users,
+            usersFlow = viewModel.usersFlow,
             onEmptyAccessToken = { handleNavEvent(SearchScreenNavEvent.EmptyAccessToken) },
             onUserClick = { id, isPrivate -> handleNavEvent(SearchScreenNavEvent.ProfileClick(id, isPrivate)) },
             padding = padding,
-            isRefreshing = isRefreshing,
-            pullRefreshState = pullRefreshState
         )
     }
 
     SnackbarEventEffect(
-        state = snackbarState,
+        state = snackbarState.value,
         onConsumed = { viewModel.handleEvent(SearchScreenEvent.SnackbarConsumed) },
         action = { snackbarHostState.showSnackbar(it) }
     )
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(SearchScreenEvent.Start)
-        snapshotFlow { users.itemCount }.collect {
-            if (it == 0) return@collect
-            initialDataLoaded = true
-        }
     }
 
 }
@@ -139,11 +118,13 @@ fun SearchScreen(handleNavEvent: (SearchScreenNavEvent) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    accountOwner: User?,
+    accountOwnerStateFlow: StateFlow<User?>,
     onAvatarClick: (Long) -> Unit,
     onPlaceholderClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
+    val accountOwner = accountOwnerStateFlow.collectAsState()
+
     TopAppBar(
         title = {
             Text(
@@ -159,11 +140,11 @@ private fun TopBar(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .clickable { accountOwner?.id?.let(onAvatarClick) ?: onPlaceholderClick() },
+                    .clickable { accountOwner.value?.id?.let(onAvatarClick) ?: onPlaceholderClick() },
                 model = ImageRequest.Builder(LocalContext.current)
                     .placeholder(R.drawable.avatar)
                     .fallback(R.drawable.avatar)
-                    .data(accountOwner?.photoUrl)
+                    .data(accountOwner.value?.photoUrl)
                     .build(),
                 contentDescription = "ownerPhoto200",
                 contentScale = ContentScale.Crop
@@ -181,13 +162,20 @@ private fun TopBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
-    users: LazyPagingItems<User>,
+    usersFlow: Flow<PagingData<User>>,
     onEmptyAccessToken: () -> Unit,
     onUserClick: (userId: Long, isPrivate: Boolean) -> Unit,
     padding: PaddingValues,
-    isRefreshing: Boolean,
-    pullRefreshState: PullRefreshState
 ) {
+    val users = usersFlow.collectAsLazyPagingItems()
+    val initialDataLoaded = remember { derivedStateOf { users.itemCount > 0 } }
+    val isRefreshing = users.loadState.refresh == LoadState.Loading && initialDataLoaded.value
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = { users.refresh() }
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -9,8 +9,9 @@ data class Comment(
     val id: Long,
     val text: String,
     val thread: List<ThreadComment>,
-    val likes: Likes,
-    val owner: User?
+    val likes: Likes?,
+    val owner: User?,
+    val deleted: Boolean
 )
 
 data class ThreadComment(

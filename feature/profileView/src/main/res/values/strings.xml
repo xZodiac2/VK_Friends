@@ -50,6 +50,9 @@
     <string name="add_user_to_friends_to_see_info">Add this user to friends to see him photos, posts and other information</string>
     <string name="you_already_on_reqiered_profile">You already on this profile</string>
     <string name="comments">Comments</string>
-    <string name="user_not_supports">Thsi user type is not supporing</string>
-    <string name="this_type_of_comment_is_not_supports">This type of comment is not supports</string>
+    <string name="user_not_supports">This user type is not supports</string>
+    <string name="comment_is_not_supports">This type of comment is not supports</string>
+    <string name="comment_deleted">This comments is deleted by user</string>
+    <string name="show_thread">Show answers (%d)</string>
+    <string name="no_comments">There is no commets to this post yet. Become the first person who comment it!</string>
 </resources>

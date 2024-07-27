@@ -29,10 +29,10 @@ internal class SearchViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
 
-    private val searchValueSharedFlow = MutableSharedFlow<String>()
+    private val searchValuesFlow = MutableSharedFlow<String>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingFlow = searchValueSharedFlow
+    val usersFlow = searchValuesFlow
         .map(::newPager)
         .flatMapLatest { it.flow }
         .cachedIn(viewModelScope)
@@ -46,7 +46,7 @@ internal class SearchViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             delay(100)
-            searchValueSharedFlow.emit("")
+            searchValuesFlow.emit("")
         }
     }
 
@@ -70,13 +70,15 @@ internal class SearchViewModel @Inject constructor(
     }
 
     private fun onStart() {
-        val accessTokenValue = accessTokenManager.accessToken ?: return
-        _accountOwnerStateFlow.value = accessTokenValue.userData.toUser(accessTokenValue)
+        if (_accountOwnerStateFlow.value == null) {
+            val accessTokenValue = accessTokenManager.accessToken ?: return
+            _accountOwnerStateFlow.value = accessTokenValue.userData.toUser(accessTokenValue)
+        }
     }
 
     private fun onSearch(query: String) {
         viewModelScope.launch {
-            searchValueSharedFlow.emit(query)
+            searchValuesFlow.emit(query)
         }
     }
 

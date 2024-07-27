@@ -16,11 +16,11 @@ class ProfileScreenNavEventHandler(private val navController: NavController) : E
             is ProfileScreenNavEvent.PhotoClick -> onPhotoClick(event.userId, event.targetPhotoIndex)
             is ProfileScreenNavEvent.PostPhotoClick -> onPostPhotoClick(event.userId, event.targetPhotoIndex, event.photoIds)
             is ProfileScreenNavEvent.VideoClick -> onVideoClick(event.userId, event.id, event.accessKey)
-            is ProfileScreenNavEvent.PostAuthorClick -> onPostAuthorClick(event.id, event.isPrivate)
+            is ProfileScreenNavEvent.AnotherProfileClick -> onAnotherProfileClick(event.id, event.isPrivate)
         }
     }
 
-    private fun onPostAuthorClick(id: Long, isPrivate: Boolean) {
+    private fun onAnotherProfileClick(id: Long, isPrivate: Boolean) {
         navController.navigate(Destination.ProfileScreen(id, isPrivate))
     }
 

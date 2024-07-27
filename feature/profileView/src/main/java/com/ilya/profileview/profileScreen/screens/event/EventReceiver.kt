@@ -47,9 +47,9 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
         eventHandler.handleEvent(ProfileScreenEvent.NewNavEvent(ProfileScreenNavEvent.EmptyAccessToken))
     }
 
-    fun onPostAuthorClick(userId: Long, isPrivate: Boolean) {
+    fun onAnotherProfileClick(userId: Long, isPrivate: Boolean) {
         eventHandler.handleEvent(
-            ProfileScreenEvent.NewNavEvent(ProfileScreenNavEvent.PostAuthorClick(userId, isPrivate))
+            ProfileScreenEvent.NewNavEvent(ProfileScreenNavEvent.AnotherProfileClick(userId, isPrivate))
         )
     }
 

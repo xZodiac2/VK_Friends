@@ -19,22 +19,9 @@ class UsersPagingSource private constructor(
     private val query: String
 ) : PagingSource<Int, User>() {
 
-    override val keyReuseSupported: Boolean = true
-    private var initialLoad = true
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
         try {
             val key = params.key ?: 0
-            if (key == 0 && initialLoad) {
-                initialLoad = false
-                return LoadResult.Page(
-                    data = emptyList(),
-                    nextKey = 0,
-                    prevKey = null,
-                    itemsAfter = 1
-                )
-            }
-
             val offset = key * params.loadSize
 
             val accessToken = accessTokenManager.accessToken ?: return LoadResult.Error(PaginationError.NoAccessToken)

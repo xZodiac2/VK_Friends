@@ -118,7 +118,6 @@ fun OnEmptyFriends(friends: LazyPagingItems<User>) {
                 color = LocalColorScheme.current.secondaryTextColor
             )
         }
-
     }
 }
 

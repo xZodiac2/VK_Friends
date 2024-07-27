@@ -24,7 +24,7 @@ internal class FriendsScreenViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager,
 ) : ViewModel() {
 
-    val pagingFlow = Pager(
+    val friendsFlow = Pager(
         config = PagingConfig(pageSize = PAGE_SIZE),
         pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
     ).flow.cachedIn(viewModelScope)
@@ -48,8 +48,10 @@ internal class FriendsScreenViewModel @Inject constructor(
     }
 
     private fun onStart() {
-        val accessTokenValue = accessTokenManager.accessToken ?: return
-        _accountOwnerState.value = accessTokenValue.userData.toUser(accessTokenValue)
+        if (_accountOwnerState.value == null) {
+            val accessTokenValue = accessTokenManager.accessToken ?: return
+            _accountOwnerState.value = accessTokenValue.userData.toUser(accessTokenValue)
+        }
     }
 
     private fun onSnackbarConsumed() {

@@ -16,8 +16,9 @@ fun CommentDto.toComment(owner: User?, thread: List<ThreadComment>): Comment {
         id = id,
         text = text,
         thread = thread,
-        likes = likes.toLikes(),
-        owner = owner
+        likes = likes?.toLikes(),
+        owner = owner,
+        deleted = deleted
     )
 }
 

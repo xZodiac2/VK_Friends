@@ -80,10 +80,7 @@ internal fun Photos(
 }
 
 @Composable
-private fun PhotosGrid(
-    photos: List<Photo>,
-    onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit
-) {
+private fun PhotosGrid(photos: List<Photo>, onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

@@ -11,5 +11,5 @@ sealed interface ProfileScreenNavEvent {
         val photoIds: Map<Long, String>
     ) : ProfileScreenNavEvent
     data class VideoClick(val userId: Long, val id: Long, val accessKey: String) : ProfileScreenNavEvent
-    data class PostAuthorClick(val id: Long, val isPrivate: Boolean) : ProfileScreenNavEvent
+    data class AnotherProfileClick(val id: Long, val isPrivate: Boolean) : ProfileScreenNavEvent
 }

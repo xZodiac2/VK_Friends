@@ -52,5 +52,8 @@
     <string name="you_already_on_reqiered_profile">Вы уже на этом профиле</string>
     <string name="comments">Комментарии</string>
     <string name="user_not_supports">Этот тип пользователя не поддерживается</string>
-    <string name="this_type_of_comment_is_not_supports">Этот тип комментария не поддерживается</string>
+    <string name="comment_is_not_supports">Этот тип комментария не поддерживается</string>
+    <string name="comment_deleted">Этот комментарий удалён пользователем</string>
+    <string name="show_thread">Показать ответы (%d)</string>
+    <string name="no_comments">Под этой записью пока нет комментариев. Станьте первым, кто её прокомментирует!</string>
 </resources>

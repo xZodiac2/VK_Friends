@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.core.basicComposables.BaseButton
+import com.ilya.core.basicComposables.BaseButtonStyles
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver
@@ -137,7 +137,8 @@ private fun FriendRequestButton(isAccountOwner: Boolean, friendStatus: FriendSta
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 40.dp),
-            onClick = onClick
+            onClick = onClick,
+            style = BaseButtonStyles.Attractive
         ) {
             Icon(
                 modifier = Modifier
@@ -150,7 +151,6 @@ private fun FriendRequestButton(isAccountOwner: Boolean, friendStatus: FriendSta
                     FriendStatus.SUBSCRIBED -> painterResource(id = R.drawable.plus)
                 },
                 contentDescription = "add",
-                tint = Color.White
             )
             Text(
                 text = stringResource(

@@ -83,8 +83,6 @@ internal fun CommentsTopBar(contentScrolled: Boolean) {
                 containerColor = LocalColorScheme.current.cardContainerColor
             )
         )
-        HorizontalDivider(
-            color = topBarDividerColor.value
-        )
+        HorizontalDivider(color = topBarDividerColor.value)
     }
 }

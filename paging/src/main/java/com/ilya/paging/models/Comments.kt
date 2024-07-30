@@ -1,28 +1,34 @@
 package com.ilya.paging.models
 
+import com.ilya.core.appCommon.enums.ObjectType
+
 
 data class Comment(
     val date: String,
-    val fromId: Long,
     val postId: Long,
-    val ownerId: Long,
-    val id: Long,
-    val text: String,
-    val thread: List<ThreadComment>,
-    val likes: Likes?,
+    val fromId: Long,
+    override val ownerId: Long,
+    override val id: Long,
+    override val likes: Likes?,
+    override val objectType: ObjectType = ObjectType.COMMENT,
     val owner: User?,
-    val deleted: Boolean
-)
+    val text: String,
+    val isDeleted: Boolean,
+    val thread: List<ThreadComment>
+) : Likeable
 
 data class ThreadComment(
     val date: String,
-    val fromId: Long,
-    val replyToComment: Long,
     val postId: Long,
-    val replyToUser: User?,
+    val fromId: Long,
+    override val ownerId: Long,
+    override val id: Long,
+    override val likes: Likes?,
+    override val objectType: ObjectType = ObjectType.COMMENT,
     val owner: User?,
-    val id: Long,
     val text: String,
-    val likes: Likes
-)
+    val isDeleted: Boolean,
+    val replyToUser: User?,
+    val replyToComment: Long
+) : Likeable
 

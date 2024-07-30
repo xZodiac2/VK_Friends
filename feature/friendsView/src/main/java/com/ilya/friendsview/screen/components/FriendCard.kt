@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.ilya.core.util.log
 import com.ilya.paging.models.User
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography

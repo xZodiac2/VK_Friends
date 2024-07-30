@@ -1,5 +1,6 @@
 package com.ilya.paging.models
 
+import com.ilya.core.appCommon.enums.ObjectType
 
 
 abstract class Attachment
@@ -18,6 +19,7 @@ data class Photo(
     override val id: Long,
     override val ownerId: Long,
     override val likes: Likes?,
+    override val objectType: ObjectType = ObjectType.PHOTO,
     val sizes: List<Size>,
     val accessKey: String
 ) : Attachment(), Likeable
@@ -37,6 +39,7 @@ data class VideoExtended(
     override val id: Long,
     override val ownerId: Long,
     override val likes: Likes?,
+    override val objectType: ObjectType = ObjectType.VIDEO,
     val title: String,
     val playerUrl: String
 ) : Likeable

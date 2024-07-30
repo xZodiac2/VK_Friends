@@ -1,13 +1,9 @@
 package com.ilya.profileViewDomain.useCase
 
 import com.ilya.core.appCommon.base.UseCase
-import com.ilya.core.appCommon.enums.ObjectType
 import com.ilya.data.LikesRemoteRepository
 import com.ilya.paging.models.Likeable
 import com.ilya.paging.models.Likes
-import com.ilya.paging.models.Photo
-import com.ilya.paging.models.Post
-import com.ilya.paging.models.VideoExtended
 import javax.inject.Inject
 
 class ResolveLikeUseCase @Inject constructor(
@@ -16,33 +12,29 @@ class ResolveLikeUseCase @Inject constructor(
 
     override suspend fun invoke(data: InvokeData): Result<Likes> {
         val likes = data.likeable.likes ?: return Result.failure(IllegalArgumentException())
-        val type = when (data.likeable) {
-            is Photo -> ObjectType.PHOTO
-            is VideoExtended -> ObjectType.VIDEO
-            is Post -> ObjectType.POST
-            else -> return Result.failure(IllegalArgumentException())
-        }
 
         val likesCount = if (likes.userLikes) {
             repository.deleteLike(
                 accessToken = data.accessToken,
-                type = type,
+                type = data.likeable.objectType,
                 ownerId = data.likeable.ownerId,
                 itemId = data.likeable.id
             )
         } else {
             repository.addLike(
                 accessToken = data.accessToken,
-                type = type,
+                type = data.likeable.objectType,
                 ownerId = data.likeable.ownerId,
                 itemId = data.likeable.id
             )
         }
 
-        return Result.success(Likes(
-            count = likesCount,
-            userLikes = !likes.userLikes
-        ))
+        return Result.success(
+            Likes(
+                count = likesCount,
+                userLikes = !likes.userLikes
+            )
+        )
     }
 
     data class InvokeData(

@@ -2,8 +2,8 @@ package com.ilya.profileview.profileScreen.screens.event
 
 import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.paging.models.Audio
+import com.ilya.paging.models.Likeable
 import com.ilya.paging.models.Likes
-import com.ilya.paging.models.Post
 import com.ilya.paging.models.Video
 import com.ilya.profileViewDomain.User
 
@@ -23,8 +23,8 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
         eventHandler.handleEvent(ProfileScreenEvent.NewNavEvent(ProfileScreenNavEvent.OpenPhotosClick(userId)))
     }
 
-    fun onLikeClick(post: Post) {
-        eventHandler.handleEvent(ProfileScreenEvent.Like(post))
+    fun onLike(item: Likeable) {
+        eventHandler.handleEvent(ProfileScreenEvent.Like(item))
     }
 
     fun onPostPhotoClick(userId: Long, targetPhotoIndex: Int, photoIds: Map<Long, String>) {
@@ -62,7 +62,7 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
         eventHandler.handleEvent(ProfileScreenEvent.Retry)
     }
 
-    fun onPostsAdded(newLikes: Map<Long, Likes>) {
+    fun onPostAdded(newLikes: Map<Long, Likes>) {
         eventHandler.handleEvent(ProfileScreenEvent.PostsAdded(newLikes))
     }
 
@@ -80,6 +80,10 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
 
     fun onDismissCommentsSheet() {
         eventHandler.handleEvent(ProfileScreenEvent.DismissBottomSheet)
+    }
+
+    fun onCommentsAdded(newLikes: Map<Long, Likes>) {
+        eventHandler.handleEvent(ProfileScreenEvent.CommentsAdded(newLikes))
     }
 
 }

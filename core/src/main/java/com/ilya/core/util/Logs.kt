@@ -7,6 +7,6 @@ fun logThrowable(exception: Throwable) {
     Log.e("throwable", "Cause: ${exception.cause}")
 }
 
-fun log(text: String) {
-    Log.d("mytag", text)
+fun myLog(data: Any?) {
+    Log.d("mytag", data.toString())
 }

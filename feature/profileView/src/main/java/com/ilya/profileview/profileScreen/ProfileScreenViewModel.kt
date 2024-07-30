@@ -16,8 +16,10 @@ import com.ilya.core.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Comment
+import com.ilya.paging.models.Likeable
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Post
+import com.ilya.paging.models.ThreadComment
 import com.ilya.paging.models.toggled
 import com.ilya.paging.pagingSources.CommentsPagingSource
 import com.ilya.paging.pagingSources.PostsPagingSource
@@ -37,9 +39,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import okio.IOException
@@ -97,12 +99,14 @@ internal class ProfileScreenViewModel @Inject constructor(
         )
     }
 
-    val bottomSheetState = postId.map {
-        CommentsBottomSheetState(it != DEFAULT_POST_ID, commentsFlow)
+    private val commentsLikesFlow = MutableStateFlow<Map<Long, Likes>>(emptyMap())
+
+    val bottomSheetState = combine(postId, commentsLikesFlow) { id, likes ->
+        CommentsBottomSheetState(id != DEFAULT_POST_ID, commentsFlow, likes)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = CommentsBottomSheetState(false, flow { emit(PagingData.empty()) })
+        initialValue = CommentsBottomSheetState(false, flow { emit(PagingData.empty()) }, emptyMap())
     )
 
     private val _screenState = MutableStateFlow<ProfileScreenState>(ProfileScreenState.Loading)
@@ -111,15 +115,14 @@ internal class ProfileScreenViewModel @Inject constructor(
     private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
     val snackbarState = _snackbarState.asStateFlow()
 
-    private val _likesState = MutableStateFlow(PostsLikesState(emptyMap()))
-    val likesState = _likesState.asStateFlow()
+    private val _postLikesState = MutableStateFlow(PostsLikesState(emptyMap()))
+    val postLikesState = _postLikesState.asStateFlow()
 
     // current looping audio to mediaPlayer.isPlaying
     private val _currentLoopingAudioState = MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
     val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
 
-    private val _audioLoadingState =
-        MutableStateFlow<AudioLoadIndicatorState>(AudioLoadIndicatorState.Idle)
+    private val _audioLoadingState = MutableStateFlow<AudioLoadIndicatorState>(AudioLoadIndicatorState.Idle)
     val audioIndicatorState = _audioLoadingState.asStateFlow()
 
     private val _navEventFlow = MutableSharedFlow<ProfileScreenNavEvent>()
@@ -133,16 +136,21 @@ internal class ProfileScreenViewModel @Inject constructor(
             }
 
             is ProfileScreenEvent.FriendRequest -> onFriendRequest(event.user)
-            is ProfileScreenEvent.Like -> onLike(event.post)
+            is ProfileScreenEvent.Like -> onLike(event.item)
             is ProfileScreenEvent.PostsAdded -> onPostsAdded(event.newLikes)
             is ProfileScreenEvent.AudioClick -> onAudioClick(event.audio)
             is ProfileScreenEvent.NewNavEvent -> onNewNavEvent(event.navEvent)
             is ProfileScreenEvent.CommentsClick -> onCommentsClick(event.postId)
+            is ProfileScreenEvent.CommentsAdded -> onCommentsAdded(event.newLikes)
             ProfileScreenEvent.Retry -> onRetry()
             ProfileScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
             ProfileScreenEvent.Back -> onBack()
             ProfileScreenEvent.DismissBottomSheet -> onDismissBottomSheet()
         }
+    }
+
+    private fun onCommentsAdded(newLikes: Map<Long, Likes>) {
+        commentsLikesFlow.value = newLikes
     }
 
     private fun onDismissBottomSheet() {
@@ -151,6 +159,9 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onCommentsClick(postId: Long) {
         this.postId.value = postId
+        viewModelScope.launch {
+            commentsLikesFlow.emit(emptyMap())
+        }
     }
 
     private fun onNewNavEvent(event: ProfileScreenNavEvent) {
@@ -219,23 +230,23 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onPostsAdded(likes: Map<Long, Likes>) {
-        _likesState.value = PostsLikesState(_likesState.value.likes + likes)
+        _postLikesState.value = PostsLikesState(_postLikesState.value.likes + likes)
     }
 
-    private fun onLike(post: Post) {
+    private fun onLike(item: Likeable) {
         val accessToken = accessTokenManager.accessToken ?: run {
             showSnackbar(R.string.error_cant_like)
             return
         }
 
-        toggleLike(post.id).onFailure {
+        toggleLike(item).onFailure {
             showSnackbar(R.string.error_cant_like)
             return
         }
 
         val likesExceptionHandler = CoroutineExceptionHandler { _, throwable ->
             logThrowable(throwable)
-            toggleLike(post.id)
+            toggleLike(item)
             when (throwable) {
                 is IOException -> showSnackbar(R.string.error_no_internet)
                 else -> showSnackbar(R.string.error_cant_like)
@@ -245,23 +256,33 @@ internal class ProfileScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
                 ResolveLikeUseCase.InvokeData(
-                    likeable = post,
+                    likeable = item,
                     accessToken = accessToken.token
                 )
             )
 
             result.onFailure {
                 showSnackbar(R.string.error_cant_like)
-                toggleLike(post.id)
+                toggleLike(item)
             }
         }
     }
 
-    private fun toggleLike(postId: Long): Result<Unit> {
-        val likesMap = _likesState.value.likes.toMutableMap()
-        val likes = likesMap[postId] ?: return Result.failure(IllegalArgumentException())
-        likesMap[postId] = likes.toggled()
-        _likesState.value = PostsLikesState(likesMap)
+    private fun toggleLike(item: Likeable): Result<Unit> {
+        val likesMap = when (item) {
+            is Post -> _postLikesState.value.likes.toMutableMap()
+            is Comment -> commentsLikesFlow.value.toMutableMap()
+            is ThreadComment -> commentsLikesFlow.value.toMutableMap()
+            else -> null
+        } ?: return Result.failure(IllegalArgumentException())
+
+        val likes = likesMap[item.id] ?: return Result.failure(IllegalArgumentException())
+        likesMap[item.id] = likes.toggled()
+        when (item) {
+            is Post -> _postLikesState.value = PostsLikesState(likesMap)
+            is Comment -> commentsLikesFlow.value = likesMap
+            is ThreadComment -> commentsLikesFlow.value = likesMap
+        }
         return Result.success(Unit)
     }
 

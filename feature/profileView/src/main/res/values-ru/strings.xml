@@ -56,4 +56,5 @@
     <string name="comment_deleted">Этот комментарий удалён пользователем</string>
     <string name="show_thread">Показать ответы (%d)</string>
     <string name="no_comments">Под этой записью пока нет комментариев. Станьте первым, кто её прокомментирует!</string>
+    <string name="hide">Скрыть</string>
 </resources>

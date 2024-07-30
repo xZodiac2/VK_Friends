@@ -74,7 +74,7 @@ internal fun PostCard(
                     likes = likes,
                     postId = post.id,
                     commentsInfo = post.commentsInfo,
-                    onLikeClick = { eventReceiver.onLikeClick(post.copy(likes = it)) },
+                    onLikeClick = { eventReceiver.onLike(post.copy(likes = it)) },
                     onCommentsClick = { eventReceiver.onCommentsClick(post.id) }
                 )
             }
@@ -206,13 +206,13 @@ private fun Comments(commentsInfo: CommentsInfo, onCommentsClick: () -> Unit) {
                 Icon(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(R.drawable.comment),
-                    tint = LocalColorScheme.current.primaryTextColor,
+                    tint = LocalColorScheme.current.secondaryTextColor,
                     contentDescription = "postComments"
                 )
                 if (commentsInfo.count > 0) {
                     Text(
                         text = commentsInfo.count.coerceAtLeast(0).toString(),
-                        color = LocalColorScheme.current.primaryTextColor,
+                        color = LocalColorScheme.current.secondaryTextColor,
                         fontSize = LocalTypography.current.average
                     )
                 }
@@ -250,7 +250,7 @@ private fun Likes(likesState: State<PostsLikesState>, onLikeClick: (Likes) -> Un
                 tint = if (likes.value?.userLikes == true) {
                     Color.Red
                 } else {
-                    LocalColorScheme.current.primaryTextColor
+                    LocalColorScheme.current.secondaryTextColor
                 },
                 contentDescription = "postLikes"
             )
@@ -272,7 +272,7 @@ private fun Likes(likesState: State<PostsLikesState>, onLikeClick: (Likes) -> Un
                             color = if (likesValue.userLikes) {
                                 Color.Red
                             } else {
-                                LocalColorScheme.current.primaryTextColor
+                                LocalColorScheme.current.secondaryTextColor
                             },
                             fontSize = LocalTypography.current.average
                         )

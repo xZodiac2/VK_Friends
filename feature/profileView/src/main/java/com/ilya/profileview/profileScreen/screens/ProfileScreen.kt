@@ -76,7 +76,7 @@ fun ProfileScreen(
     }
 
     val screenState = viewModel.screenState.collectAsState()
-    val likesState = viewModel.likesState.collectAsState()
+    val likesState = viewModel.postLikesState.collectAsState()
     val currentLoopingAudio = viewModel.currentLoopingAudio.collectAsState()
     val snackbarState = viewModel.snackbarState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -239,7 +239,7 @@ private fun Content(
             val newLikes = posts.associate { it.id to it.likes }.filterNot {
                 it.key in likes.value.likes.keys
             }
-            eventReceiver.onPostsAdded(newLikes)
+            eventReceiver.onPostAdded(newLikes)
         }
     }
 

@@ -28,5 +28,6 @@ internal sealed interface AudioLoadIndicatorState {
 @Stable
 internal data class CommentsBottomSheetState(
     val showSheet: Boolean,
-    val commentsFlow: Flow<PagingData<Comment>>
+    val commentsFlow: Flow<PagingData<Comment>>,
+    val likes: Map<Long, Likes>
 )

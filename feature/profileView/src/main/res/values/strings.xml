@@ -55,4 +55,5 @@
     <string name="comment_deleted">This comments is deleted by user</string>
     <string name="show_thread">Show answers (%d)</string>
     <string name="no_comments">There is no commets to this post yet. Become the first person who comment it!</string>
+    <string name="hide">Hide</string>
 </resources>

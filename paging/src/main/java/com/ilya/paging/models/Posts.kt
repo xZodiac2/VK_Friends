@@ -1,5 +1,7 @@
 package com.ilya.paging.models
 
+import com.ilya.core.appCommon.enums.ObjectType
+
 
 data class Post(
     val videos: List<Video>,
@@ -9,6 +11,7 @@ data class Post(
     override val id: Long,
     override val likes: Likes,
     override val ownerId: Long,
+    override val objectType: ObjectType = ObjectType.POST,
     val commentsInfo: CommentsInfo,
     val date: String,
     val text: String,

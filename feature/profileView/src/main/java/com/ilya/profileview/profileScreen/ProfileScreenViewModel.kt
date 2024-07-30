@@ -105,7 +105,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         CommentsBottomSheetState(id != DEFAULT_POST_ID, commentsFlow, likes)
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.Eagerly,
+        started = SharingStarted.Lazily,
         initialValue = CommentsBottomSheetState(false, flow { emit(PagingData.empty()) }, emptyMap())
     )
 
@@ -150,7 +150,9 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onCommentsAdded(newLikes: Map<Long, Likes>) {
-        commentsLikesFlow.value = newLikes
+        viewModelScope.launch {
+            commentsLikesFlow.emit(newLikes)
+        }
     }
 
     private fun onDismissBottomSheet() {

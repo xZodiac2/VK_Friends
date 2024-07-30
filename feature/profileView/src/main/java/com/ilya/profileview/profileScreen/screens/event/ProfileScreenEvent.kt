@@ -1,13 +1,10 @@
 package com.ilya.profileview.profileScreen.screens.event
 
-import androidx.compose.runtime.Stable
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Likeable
 import com.ilya.paging.models.Likes
 import com.ilya.profileViewDomain.User
 
-
-@Stable
 internal sealed interface ProfileScreenEvent {
     data object SnackbarConsumed : ProfileScreenEvent
     data object Retry : ProfileScreenEvent

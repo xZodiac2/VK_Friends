@@ -43,7 +43,7 @@ import com.ilya.paging.models.PostAuthor
 import com.ilya.paging.models.RepostedPost
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.PostsLikesState
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

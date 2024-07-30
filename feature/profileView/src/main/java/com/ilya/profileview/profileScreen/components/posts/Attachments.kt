@@ -38,7 +38,7 @@ import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Photo
 import com.ilya.paging.models.Video
 import com.ilya.profileview.R
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

@@ -37,6 +37,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -69,6 +70,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.ilya.core.appCommon.compose.isEmpty
 import com.ilya.core.appCommon.compose.rememberSwitch
 import com.ilya.paging.models.Comment
 import com.ilya.paging.models.Likeable
@@ -79,7 +81,7 @@ import com.ilya.profileview.profileScreen.CommentsBottomSheetState
 import com.ilya.profileview.profileScreen.components.profileCommon.CommentsTopBar
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveAppend
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveRefresh
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 import kotlinx.coroutines.flow.StateFlow
@@ -123,11 +125,11 @@ private fun CommentsSheetContent(commentsSheetState: CommentsBottomSheetState, e
             val contentScrolled by remember { derivedStateOf { scrollBehavior.state.contentOffset < -50 } }
             CommentsTopBar(contentScrolled)
         },
-        containerColor = LocalColorScheme.current.cardContainerColor
+        containerColor = LocalColorScheme.current.cardContainerColor,
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(bottom = 70.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             items(comments.itemCount, key = comments.itemKey { it.id }) { index ->
@@ -257,6 +259,7 @@ private fun CommentBody(
 private fun ExpandThreadButton(isCommentThreadExpanded: MutableState<Boolean>, threadSize: Int) {
     val textSwitch = rememberSwitch(R.string.show_thread, R.string.hide)
     val text = remember { mutableIntStateOf(textSwitch.last()) }
+
     Row(
         modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
             isCommentThreadExpanded.value = !isCommentThreadExpanded.value
@@ -277,9 +280,7 @@ private fun ExpandThreadButton(isCommentThreadExpanded: MutableState<Boolean>, t
         AnimatedContent(
             targetState = text.intValue,
             label = "expandButtonText",
-            transitionSpec = {
-                fadeIn(tween(100)) togetherWith fadeOut(tween(100))
-            }
+            transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) }
         ) { targetValue ->
             Text(
                 text = stringResource(targetValue, threadSize),
@@ -363,15 +364,12 @@ private fun ThreadCommentBody(
                             contentDescription = "replyTo"
                         )
                         Text(
-                            text = comment.replyToUser?.firstName
-                                ?: stringResource(R.string.user_not_supports),
+                            text = comment.replyToUser?.firstName ?: stringResource(R.string.user_not_supports),
                             color = LocalColorScheme.current.secondaryTextColor,
                             fontSize = LocalTypography.current.tiny
                         )
                     }
-                    val commentText = comment.text.ifEmpty {
-                        stringResource(R.string.comment_is_not_supports)
-                    }
+                    val commentText = comment.text.ifEmpty { stringResource(R.string.comment_is_not_supports) }
                     val commentTextColor = if (comment.text.isEmpty()) {
                         LocalColorScheme.current.secondaryTextColor
                     } else {
@@ -468,7 +466,7 @@ private fun CommentLikes(
 
 @Composable
 private fun OnEmptyCommentsMessage(comments: LazyPagingItems<Comment>) {
-    if (comments.itemCount == 0 && comments.loadState.refresh is LoadState.NotLoading) {
+    if (comments.isEmpty() && comments.loadState.refresh is LoadState.NotLoading) {
         Box(modifier = Modifier.height(300.dp), contentAlignment = Alignment.Center) {
             Column(
                 modifier = Modifier.fillMaxWidth(),

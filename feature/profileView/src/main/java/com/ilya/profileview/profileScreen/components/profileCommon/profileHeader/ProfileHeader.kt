@@ -40,7 +40,7 @@ import com.ilya.core.appCommon.compose.basicComposables.BaseButtonStyles
 import com.ilya.core.appCommon.enums.FriendStatus
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -55,8 +55,8 @@ import com.ilya.profileview.profileScreen.components.profileCommon.profileHeader
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.OnEmptyPostsMessage
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveAppend
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveRefresh
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import kotlinx.coroutines.flow.Flow
 
@@ -71,7 +71,7 @@ fun ProfileScreen(
     val eventReceiver = remember { EventReceiver(viewModel) }
 
     if (isPrivate) {
-        PrivateProfile(viewModel, userId, handleNavEvent)
+        PrivateProfile(viewModel, userId, eventReceiver, handleNavEvent)
         return
     }
 

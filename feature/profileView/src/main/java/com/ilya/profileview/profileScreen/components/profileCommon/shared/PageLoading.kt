@@ -27,7 +27,7 @@ import com.ilya.paging.PaginationError
 import com.ilya.paging.models.Post
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.ErrorType
-import com.ilya.profileview.profileScreen.screens.event.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

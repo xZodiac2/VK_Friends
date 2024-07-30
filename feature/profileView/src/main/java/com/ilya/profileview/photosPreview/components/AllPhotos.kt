@@ -24,8 +24,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel

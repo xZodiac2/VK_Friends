@@ -9,7 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
-import com.ilya.core.basicComposables.snackbar.SnackbarState
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.PaginationError
 import com.ilya.paging.models.Likes

@@ -36,8 +36,8 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.compose.basicComposables.OnError
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.core.basicComposables.OnError
 import com.ilya.paging.PaginationError
 import com.ilya.paging.models.Photo
 import com.ilya.profileview.R

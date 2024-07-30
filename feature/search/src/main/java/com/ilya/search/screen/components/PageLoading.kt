@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
-import com.ilya.core.appCommon.isEmpty
-import com.ilya.core.basicComposables.OnError
+import com.ilya.core.appCommon.compose.basicComposables.OnError
+import com.ilya.core.appCommon.compose.isEmpty
 import com.ilya.paging.PaginationError
 import com.ilya.paging.models.User
 import com.ilya.search.R
@@ -87,6 +87,7 @@ fun ResolveAppend(users: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) 
         LoadState.Loading -> {
             OnLoading(modifier = Modifier.height(if (users.itemCount == 0) 120.dp else 500.dp))
         }
+
         is LoadState.Error -> {
             OnPagingError(
                 modifier = Modifier.height(120.dp),

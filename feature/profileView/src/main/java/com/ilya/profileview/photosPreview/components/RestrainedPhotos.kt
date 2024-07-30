@@ -23,8 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import coil.compose.SubcomposeAsyncImage
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Photo
 import com.ilya.profileview.photosPreview.PhotosPreviewViewModel

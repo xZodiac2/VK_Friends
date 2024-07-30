@@ -2,14 +2,9 @@ package com.ilya.core.appCommon
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import androidx.paging.compose.LazyPagingItems
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-fun <T : Any> LazyPagingItems<T>.isEmpty(): Boolean {
-    return this.itemCount == 0
-}
 
 fun MediaPlayer.configure(): MediaPlayer {
     val audioAttributes = AudioAttributes.Builder()

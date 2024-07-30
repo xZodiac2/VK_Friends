@@ -1,4 +1,4 @@
-package com.ilya.core.basicComposables.snackbar
+package com.ilya.core.appCommon.compose.basicComposables.snackbar
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

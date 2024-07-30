@@ -1,4 +1,4 @@
-package com.ilya.core.basicComposables
+package com.ilya.core.appCommon.compose.basicComposables
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource

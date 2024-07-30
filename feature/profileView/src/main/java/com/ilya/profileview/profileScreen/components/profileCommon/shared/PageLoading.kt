@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
-import com.ilya.core.basicComposables.OnError
+import com.ilya.core.appCommon.compose.basicComposables.OnError
 import com.ilya.paging.PaginationError
 import com.ilya.paging.models.Post
 import com.ilya.profileview.R

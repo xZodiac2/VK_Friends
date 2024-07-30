@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
-import com.ilya.core.basicComposables.snackbar.SnackbarState
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.VideoExtended

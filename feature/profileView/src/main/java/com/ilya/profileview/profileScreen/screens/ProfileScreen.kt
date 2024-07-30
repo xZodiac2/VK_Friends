@@ -31,12 +31,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.ilya.core.appCommon.StringResource
-import com.ilya.core.basicComposables.OnError
-import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
+import com.ilya.core.appCommon.compose.ImmutableList
+import com.ilya.core.appCommon.compose.basicComposables.OnError
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
+import com.ilya.core.appCommon.compose.toImmutableList
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Post
 import com.ilya.profileViewDomain.User
@@ -193,6 +193,8 @@ internal fun OnErrorState(
     }
 }
 
+/* posts.itemSnapshotList.toSet() usage in this method required because of VK API sometimes send two absolutely same posts by
+different query parameters, and LazyColumn throws exception because of using two same item keys  */
 @Composable
 private fun Content(
     user: User,
@@ -203,6 +205,7 @@ private fun Content(
     eventReceiver: EventReceiver
 ) {
     val posts = postsFlow.collectAsLazyPagingItems()
+    val postsList = remember(posts.itemCount) { posts.itemSnapshotList.toSet().toImmutableList() }
 
     LazyColumn(
         modifier = Modifier
@@ -220,9 +223,11 @@ private fun Content(
                 onOpenPhotosClick = { eventReceiver.onOpenPhotosClick(user.id) }
             )
         }
-        items(count = posts.itemCount, key = posts.itemKey { posts.itemSnapshotList.indexOf(it) }) {
+        items(count = postsList.size, key = { postsList.elementAt(it)?.id ?: 0 }) {
+            // Pager fetches new data by getting element exactly from LazyPagingItems<T>
+            posts[it]
             Post(
-                posts = posts,
+                postsList = postsList,
                 index = it,
                 currentLoopingAudio = currentLoopingAudio,
                 likesState = likes,
@@ -247,13 +252,13 @@ private fun Content(
 
 @Composable
 private fun Post(
-    posts: LazyPagingItems<Post>,
+    postsList: ImmutableList<Post?>,
     index: Int,
     currentLoopingAudio: State<Pair<Audio?, Boolean>>,
     likesState: State<PostsLikesState>,
     eventReceiver: EventReceiver
 ) {
-    val post = remember { posts[index] }
+    val post = remember { postsList.elementAt(index) }
 
     post?.let {
         PostCard(

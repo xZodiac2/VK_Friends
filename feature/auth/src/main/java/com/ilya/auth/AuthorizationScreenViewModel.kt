@@ -5,7 +5,7 @@ import com.ilya.auth.screen.AuthorizationScreenEvent
 import com.ilya.auth.screen.AuthorizationScreenState
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
-import com.ilya.core.basicComposables.snackbar.SnackbarState
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.vk.id.AccessToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

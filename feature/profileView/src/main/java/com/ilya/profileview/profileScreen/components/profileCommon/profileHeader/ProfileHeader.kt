@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.ilya.core.appCommon.compose.basicComposables.BaseButton
+import com.ilya.core.appCommon.compose.basicComposables.BaseButtonStyles
 import com.ilya.core.appCommon.enums.FriendStatus
-import com.ilya.core.basicComposables.BaseButton
-import com.ilya.core.basicComposables.BaseButtonStyles
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.screens.event.EventReceiver

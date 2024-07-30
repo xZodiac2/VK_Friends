@@ -7,8 +7,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
-import com.ilya.core.basicComposables.alertDialog.AlertDialogState
-import com.ilya.core.basicComposables.snackbar.SnackbarState
+import com.ilya.core.appCommon.compose.basicComposables.alertDialog.AlertDialogState
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.ilya.friendsview.screen.event.FriendsScreenEvent
 import com.ilya.paging.mappers.toUser
 import com.ilya.paging.models.User

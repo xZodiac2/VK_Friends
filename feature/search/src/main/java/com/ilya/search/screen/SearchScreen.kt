@@ -47,7 +47,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.models.User
 import com.ilya.search.R
 import com.ilya.search.SearchViewModel

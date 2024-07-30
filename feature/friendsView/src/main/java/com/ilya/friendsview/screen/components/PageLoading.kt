@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.StringResource
-import com.ilya.core.appCommon.isEmpty
-import com.ilya.core.basicComposables.OnError
+import com.ilya.core.appCommon.compose.basicComposables.OnError
+import com.ilya.core.appCommon.compose.isEmpty
 import com.ilya.friendsview.R
 import com.ilya.friendsview.screen.ErrorType
 import com.ilya.paging.PaginationError

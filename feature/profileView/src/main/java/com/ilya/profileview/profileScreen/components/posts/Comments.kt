@@ -69,7 +69,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.ilya.core.appCommon.base.rememberSwitch
+import com.ilya.core.appCommon.compose.rememberSwitch
 import com.ilya.paging.models.Comment
 import com.ilya.paging.models.Likeable
 import com.ilya.paging.models.Likes
@@ -234,25 +234,20 @@ private fun CommentBody(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = comment.date,
-                        color = LocalColorScheme.current.secondaryTextColor,
-                        fontSize = LocalTypography.current.tiny
-                    )
-                    if (comment.thread.isNotEmpty()) {
-                        ExpandThreadButton(isThreadExpanded, comment.thread.size)
-                    }
-                }
+                Text(
+                    text = comment.date,
+                    color = LocalColorScheme.current.secondaryTextColor,
+                    fontSize = LocalTypography.current.tiny
+                )
                 CommentLikes(
                     commentsSheetState = commentsSheetState,
                     commentId = comment.id,
                     isDeleted = comment.isDeleted,
                     onLikeClick = { onLikeClick(comment.copy(likes = it)) }
                 )
+            }
+            if (comment.thread.isNotEmpty()) {
+                ExpandThreadButton(isThreadExpanded, comment.thread.size)
             }
         }
     }

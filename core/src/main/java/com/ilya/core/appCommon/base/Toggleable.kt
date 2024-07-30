@@ -4,3 +4,4 @@ interface Toggleable<T> {
     fun toggle(): T
     fun last(): T
 }
+

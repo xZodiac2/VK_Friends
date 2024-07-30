@@ -1,4 +1,4 @@
-package com.ilya.core.basicComposables.alertDialog
+package com.ilya.core.appCommon.compose.basicComposables.alertDialog
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable

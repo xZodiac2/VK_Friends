@@ -1,4 +1,4 @@
-package com.ilya.core.basicComposables.alertDialog
+package com.ilya.core.appCommon.compose.basicComposables.alertDialog
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -12,9 +12,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ilya.core.R
+import com.ilya.core.appCommon.compose.basicComposables.BaseButton
+import com.ilya.core.appCommon.compose.basicComposables.BaseButtonStyles
 import com.ilya.core.appCommon.resolve
-import com.ilya.core.basicComposables.BaseButton
-import com.ilya.core.basicComposables.BaseButtonStyles
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 

@@ -1,4 +1,4 @@
-package com.ilya.core.basicComposables.snackbar
+package com.ilya.core.appCommon.compose.basicComposables.snackbar
 
 import androidx.compose.runtime.Stable
 import com.ilya.core.appCommon.StringResource

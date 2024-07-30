@@ -26,7 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ilya.core.basicComposables.snackbar.SnackbarEventEffect
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.profileview.R
 import com.ilya.profileview.photosScreen.OnLoading
 import com.ilya.profileview.profileScreen.ProfileScreenState

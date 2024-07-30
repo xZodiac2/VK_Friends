@@ -3,7 +3,6 @@ package com.ilya.search.screen.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -84,9 +83,7 @@ private fun OnLoading(modifier: Modifier = Modifier) {
 @Composable
 fun ResolveAppend(users: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) {
     when (val state = users.loadState.append) {
-        LoadState.Loading -> {
-            OnLoading(modifier = Modifier.height(if (users.itemCount == 0) 120.dp else 500.dp))
-        }
+        LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
 
         is LoadState.Error -> {
             OnPagingError(
@@ -104,24 +101,29 @@ fun ResolveAppend(users: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) 
 @Composable
 fun OnEmptyUsers(users: LazyPagingItems<User>) {
     if (users.isEmpty() && users.loadState.refresh is LoadState.NotLoading) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier
+                .height(350.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                modifier = Modifier.size(100.dp),
-                painter = painterResource(R.drawable.empty),
-                contentDescription = "emptiness",
-                tint = LocalColorScheme.current.secondaryTextColor
-            )
-            Text(
-                text = stringResource(R.string.no_users_found),
-                fontSize = LocalTypography.current.big,
-                color = LocalColorScheme.current.secondaryTextColor
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(100.dp),
+                    painter = painterResource(R.drawable.empty),
+                    contentDescription = "emptiness",
+                    tint = LocalColorScheme.current.secondaryTextColor
+                )
+                Text(
+                    text = stringResource(R.string.no_users_found),
+                    fontSize = LocalTypography.current.big,
+                    color = LocalColorScheme.current.secondaryTextColor
+                )
+            }
         }
-
     }
 }
 

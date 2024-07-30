@@ -73,8 +73,7 @@ internal class ProfileScreenViewModel @Inject constructor(
                 pageSize = POSTS_PAGE_SIZE,
                 initialLoadSize = INITIAL_POSTS_LOAD_SIZE
             ),
-            pagingSourceFactory =
-            {
+            pagingSourceFactory = {
                 postsPagingSourceFactory.newInstance(userId)
             }
         )
@@ -165,9 +164,7 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onCommentsClick(postId: Long) {
         this.postId.value = postId
-        viewModelScope.launch {
-            commentsLikesFlow.emit(emptyMap())
-        }
+        //viewModelScope.launch { commentsLikesFlow.emit(emptyMap()) }
     }
 
     private fun onNewNavEvent(event: ProfileScreenNavEvent) {

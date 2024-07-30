@@ -241,9 +241,7 @@ private fun Content(
 
     LaunchedEffect(Unit) {
         snapshotFlow { posts.itemSnapshotList.items }.collect { posts ->
-            val newLikes = posts.associate { it.id to it.likes }.filterNot {
-                it.key in likes.value.likes.keys
-            }
+            val newLikes = posts.associate { it.id to it.likes }
             eventReceiver.onPostAdded(newLikes)
         }
     }

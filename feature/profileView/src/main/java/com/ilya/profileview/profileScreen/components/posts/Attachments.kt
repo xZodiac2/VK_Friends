@@ -250,7 +250,7 @@ private fun Audio(
                 val iconId = if (isPlaying) R.drawable.stop else R.drawable.play
                 Icon(
                     modifier = Modifier
-                        .fillMaxSize(0.5f)
+                        .fillMaxSize(0.3f)
                         .align(Alignment.CenterVertically),
                     painter = painterResource(iconId),
                     tint = color,

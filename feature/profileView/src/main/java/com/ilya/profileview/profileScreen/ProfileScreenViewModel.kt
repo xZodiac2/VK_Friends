@@ -73,7 +73,10 @@ internal class ProfileScreenViewModel @Inject constructor(
                 pageSize = POSTS_PAGE_SIZE,
                 initialLoadSize = INITIAL_POSTS_LOAD_SIZE
             ),
-            pagingSourceFactory = { postsPagingSourceFactory.newInstance(userId) }
+            pagingSourceFactory =
+            {
+                postsPagingSourceFactory.newInstance(userId)
+            }
         )
     }
 
@@ -89,7 +92,8 @@ internal class ProfileScreenViewModel @Inject constructor(
                 pageSize = COMMENTS_PAGE_SIZE,
                 initialLoadSize = INITIAL_COMMENTS_LOAD_SIZE
             ),
-            pagingSourceFactory = {
+            pagingSourceFactory =
+            {
                 val initData = CommentsPagingSource.InitData(
                     ownerId = userId.value,
                     postId = postId
@@ -232,7 +236,7 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun onPostsAdded(likes: Map<Long, Likes>) {
-        _postLikesState.value = PostsLikesState(_postLikesState.value.likes + likes)
+        _postLikesState.value = PostsLikesState(likes)
     }
 
     private fun onLike(item: Likeable) {
@@ -327,12 +331,9 @@ internal class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun toggleFriend(): Result<Unit> {
-        val state = _screenState.value as? ProfileScreenState.ViewData
-            ?: return Result.failure(IllegalStateException())
+        val state = _screenState.value as? ProfileScreenState.ViewData ?: return Result.failure(IllegalStateException())
 
-        _screenState.value = state.copy(
-            user = state.user.copy(friendStatus = state.user.friendStatus.toggled())
-        )
+        _screenState.value = state.copy(user = state.user.copy(friendStatus = state.user.friendStatus.toggled()))
         return Result.success(Unit)
     }
 

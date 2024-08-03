@@ -1,7 +1,7 @@
 package com.ilya.profileview.photosPreview.event
 
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
-import com.ilya.paging.models.Photo
 
 
 internal sealed interface PhotosPreviewEvent {
@@ -11,11 +11,13 @@ internal sealed interface PhotosPreviewEvent {
         val userId: Long,
         val targetPhotoIndex: Int
     ) : PhotosPreviewEvent
+
     data class RestrainedStart(
         val userId: Long,
         val targetPhotoIndex: Int,
         val photoIds: Map<Long, String>
     ) : PhotosPreviewEvent
-    data class Like(val photo: Photo?) : PhotosPreviewEvent
+
+    data class Like(val photo: LikeableCommonInfo?) : PhotosPreviewEvent
     data class Error(val error: Throwable?) : PhotosPreviewEvent
 }

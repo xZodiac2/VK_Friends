@@ -1,12 +1,13 @@
 package com.ilya.profileview.profileScreen.screens.event.receiver
 
 import com.ilya.paging.models.Audio
-import com.ilya.paging.models.Likeable
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Video
 import com.ilya.profileViewDomain.User
 
-interface ProfileScreenEventReceiver {
+
+internal interface ProfileScreenEventReceiver {
     // Base events
     fun onStart(userId: Long)
     fun onSnackbarConsumed()
@@ -20,7 +21,7 @@ interface ProfileScreenEventReceiver {
     fun onAudioClick(audio: Audio)
     fun onVideoClick(video: Video)
     fun onAnotherProfileClick(userId: Long, isPrivate: Boolean)
-    fun onLike(item: Likeable)
+    fun onLike(item: LikeableCommonInfo)
     fun onBackClick()
     fun onFriendRequest(user: User)
     fun onDismissCommentsSheet()

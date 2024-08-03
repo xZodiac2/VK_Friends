@@ -34,7 +34,7 @@ import com.ilya.profileview.profileScreen.ProfileScreenViewModel
 import com.ilya.profileview.profileScreen.components.profileCommon.TopBar
 import com.ilya.profileview.profileScreen.components.profileCommon.profileHeader.ProfileHeader
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
-import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -42,7 +42,7 @@ import com.ilya.theme.LocalTypography
 internal fun PrivateProfile(
     viewModel: ProfileScreenViewModel,
     userId: Long,
-    eventReceiver: EventReceiver,
+    eventReceiver: ProfileScreenEventReceiver,
     handleNavEvent: (ProfileScreenNavEvent) -> Unit
 ) {
     val screenState = viewModel.screenState.collectAsState()

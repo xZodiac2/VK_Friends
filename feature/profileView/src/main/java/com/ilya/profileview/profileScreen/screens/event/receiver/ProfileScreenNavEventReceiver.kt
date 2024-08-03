@@ -2,13 +2,14 @@ package com.ilya.profileview.profileScreen.screens.event.receiver
 
 import com.ilya.core.appCommon.base.EventHandler
 import com.ilya.paging.models.Audio
-import com.ilya.paging.models.Likeable
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Video
 import com.ilya.profileViewDomain.User
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenEvent
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 
+// this class created to simplify posting events from the UI to the view model
 internal class EventReceiver(private val eventHandler: EventHandler<ProfileScreenEvent>) : ProfileScreenEventReceiver {
 
     override fun onFriendRequest(user: User) {
@@ -25,7 +26,7 @@ internal class EventReceiver(private val eventHandler: EventHandler<ProfileScree
         eventHandler.handleEvent(ProfileScreenEvent.NewNavEvent(ProfileScreenNavEvent.OpenPhotosClick(userId)))
     }
 
-    override fun onLike(item: Likeable) {
+    override fun onLike(item: LikeableCommonInfo) {
         eventHandler.handleEvent(ProfileScreenEvent.Like(item))
     }
 

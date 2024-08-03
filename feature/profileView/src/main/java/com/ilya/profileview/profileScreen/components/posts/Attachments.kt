@@ -32,21 +32,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.ilya.core.appCommon.compose.ImmutablePair
 import com.ilya.core.appCommon.enums.PhotoSize
-import com.ilya.paging.models.Attachment
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Photo
 import com.ilya.paging.models.Video
 import com.ilya.profileview.R
-import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
 internal fun Attachments(
-    attachments: List<Attachment>,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
-    eventReceiver: EventReceiver
+    attachments: List<Any>,
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+    eventReceiver: ProfileScreenEventReceiver
 ) {
     val photos = attachments.mapNotNull { it as? Photo }
     val videos = attachments.mapNotNull { it as? Video }
@@ -175,7 +175,7 @@ private fun RowScope.Video(
 private fun Audio(
     audio: Audio,
     onAudioClick: () -> Unit,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>
 ) {
     val color = when {
         audio.url.isBlank() -> Color.Gray

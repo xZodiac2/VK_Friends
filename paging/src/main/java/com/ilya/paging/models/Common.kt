@@ -3,12 +3,12 @@ package com.ilya.paging.models
 import com.ilya.core.appCommon.enums.ObjectType
 import com.ilya.core.appCommon.enums.PhotoSize
 
-interface Likeable {
-    val id: Long
-    val ownerId: Long
-    val likes: Likes?
+data class LikeableCommonInfo(
+    val id: Long,
+    val ownerId: Long,
+    val likes: Likes?,
     val objectType: ObjectType
-}
+)
 
 data class Likes(
     val count: Int,
@@ -27,11 +27,3 @@ data class FirstFrame(
     val width: Int,
     val height: Int
 )
-
-
-fun Likes.toggled(): Likes {
-    return this.copy(
-        userLikes = !this.userLikes,
-        count = if (this.userLikes) this.count - 1 else this.count + 1
-    )
-}

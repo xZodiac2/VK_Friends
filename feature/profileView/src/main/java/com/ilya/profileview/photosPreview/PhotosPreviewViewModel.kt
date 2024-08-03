@@ -12,9 +12,9 @@ import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.PaginationError
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Photo
-import com.ilya.paging.models.toggled
 import com.ilya.paging.pagingSources.PhotosPagingSource
 import com.ilya.profileViewDomain.useCase.GetPhotosUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
@@ -147,8 +147,8 @@ internal class PhotosPreviewViewModel @Inject constructor(
         _snackbarState.value = SnackbarState.Consumed
     }
 
-    private fun onLike(photo: Photo?) {
-        photo ?: run {
+    private fun onLike(info: LikeableCommonInfo?) {
+        info ?: run {
             showSnackbar(R.string.error_cant_like)
             return
         }
@@ -161,10 +161,10 @@ internal class PhotosPreviewViewModel @Inject constructor(
         val likesExceptionHandler = CoroutineExceptionHandler { _, e ->
             logThrowable(e)
             showSnackbar(R.string.error_cant_like)
-            toggleLike(photo.id)
+            toggleLike(info.id)
         }
 
-        toggleLike(photo.id).onFailure {
+        toggleLike(info.id).onFailure {
             showSnackbar(R.string.error_cant_like)
             return
         }
@@ -173,13 +173,13 @@ internal class PhotosPreviewViewModel @Inject constructor(
             val result = resolveLikeUseCase(
                 data = ResolveLikeUseCase.InvokeData(
                     accessToken = accessToken,
-                    likeable = photo
+                    info = info
                 )
             )
 
             result.onFailure {
                 showSnackbar(R.string.error_cant_like)
-                toggleLike(photo.id)
+                toggleLike(info.id)
             }
         }
     }
@@ -191,6 +191,13 @@ internal class PhotosPreviewViewModel @Inject constructor(
         likesMap[photoId] = likes.toggled()
         _likesState.value = PhotosLikesState(likesMap)
         return Result.success(Unit)
+    }
+
+    private fun Likes.toggled(): Likes {
+        return this.copy(
+            userLikes = !this.userLikes,
+            count = if (this.userLikes) this.count - 1 else this.count + 1
+        )
     }
 
     private fun showSnackbar(@StringRes text: Int, vararg formatArgs: Any) {

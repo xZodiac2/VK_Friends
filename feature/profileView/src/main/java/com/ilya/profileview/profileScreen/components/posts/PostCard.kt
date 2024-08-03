@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.ilya.core.appCommon.compose.ImmutablePair
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.CommentsInfo
 import com.ilya.paging.models.Likes
@@ -43,7 +44,7 @@ import com.ilya.paging.models.PostAuthor
 import com.ilya.paging.models.RepostedPost
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.PostsLikesState
-import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
@@ -51,8 +52,8 @@ import com.ilya.theme.LocalTypography
 internal fun PostCard(
     post: Post,
     likes: State<PostsLikesState>,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
-    eventReceiver: EventReceiver
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+    eventReceiver: ProfileScreenEventReceiver
 ) {
     Box(contentAlignment = Alignment.Center) {
         Card(
@@ -74,7 +75,7 @@ internal fun PostCard(
                     likes = likes,
                     postId = post.id,
                     commentsInfo = post.commentsInfo,
-                    onLikeClick = { eventReceiver.onLike(post.copy(likes = it)) },
+                    onLikeClick = { eventReceiver.onLike(post.likeableCommonInfo.copy(likes = it)) },
                     onCommentsClick = { eventReceiver.onCommentsClick(post.id) }
                 )
             }
@@ -103,8 +104,8 @@ private fun PostText(post: Post, isAttachmentsEmpty: Boolean) {
 @Composable
 private fun OptionalRepostedPost(
     post: Post,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
-    eventReceiver: EventReceiver
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+    eventReceiver: ProfileScreenEventReceiver
 ) {
     post.reposted?.let {
         val attachments = post.photos + post.videos + post.audios
@@ -136,7 +137,7 @@ private fun RepostedText(post: RepostedPost, isAttachmentsEmpty: Boolean) {
 }
 
 @Composable
-private fun Author(author: PostAuthor, date: String, eventReceiver: EventReceiver) {
+private fun Author(author: PostAuthor, date: String, eventReceiver: ProfileScreenEventReceiver) {
     Row(
         modifier = Modifier
             .padding(top = 12.dp, start = 20.dp, end = 20.dp)

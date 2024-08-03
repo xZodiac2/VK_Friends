@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Photo
 import com.ilya.profileview.R
@@ -63,7 +64,7 @@ fun PreviewTopBar(
 fun PreviewBottomBar(
     likes: Likes?,
     currentPhoto: Photo?,
-    onLikeClick: (Photo?) -> Unit
+    onLikeClick: (LikeableCommonInfo?) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -76,7 +77,7 @@ fun PreviewBottomBar(
     ) {
         IconButton(
             modifier = Modifier.size(32.dp),
-            onClick = { onLikeClick(currentPhoto?.copy(likes = likes)) }
+            onClick = { onLikeClick(currentPhoto?.likeableCommonInfo?.copy(likes = likes)) }
         ) {
             Icon(
                 modifier = Modifier.fillMaxSize(),

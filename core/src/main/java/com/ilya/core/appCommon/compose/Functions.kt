@@ -13,7 +13,7 @@ fun <T : Any> LazyPagingItems<T>.isEmpty(): Boolean {
 @Composable
 @NonRestartableComposable
 fun <T> rememberSwitch(first: T, second: T): Switch<T> {
-    val switch = remember { Switch(first, second) }
+    val switch = remember(first, second) { Switch(first, second) }
     return switch
 }
 

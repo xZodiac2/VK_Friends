@@ -50,7 +50,7 @@ class AccessTokenManager @Inject constructor(
     }
 
     override fun notifyListeners() {
-        synchronized(mutex) {
+        synchronized(lock) {
             listeners.forEach { it.onChange(accessToken) }
         }
     }

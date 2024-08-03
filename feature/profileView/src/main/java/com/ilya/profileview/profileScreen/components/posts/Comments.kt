@@ -72,22 +72,24 @@ import coil.request.ImageRequest
 import com.ilya.core.appCommon.compose.isEmpty
 import com.ilya.core.appCommon.compose.rememberSwitch
 import com.ilya.paging.models.Comment
-import com.ilya.paging.models.Likeable
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
-import com.ilya.paging.models.ThreadComment
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.CommentsBottomSheetState
 import com.ilya.profileview.profileScreen.components.profileCommon.CommentsTopBar
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveAppend
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveRefresh
-import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CommentsBottomSheet(stateFlow: StateFlow<CommentsBottomSheetState>, eventReceiver: EventReceiver) {
+internal fun CommentsBottomSheet(
+    stateFlow: StateFlow<CommentsBottomSheetState>,
+    eventReceiver: ProfileScreenEventReceiver
+) {
     val commentsSheetState = stateFlow.collectAsState()
     val sheetState = rememberModalBottomSheetState()
 
@@ -113,7 +115,10 @@ internal fun CommentsBottomSheet(stateFlow: StateFlow<CommentsBottomSheetState>,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CommentsSheetContent(commentsSheetState: CommentsBottomSheetState, eventReceiver: EventReceiver) {
+private fun CommentsSheetContent(
+    commentsSheetState: CommentsBottomSheetState,
+    eventReceiver: ProfileScreenEventReceiver
+) {
     val commentsFlow = rememberUpdatedState(commentsSheetState.commentsFlow)
     val comments = commentsFlow.value.collectAsLazyPagingItems()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -166,7 +171,7 @@ private fun Comment(
     comments: LazyPagingItems<Comment>,
     index: Int,
     commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (Likeable) -> Unit
+    onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
     val comment = comments[index]
 
@@ -185,7 +190,7 @@ private fun CommentBody(
     comment: Comment,
     isThreadExpanded: MutableState<Boolean>,
     commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (Comment) -> Unit
+    onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -244,7 +249,7 @@ private fun CommentBody(
                     commentsSheetState = commentsSheetState,
                     commentId = comment.id,
                     isDeleted = comment.isDeleted,
-                    onLikeClick = { onLikeClick(comment.copy(likes = it)) }
+                    onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
                 )
             }
             if (comment.thread.isNotEmpty()) {
@@ -257,7 +262,7 @@ private fun CommentBody(
 @Composable
 private fun ExpandThreadButton(isCommentThreadExpanded: MutableState<Boolean>, threadSize: Int) {
     val textSwitch = rememberSwitch(R.string.show_thread, R.string.hide)
-    val text = remember { mutableIntStateOf(textSwitch.last()) }
+    val text = remember { mutableIntStateOf(textSwitch.value()) }
 
     Row(
         modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
@@ -292,10 +297,10 @@ private fun ExpandThreadButton(isCommentThreadExpanded: MutableState<Boolean>, t
 
 @Composable
 private fun ThreadComments(
-    thread: List<ThreadComment>,
+    thread: List<Comment>,
     isExpanded: State<Boolean>,
     commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (ThreadComment) -> Unit
+    onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -318,9 +323,9 @@ private fun ThreadComments(
 
 @Composable
 private fun ThreadCommentBody(
-    comment: ThreadComment,
+    comment: Comment,
     commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (ThreadComment) -> Unit
+    onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -398,7 +403,7 @@ private fun ThreadCommentBody(
                     commentsSheetState = commentsSheetState,
                     commentId = comment.id,
                     isDeleted = comment.isDeleted,
-                    onLikeClick = { onLikeClick(comment.copy(likes = it)) }
+                    onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
                 )
             }
         }
@@ -466,7 +471,7 @@ private fun CommentLikes(
 @Composable
 private fun OnEmptyCommentsMessage(comments: LazyPagingItems<Comment>) {
     if (comments.isEmpty() && comments.loadState.refresh is LoadState.NotLoading) {
-        Box(modifier = Modifier.height(300.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.height(200.dp), contentAlignment = Alignment.Center) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(24.dp),

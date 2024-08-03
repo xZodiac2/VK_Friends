@@ -11,16 +11,16 @@ import androidx.paging.cachedIn
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.appCommon.base.EventHandler
+import com.ilya.core.appCommon.compose.ImmutablePair
 import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
-import com.ilya.core.appCommon.enums.toggled
+import com.ilya.core.appCommon.compose.with
+import com.ilya.core.appCommon.enums.ObjectType
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.models.Audio
 import com.ilya.paging.models.Comment
-import com.ilya.paging.models.Likeable
+import com.ilya.paging.models.LikeableCommonInfo
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.Post
-import com.ilya.paging.models.ThreadComment
-import com.ilya.paging.models.toggled
 import com.ilya.paging.pagingSources.CommentsPagingSource
 import com.ilya.paging.pagingSources.PostsPagingSource
 import com.ilya.profileViewDomain.User
@@ -91,8 +91,7 @@ internal class ProfileScreenViewModel @Inject constructor(
                 pageSize = COMMENTS_PAGE_SIZE,
                 initialLoadSize = INITIAL_COMMENTS_LOAD_SIZE
             ),
-            pagingSourceFactory =
-            {
+            pagingSourceFactory = {
                 val initData = CommentsPagingSource.InitData(
                     ownerId = userId.value,
                     postId = postId
@@ -122,7 +121,7 @@ internal class ProfileScreenViewModel @Inject constructor(
     val postLikesState = _postLikesState.asStateFlow()
 
     // current looping audio to mediaPlayer.isPlaying
-    private val _currentLoopingAudioState = MutableStateFlow<Pair<Audio?, Boolean>>(null to false)
+    private val _currentLoopingAudioState = MutableStateFlow<ImmutablePair<Audio?, Boolean>>(null with false)
     val currentLoopingAudio = _currentLoopingAudioState.asStateFlow()
 
     private val _audioLoadingState = MutableStateFlow<AudioLoadIndicatorState>(AudioLoadIndicatorState.Idle)
@@ -164,7 +163,6 @@ internal class ProfileScreenViewModel @Inject constructor(
 
     private fun onCommentsClick(postId: Long) {
         this.postId.value = postId
-        //viewModelScope.launch { commentsLikesFlow.emit(emptyMap()) }
     }
 
     private fun onNewNavEvent(event: ProfileScreenNavEvent) {
@@ -197,7 +195,7 @@ internal class ProfileScreenViewModel @Inject constructor(
             } else {
                 val playResult = playNewAudio(audio)
                 playResult.onSuccess {
-                    _currentLoopingAudioState.value = audio to mediaPlayer.isPlaying
+                    _currentLoopingAudioState.value = audio with mediaPlayer.isPlaying
                 }
             }
 
@@ -211,7 +209,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         } else {
             mediaPlayer.start()
         }
-        _currentLoopingAudioState.value = _currentLoopingAudioState.value.first to mediaPlayer.isPlaying
+        _currentLoopingAudioState.value = _currentLoopingAudioState.value.first with mediaPlayer.isPlaying
     }
 
     private fun playNewAudio(audio: Audio): Result<Unit> {
@@ -236,7 +234,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         _postLikesState.value = PostsLikesState(likes)
     }
 
-    private fun onLike(item: Likeable) {
+    private fun onLike(item: LikeableCommonInfo) {
         val accessToken = accessTokenManager.accessToken ?: run {
             showSnackbar(R.string.error_cant_like)
             return
@@ -259,7 +257,7 @@ internal class ProfileScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO + likesExceptionHandler) {
             val result = resolveLikeUseCase(
                 ResolveLikeUseCase.InvokeData(
-                    likeable = item,
+                    info = item,
                     accessToken = accessToken.token
                 )
             )
@@ -271,22 +269,28 @@ internal class ProfileScreenViewModel @Inject constructor(
         }
     }
 
-    private fun toggleLike(item: Likeable): Result<Unit> {
-        val likesMap = when (item) {
-            is Post -> _postLikesState.value.likes.toMutableMap()
-            is Comment -> commentsLikesFlow.value.toMutableMap()
-            is ThreadComment -> commentsLikesFlow.value.toMutableMap()
+    private fun toggleLike(item: LikeableCommonInfo): Result<Unit> {
+        val likesMap = when (item.objectType) {
+            ObjectType.POST -> _postLikesState.value.likes.toMutableMap()
+            ObjectType.COMMENT -> commentsLikesFlow.value.toMutableMap()
             else -> null
         } ?: return Result.failure(IllegalArgumentException())
 
         val likes = likesMap[item.id] ?: return Result.failure(IllegalArgumentException())
         likesMap[item.id] = likes.toggled()
-        when (item) {
-            is Post -> _postLikesState.value = PostsLikesState(likesMap)
-            is Comment -> commentsLikesFlow.value = likesMap
-            is ThreadComment -> commentsLikesFlow.value = likesMap
+        when (item.objectType) {
+            ObjectType.POST -> _postLikesState.value = PostsLikesState(likesMap)
+            ObjectType.COMMENT -> commentsLikesFlow.value = likesMap
+            else -> Unit
         }
         return Result.success(Unit)
+    }
+
+    private fun Likes.toggled(): Likes {
+        return this.copy(
+            userLikes = !this.userLikes,
+            count = if (this.userLikes) this.count - 1 else this.count + 1
+        )
     }
 
     private fun showSnackbar(@StringRes text: Int) {

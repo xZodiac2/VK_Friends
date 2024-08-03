@@ -1,8 +1,5 @@
 import java.net.URI
 
-include(":paging")
-
-
 pluginManagement {
     repositories {
         google()
@@ -10,6 +7,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -20,9 +19,9 @@ dependencyResolutionManagement {
         }
     }
 }
-
 rootProject.name = "VK Friends"
 
+include(":paging")
 include(":app")
 include(":core")
 include(":data")

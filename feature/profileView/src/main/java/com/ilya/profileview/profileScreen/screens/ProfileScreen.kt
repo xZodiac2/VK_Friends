@@ -34,6 +34,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ilya.core.appCommon.StringResource
 import com.ilya.core.appCommon.compose.ImmutableList
+import com.ilya.core.appCommon.compose.ImmutablePair
 import com.ilya.core.appCommon.compose.basicComposables.OnError
 import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.core.appCommon.compose.toImmutableList
@@ -57,6 +58,7 @@ import com.ilya.profileview.profileScreen.components.profileCommon.shared.Resolv
 import com.ilya.profileview.profileScreen.components.profileCommon.shared.ResolveRefresh
 import com.ilya.profileview.profileScreen.screens.event.ProfileScreenNavEvent
 import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import kotlinx.coroutines.flow.Flow
 
@@ -193,7 +195,7 @@ internal fun OnErrorState(
     }
 }
 
-/* posts.itemSnapshotList.toSet() usage in this method required because of VK API sometimes send two absolutely same posts by
+/* posts.itemSnapshotList.toSet() usage in this method required because of VK API sometimes send two same posts by
 different query parameters, and LazyColumn throws exception because of using two same item keys  */
 @Composable
 private fun Content(
@@ -201,8 +203,8 @@ private fun Content(
     postsFlow: Flow<PagingData<Post>>,
     paddingValues: PaddingValues,
     likes: State<PostsLikesState>,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
-    eventReceiver: EventReceiver
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+    eventReceiver: ProfileScreenEventReceiver
 ) {
     val posts = postsFlow.collectAsLazyPagingItems()
     val postsList = remember(posts.itemCount) { posts.itemSnapshotList.toSet().toImmutableList() }
@@ -252,9 +254,9 @@ private fun Content(
 private fun Post(
     postsList: ImmutableList<Post?>,
     index: Int,
-    currentLoopingAudio: State<Pair<Audio?, Boolean>>,
+    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
     likesState: State<PostsLikesState>,
-    eventReceiver: EventReceiver
+    eventReceiver: ProfileScreenEventReceiver
 ) {
     val post = remember { postsList.elementAt(index) }
 

@@ -8,7 +8,6 @@ import com.ilya.core.util.logThrowable
 import com.ilya.data.WallRemoteRepository
 import com.ilya.paging.PaginationError
 import com.ilya.paging.mappers.toComment
-import com.ilya.paging.mappers.toThreadComment
 import com.ilya.paging.mappers.toUser
 import com.ilya.paging.models.Comment
 import java.io.IOException
@@ -50,10 +49,11 @@ class CommentsPagingSource private constructor(
             val comments = commentsDto.map {
                 it.toComment(
                     owner = owners[it.id]?.toUser(),
+                    replyToUser = null,
                     thread = threads[it.id]?.comments?.map { thread ->
                         val replyToUser = commentsResponse.profiles.find { profile -> profile.id == thread.replyToUser }
                         val owner = commentsResponse.profiles.find { profile -> profile.id == thread.fromId }
-                        thread.toThreadComment(replyToUser?.toUser(), owner?.toUser())
+                        thread.toComment(owner?.toUser(), replyToUser?.toUser(), thread = emptyList())
                     } ?: emptyList()
                 )
             }

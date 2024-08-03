@@ -27,12 +27,12 @@ import com.ilya.paging.PaginationError
 import com.ilya.paging.models.Post
 import com.ilya.profileview.R
 import com.ilya.profileview.profileScreen.ErrorType
-import com.ilya.profileview.profileScreen.screens.event.receiver.EventReceiver
+import com.ilya.profileview.profileScreen.screens.event.receiver.ProfileScreenEventReceiver
 import com.ilya.theme.LocalColorScheme
 import com.ilya.theme.LocalTypography
 
 @Composable
-internal fun <T : Any> ResolveRefresh(items: LazyPagingItems<T>, eventReceiver: EventReceiver) {
+internal fun <T : Any> ResolveRefresh(items: LazyPagingItems<T>, eventReceiver: ProfileScreenEventReceiver) {
     when (val state = items.loadState.refresh) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 
@@ -50,7 +50,7 @@ internal fun <T : Any> ResolveRefresh(items: LazyPagingItems<T>, eventReceiver: 
 }
 
 @Composable
-internal fun <T : Any> ResolveAppend(items: LazyPagingItems<T>, eventReceiver: EventReceiver) {
+internal fun <T : Any> ResolveAppend(items: LazyPagingItems<T>, eventReceiver: ProfileScreenEventReceiver) {
     when (val state = items.loadState.append) {
         LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
 

@@ -7,16 +7,16 @@ import kotlinx.coroutines.internal.synchronized
 abstract class BaseObservable<T> {
 
     protected val listeners = mutableListOf<T>()
-    protected val mutex = Any()
+    protected val lock = Any()
 
     fun addListener(listener: T) {
-        synchronized(mutex) {
+        synchronized(lock) {
             listeners += listener
         }
     }
 
     fun removeListener(listener: T) {
-        synchronized(mutex) {
+        synchronized(lock) {
             listeners -= listener
         }
     }

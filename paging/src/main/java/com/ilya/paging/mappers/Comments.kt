@@ -2,12 +2,19 @@ package com.ilya.paging.mappers
 
 import com.ilya.core.appCommon.parseUnixTime
 import com.ilya.data.retrofit.api.dto.CommentDto
-import com.ilya.data.retrofit.api.dto.ThreadDto
+import com.ilya.data.retrofit.api.dto.DEFAULT_REPLY_TO_ID
 import com.ilya.paging.models.Comment
-import com.ilya.paging.models.ThreadComment
 import com.ilya.paging.models.User
 
-fun CommentDto.toComment(owner: User?, thread: List<ThreadComment>): Comment {
+fun CommentDto.toComment(owner: User?, replyToUser: User?, thread: List<Comment>): Comment {
+
+    val text = if (this.replyToUser == DEFAULT_REPLY_TO_ID) {
+        text
+    } else {
+        text.substringAfter("|")
+            .replace("]", "")
+    }
+
     return Comment(
         date = parseUnixTime(date),
         fromId = fromId,
@@ -18,34 +25,9 @@ fun CommentDto.toComment(owner: User?, thread: List<ThreadComment>): Comment {
         thread = thread,
         likes = likes?.toLikes(),
         owner = owner,
-        isDeleted = deleted
-    )
-}
-
-fun ThreadDto.toThreadComment(replyToUser: User?, owner: User?): ThreadComment {
-    val text = if (replyToUser == null) {
-        text
-    } else {
-        /*
-         * Before: [id657782631|Даня], привет
-         * After:  Даня, привет
-         */
-        text
-            .substringAfter("|")
-            .replace("]", "")
-    }
-
-    return ThreadComment(
-        date = parseUnixTime(date),
-        fromId = fromId,
+        isDeleted = deleted,
         replyToComment = replyToComment,
-        postId = postId,
-        replyToUser = replyToUser,
-        owner = owner,
-        id = id,
-        text = text,
-        likes = likes?.toLikes(),
-        ownerId = ownerId,
-        isDeleted = deleted
+        replyToUser = replyToUser
     )
 }
+

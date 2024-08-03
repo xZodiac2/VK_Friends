@@ -9,7 +9,6 @@ import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
 import com.ilya.core.util.logThrowable
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.VideoExtended
-import com.ilya.paging.models.toggled
 import com.ilya.profileViewDomain.useCase.GetVideoUseCase
 import com.ilya.profileViewDomain.useCase.ResolveLikeUseCase
 import com.ilya.profileview.R
@@ -108,7 +107,7 @@ internal class VideoPreviewViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO + likeExceptionHandler) {
             val result = resolveLikeUseCase(
                 ResolveLikeUseCase.InvokeData(
-                    likeable = video.copy(likes = _likesState.value?.toggled()),
+                    info = video.likeableCommonInfo.copy(likes = _likesState.value?.toggled()),
                     accessToken = accessToken.token
                 )
             )
@@ -125,6 +124,13 @@ internal class VideoPreviewViewModel @Inject constructor(
         val like = _likesState.value ?: return Result.failure(IllegalStateException())
         _likesState.value = like.toggled()
         return Result.success(Unit)
+    }
+
+    private fun Likes.toggled(): Likes {
+        return this.copy(
+            userLikes = !this.userLikes,
+            count = if (this.userLikes) this.count - 1 else this.count + 1
+        )
     }
 
     private fun showSnackbar(@StringRes text: Int) {

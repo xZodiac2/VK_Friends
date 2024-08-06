@@ -194,9 +194,20 @@ private fun AttachmentsSlider(photosAndVideos: List<Any>, eventReceiver: Profile
                     ) {
                         SubcomposeAsyncImage(
                             modifier = Modifier
+                                .padding(horizontal = 8.dp)
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(8.dp)),
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { eventReceiver.onVideoClick(attachment) },
+                            contentScale = ContentScale.Crop,
                             model = attachment.firstFrame.lastOrNull()?.url,
+                            loading = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black),
+                                    contentAlignment = Alignment.Center
+                                ) { CircularProgressIndicator(color = Color.White) }
+                            },
                             contentDescription = "video"
                         )
                         Icon(

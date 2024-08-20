@@ -3,12 +3,10 @@ package com.ilya.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun VkFriendsAppTheme(content: @Composable () -> Unit) {
@@ -37,14 +35,13 @@ fun VkFriendsAppTheme(content: @Composable () -> Unit) {
         ColorScheme()
     }
 
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setStatusBarColor(colorScheme.secondary)
+
     CompositionLocalProvider(
         LocalColorScheme provides colorScheme,
         LocalTypography provides Typography
     ) {
-        Box(
-            modifier = Modifier
-                .background(LocalColorScheme.current.secondary)
-                .windowInsetsPadding(WindowInsets.systemBars)
-        ) { content() }
+        Box(modifier = Modifier.background(LocalColorScheme.current.secondary)) { content() }
     }
 }

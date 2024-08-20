@@ -4,7 +4,6 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -69,7 +68,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             VkFriendsAppTheme {
                 val navController = rememberNavController()
@@ -170,7 +168,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) { showBottomBar() }
             }
             composable<Destination.ProfileScreen>(
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)},
+                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
                 popEnterTransition = { fadeIn(tween(0)) },
                 exitTransition = {
                     slideOutHorizontally(

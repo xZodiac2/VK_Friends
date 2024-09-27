@@ -47,8 +47,6 @@ import kotlinx.coroutines.launch
 import okio.IOException
 import javax.inject.Inject
 
-open class A
-
 @HiltViewModel
 internal class ProfileScreenViewModel @Inject constructor(
     private val accessTokenManager: AccessTokenManager,

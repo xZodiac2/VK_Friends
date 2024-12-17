@@ -1,8 +1,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    kotlin("kapt")
 }
 
 android {
@@ -10,10 +10,19 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDRedirectHost" to "vk.com",
+                "VKIDRedirectScheme" to "vk51848121",
+                "VKIDClientID" to "51848121",
+                "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
+            )
+        )
     }
 
     buildTypes {

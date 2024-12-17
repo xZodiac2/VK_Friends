@@ -3,6 +3,7 @@ package com.ilya.profileview.profileScreen.components.profileCommon
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,6 +73,7 @@ internal fun CommentsTopBar(contentScrolled: Boolean) {
     )
     Column {
         TopAppBar(
+            windowInsets = WindowInsets(0, 0, 0, 0),
             title = {
                 Text(
                     text = stringResource(R.string.comments),

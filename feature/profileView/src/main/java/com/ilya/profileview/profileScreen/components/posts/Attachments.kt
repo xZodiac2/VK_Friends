@@ -68,7 +68,7 @@ internal fun Attachments(
         } else {
             AttachmentsGrid(photosAndVideos, eventReceiver)
         }
-
+        
     }
 
     if (audios.isNotEmpty()) {

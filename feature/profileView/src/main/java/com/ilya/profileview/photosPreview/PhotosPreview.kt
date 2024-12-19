@@ -20,7 +20,7 @@ fun PhotosPreview(
     val systemUiController = rememberSystemUiController()
 
     BackHandler {
-        systemUiController.isStatusBarVisible = true
+        systemUiController.isSystemBarsVisible = true
         handleNavEvent(PhotosPreviewNavEvent.BackClick)
     }
 
@@ -30,7 +30,7 @@ fun PhotosPreview(
             userId = userId,
             targetPhotoIndex = targetPhotoIndex,
             onBackClick = {
-                systemUiController.isStatusBarVisible = true
+                systemUiController.isSystemBarsVisible = true
                 handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
             navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
@@ -42,7 +42,7 @@ fun PhotosPreview(
             targetPhotoIndex = targetPhotoIndex,
             photoIds = photoIds,
             onBackClick = {
-                systemUiController.isStatusBarVisible = true
+                systemUiController.isSystemBarsVisible = true
                 handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
             navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
@@ -50,7 +50,7 @@ fun PhotosPreview(
     }
 
     LaunchedEffect(Unit) {
-        systemUiController.isStatusBarVisible = false
+        systemUiController.isSystemBarsVisible = false
     }
 
 }

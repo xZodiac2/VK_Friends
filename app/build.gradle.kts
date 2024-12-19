@@ -91,7 +91,11 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.15.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
 
+    // Splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // SystemUIController
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.35.1-alpha")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

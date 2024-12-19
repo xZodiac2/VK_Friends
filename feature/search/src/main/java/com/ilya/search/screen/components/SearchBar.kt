@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -35,6 +36,7 @@ internal fun SearchBar(
     modifier: Modifier = Modifier,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var inputStateValue by rememberSaveable { mutableStateOf("") }
 
     val background = animateColorAsState(
@@ -63,6 +65,7 @@ internal fun SearchBar(
                         onClick = {
                             inputStateValue = ""
                             onSearch(inputStateValue)
+                            focusManager.clearFocus()
                         }
                     ) {
                         Icon(imageVector = Icons.Outlined.Close, contentDescription = null)
@@ -73,6 +76,7 @@ internal fun SearchBar(
             keyboardActions = KeyboardActions(onSearch = {
                 onSearch(inputStateValue)
                 keyboardController?.hide()
+                focusManager.clearFocus()
             }),
             placeholder = { Text(text = stringResource(id = R.string.search)) },
             colors = OutlinedTextFieldDefaults.colors(

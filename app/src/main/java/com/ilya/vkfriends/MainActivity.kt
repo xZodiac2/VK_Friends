@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
 import com.ilya.core.util.logThrowable
@@ -140,6 +141,8 @@ class MainActivity : ComponentActivity() {
             else -> Destination.FriendsScreen
         }
 
+        val systemUiController = rememberSystemUiController()
+
         NavHost(
             modifier = Modifier.padding(paddingValues),
             navController = navController,
@@ -149,6 +152,7 @@ class MainActivity : ComponentActivity() {
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
+                systemUiController.setSystemBarsColor(LocalColorScheme.current.background)
                 AuthorizationScreen {
                     navController.navigate(Destination.FriendsScreen) {
                         popUpTo(Destination.AuthScreen) { inclusive = true }
@@ -159,6 +163,7 @@ class MainActivity : ComponentActivity() {
                 enterTransition = { fadeIn(tween(0)) },
                 exitTransition = { fadeOut(tween(0)) }
             ) {
+                systemUiController.setSystemBarsColor(LocalColorScheme.current.secondary)
                 val eventHandler = remember { FriendsScreenNavEventHandler(navController) }
 
                 FriendsScreen(

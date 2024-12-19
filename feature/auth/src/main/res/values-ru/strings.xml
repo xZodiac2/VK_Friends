@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_auth">Не получилось авторизоваться. Повторите попытку позже</string>
+</resources>

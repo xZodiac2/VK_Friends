@@ -1,48 +1,83 @@
 package com.ilya.friendsview
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ilya.data.VkRepository
-import com.ilya.friendsview.screen.FiendsScreenEvent
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import com.ilya.core.appCommon.StringResource
+import com.ilya.core.appCommon.accessToken.AccessTokenManager
+import com.ilya.core.appCommon.compose.basicComposables.alertDialog.AlertDialogState
+import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarState
+import com.ilya.friendsview.screen.event.FriendsScreenEvent
+import com.ilya.paging.mappers.toUser
+import com.ilya.paging.models.User
+import com.ilya.paging.pagingSources.FriendsPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
-class FriendsScreenViewModel @Inject constructor(
-    private val repository: VkRepository,
-    @Named("accessToken")
-    private val accessToken: String,
-    @ApplicationContext context: Context,
+internal class FriendsScreenViewModel @Inject constructor(
+    private val friendsPagingSourceFactory: FriendsPagingSource.Factory,
+    private val accessTokenManager: AccessTokenManager,
 ) : ViewModel() {
-    
-    private val _screenMutableState = MutableStateFlow(FriendsScreenState.Loading)
-    val screenState = _screenMutableState.asStateFlow()
-    
-    fun handleEvent(event: FiendsScreenEvent) {
+
+    val friendsFlow = Pager(
+        config = PagingConfig(pageSize = PAGE_SIZE),
+        pagingSourceFactory = { friendsPagingSourceFactory.newInstance(Unit) }
+    ).flow.cachedIn(viewModelScope)
+
+    private val _alertDialogState = MutableStateFlow<AlertDialogState>(AlertDialogState.Consumed)
+    val alertDialogState = _alertDialogState.asStateFlow()
+
+    private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
+    val snackbarState = _snackbarState.asStateFlow()
+
+    private val _accountOwnerState = MutableStateFlow<User?>(null)
+    val accountOwnerState = _accountOwnerState.asStateFlow()
+
+    fun handleEvent(event: FriendsScreenEvent) {
         when (event) {
-            FiendsScreenEvent.Start -> onStart()
-            FiendsScreenEvent.Restart -> onRestart()
+            FriendsScreenEvent.PlaceholderAvatarClick -> onPlaceholderAvatarClick()
+            FriendsScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
+            FriendsScreenEvent.Start -> onStart()
+            is FriendsScreenEvent.BackPress -> onBackPress(event.onConfirm)
         }
     }
-    
+
     private fun onStart() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (accessToken.isEmpty()) {
-            
-            }
+        if (_accountOwnerState.value == null) {
+            val accessTokenValue = accessTokenManager.accessToken ?: return
+            _accountOwnerState.value = accessTokenValue.userData.toUser(accessTokenValue)
         }
     }
-    
-    private fun onRestart() {
-    
+
+    private fun onSnackbarConsumed() {
+        _snackbarState.value = SnackbarState.Consumed
     }
-    
-    
+
+    private fun onPlaceholderAvatarClick() {
+        _snackbarState.value =
+            SnackbarState.Triggered(StringResource.FromId(R.string.data_not_loaded_yet))
+    }
+
+    private fun onBackPress(onConfirm: () -> Unit) {
+        _alertDialogState.value = AlertDialogState.Triggered(
+            text = StringResource.FromId(R.string.app_exit_warning),
+            onConfirm = {
+                onConfirm()
+                _alertDialogState.value = AlertDialogState.Consumed
+            },
+            onDismiss = {
+                _alertDialogState.value = AlertDialogState.Consumed
+            }
+        )
+    }
+
+    companion object {
+        const val PAGE_SIZE = 80
+    }
+
 }

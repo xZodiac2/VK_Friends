@@ -6,18 +6,30 @@ plugins {
 android {
     namespace = "com.ilya.theme"
     compileSdk = 34
-    
+
     defaultConfig {
         minSdk = 26
-        
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        addManifestPlaceholders(
+            mapOf(
+                "VKIDRedirectHost" to "vk.com",
+                "VKIDRedirectScheme" to "vk51848121",
+                "VKIDClientID" to "51848121",
+                "VKIDClientSecret" to "6HSuOmK8zGfCaXw0ZlR8"
+            )
+        )
     }
-    
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -31,7 +43,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.6"
+        kotlinCompilerExtensionVersion = "1.5.6"
     }
     packaging {
         resources {
@@ -41,7 +53,9 @@ android {
 }
 
 dependencies {
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+    // SystemUIController
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.35.1-alpha")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")

@@ -3,44 +3,45 @@ package com.ilya.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
-fun SessionsAppTheme(content: @Composable () -> Unit) {
+fun VkFriendsAppTheme(content: @Composable () -> Unit) {
     val colorScheme = if (isSystemInDarkTheme()) {
         ColorScheme(
             primary = DarkColorScheme.primary,
             secondary = DarkColorScheme.secondary,
             cardContainerColor = DarkColorScheme.cardContainerColor,
             background = DarkColorScheme.background,
-            filledHeartIconTint = DarkColorScheme.heartIconTint,
-            outlinedHeartIconTint = DarkColorScheme.outlinedHeartIconTint,
             primaryTextColor = DarkColorScheme.primaryTextColor,
             secondaryTextColor = DarkColorScheme.secondaryTextColor,
             containerTextFieldColor = DarkColorScheme.containerTextFieldColor,
             valueTextFieldColor = DarkColorScheme.valueTextFieldColor,
-            trailingIconTextFieldColor = DarkColorScheme.trailingIconTextFieldColor,
-            leadingIconTextFieldColor = DarkColorScheme.leadingIconTextFieldColor,
             focusedIndicatorTextFieldColor = DarkColorScheme.focusedIndicatorTextFieldColor,
             unfocusedIndicatorTextFieldColor = DarkColorScheme.unfocusedIndicatorTextFieldColor,
-            placeholderTextFieldColor = DarkColorScheme.placeholderTextFieldColor
+            placeholderTextFieldColor = DarkColorScheme.placeholderTextFieldColor,
+            buttonColor = DarkColorScheme.buttonColor,
+            selectedIconColor = DarkColorScheme.selectedIconColor,
+            unselectedIconColor = DarkColorScheme.unselectedIconColor,
+            bottomNavSelectedIndicatorColor = DarkColorScheme.bottomNavSelectedIndicatorColor,
+            iconTintColor = DarkColorScheme.iconTintColor,
+            primaryIconTintColor = DarkColorScheme.primaryIconTintColor,
+            faded = DarkColorScheme.faded
         )
     } else {
         ColorScheme()
     }
-    
+
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(colorScheme.secondary)
-    
-    CompositionLocalProvider(LocalColorScheme provides colorScheme) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LocalColorScheme.current.background)
-        ) { content() }
+
+    CompositionLocalProvider(
+        LocalColorScheme provides colorScheme,
+        LocalTypography provides Typography
+    ) {
+        Box(modifier = Modifier.background(LocalColorScheme.current.secondary)) { content() }
     }
 }

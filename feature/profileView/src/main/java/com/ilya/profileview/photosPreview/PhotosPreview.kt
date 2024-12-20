@@ -2,9 +2,7 @@ package com.ilya.profileview.photosPreview
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.profileview.photosPreview.components.AllPhotosPreview
 import com.ilya.profileview.photosPreview.components.RestrainedPhotosPreview
 import com.ilya.profileview.photosPreview.event.PhotosPreviewNavEvent
@@ -17,10 +15,8 @@ fun PhotosPreview(
     handleNavEvent: (PhotosPreviewNavEvent) -> Unit
 ) {
     val viewModel: PhotosPreviewViewModel = hiltViewModel()
-    val systemUiController = rememberSystemUiController()
 
     BackHandler {
-        systemUiController.isSystemBarsVisible = true
         handleNavEvent(PhotosPreviewNavEvent.BackClick)
     }
 
@@ -30,7 +26,6 @@ fun PhotosPreview(
             userId = userId,
             targetPhotoIndex = targetPhotoIndex,
             onBackClick = {
-                systemUiController.isSystemBarsVisible = true
                 handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
             navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
@@ -42,15 +37,10 @@ fun PhotosPreview(
             targetPhotoIndex = targetPhotoIndex,
             photoIds = photoIds,
             onBackClick = {
-                systemUiController.isSystemBarsVisible = true
                 handleNavEvent(PhotosPreviewNavEvent.BackClick)
             },
             navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
         )
-    }
-
-    LaunchedEffect(Unit) {
-        systemUiController.isSystemBarsVisible = false
     }
 
 }

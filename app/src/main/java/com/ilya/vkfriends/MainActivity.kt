@@ -1,5 +1,6 @@
 package com.ilya.vkfriends
 
+import android.annotation.SuppressLint
 import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,22 +18,26 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.auth.screen.AuthorizationScreen
 import com.ilya.core.appCommon.accessToken.AccessTokenManager
@@ -71,14 +76,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             VkFriendsAppTheme {
-                val navController = rememberNavController()
+                val systemUiController = rememberSystemUiController()
 
-                var bottomBarVisible by remember { mutableStateOf(false) }
+                val navController = rememberNavController()
+                val currentBackStackEntry = navController.currentBackStackEntryAsState()
+
+                setSystemBarsColor(currentBackStackEntry, systemUiController)
+                setSystemBarsVisibility(currentBackStackEntry, systemUiController)
 
                 Scaffold(
                     bottomBar = {
-                        if (bottomBarVisible) {
-                            BottomBar(navController)
+                        val isBottomBarVisible = isBottomBarVisible(currentBackStackEntry)
+
+                        if (isBottomBarVisible) {
+                            BottomBar(navController, currentBackStackEntry.value)
                         }
                     },
                     containerColor = LocalColorScheme.current.primary
@@ -86,17 +97,65 @@ class MainActivity : ComponentActivity() {
                     Navigation(
                         navController = navController,
                         paddingValues = paddingValues,
-                        hideBottomBar = { bottomBarVisible = false },
-                        showBottomBar = { bottomBarVisible = true }
                     )
                 }
             }
         }
     }
 
+    @SuppressLint("ComposableNaming")
     @Composable
-    private fun BottomBar(navController: NavController) {
-        val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    @NonRestartableComposable
+    private fun setSystemBarsVisibility(
+        backStackEntry: State<NavBackStackEntry?>,
+        systemUiController: SystemUiController
+    ) {
+        val itIsPhotosPreview by remember {
+            derivedStateOf { backStackEntry.value?.destination?.hasRoute(Destination.PhotosPreview::class) == true }
+        }
+        val itIsVideoPreview by remember {
+            derivedStateOf { backStackEntry.value?.destination?.hasRoute(Destination.VideoPreview::class) == true }
+        }
+
+        systemUiController.isSystemBarsVisible = !(itIsVideoPreview || itIsPhotosPreview)
+    }
+
+    @SuppressLint("ComposableNaming")
+    @Composable
+    @NonRestartableComposable
+    private fun setSystemBarsColor(backStackEntry: State<NavBackStackEntry?>, systemUiController: SystemUiController) {
+        val itIsAuthScreen by remember {
+            derivedStateOf {
+                backStackEntry.value?.destination?.hasRoute(Destination.AuthScreen::class) == true
+            }
+        }
+        val itIsFriendsScreen by remember {
+            derivedStateOf {
+                backStackEntry.value?.destination?.hasRoute(Destination.FriendsScreen::class) == true
+            }
+        }
+
+        if (itIsAuthScreen) systemUiController.setSystemBarsColor(LocalColorScheme.current.background)
+        if (itIsFriendsScreen) systemUiController.setSystemBarsColor(LocalColorScheme.current.secondary)
+    }
+
+    @Composable
+    @NonRestartableComposable
+    private fun isBottomBarVisible(backStackEntry: State<NavBackStackEntry?>): Boolean {
+        val itIsNotPhotosPreview by remember {
+            derivedStateOf { backStackEntry.value?.destination?.hasRoute(Destination.PhotosPreview::class) == false }
+        }
+        val itIsNotVideoPreview by remember {
+            derivedStateOf { backStackEntry.value?.destination?.hasRoute(Destination.VideoPreview::class) == false }
+        }
+        val itIsNotAuthScreen by remember {
+            derivedStateOf { backStackEntry.value?.destination?.hasRoute(Destination.AuthScreen::class) == false }
+        }
+        return itIsNotVideoPreview && itIsNotPhotosPreview && itIsNotAuthScreen
+    }
+
+    @Composable
+    private fun BottomBar(navController: NavController, currentBackStackEntry: NavBackStackEntry?) {
         val currentDestination = currentBackStackEntry?.destination
         val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
 
@@ -107,7 +166,7 @@ class MainActivity : ComponentActivity() {
             navigationBarItems.forEach { item ->
                 NavigationBarItem(
                     selected = currentDestination?.hierarchy?.any {
-                        currentBackStackEntry?.lastDestinationName == item.destination::class.simpleName
+                        currentBackStackEntry.lastDestinationName == item.destination::class.simpleName
                     } == true,
                     onClick = {
                         navController.navigate(item.destination) {
@@ -130,131 +189,145 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun Navigation(
-        navController: NavHostController,
-        paddingValues: PaddingValues,
-        hideBottomBar: () -> Unit,
-        showBottomBar: () -> Unit,
-    ) {
-        val startDestination = when (accessTokenManager.accessToken) {
-            null -> Destination.AuthScreen
-            else -> Destination.FriendsScreen
-        }
-
-        val systemUiController = rememberSystemUiController()
+    private fun Navigation(navController: NavHostController, paddingValues: PaddingValues) {
+        val startDestination = getStartDestination()
 
         NavHost(
             modifier = Modifier.padding(paddingValues),
             navController = navController,
             startDestination = startDestination
         ) {
-            composable<Destination.AuthScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                systemUiController.setSystemBarsColor(LocalColorScheme.current.background)
-                AuthorizationScreen {
-                    navController.navigate(Destination.FriendsScreen) {
-                        popUpTo(Destination.AuthScreen) { inclusive = true }
-                    }
+            authScreenComposable(navController)
+            friendsScreenComposable(navController)
+            profileScreenComposable(navController)
+            searchScreenComposable(navController)
+            photosPreviewComposable(navController)
+            photosScreenComposable(navController)
+            videoPreviewComposable(navController)
+        }
+    }
+
+    private fun getStartDestination(): Destination {
+        return when (accessTokenManager.accessToken) {
+            null -> Destination.AuthScreen
+            else -> Destination.FriendsScreen
+        }
+    }
+
+    private fun NavGraphBuilder.authScreenComposable(navController: NavHostController) {
+        composable<Destination.AuthScreen>(
+            enterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) }
+        ) {
+            AuthorizationScreen {
+                navController.navigate(Destination.FriendsScreen) {
+                    popUpTo(Destination.AuthScreen) { inclusive = true }
                 }
             }
-            composable<Destination.FriendsScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                systemUiController.setSystemBarsColor(LocalColorScheme.current.secondary)
-                val eventHandler = remember { FriendsScreenNavEventHandler(navController) }
+        }
+    }
 
-                FriendsScreen(
-                    onExitConfirm = ::finish,
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.ProfileScreen>(
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
-                popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = {
-                    slideOutHorizontally(
-                        animationSpec = tween(600),
-                        targetOffsetX = { -it / 2 }
-                    ) + fadeOut(tween(300))
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(600)
-                    ) + fadeOut(tween(300))
-                },
-            ) { backStackEntry ->
-                val route = backStackEntry.toRoute<Destination.ProfileScreen>()
-                val eventHandler = remember { ProfileScreenNavEventHandler(navController) }
+    private fun NavGraphBuilder.friendsScreenComposable(navController: NavHostController) {
+        composable<Destination.FriendsScreen>(
+            enterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) }
+        ) {
+            val eventHandler = remember { FriendsScreenNavEventHandler(navController) }
 
-                ProfileScreen(
-                    userId = route.userId,
-                    isPrivate = route.isPrivate,
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.SearchScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val eventHandler = remember { SearchScreenNavEventHandler(navController) }
-                SearchScreen(eventHandler::handleEvent)
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.PhotosPreview>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val route = it.toRoute<Destination.PhotosPreview>()
-                val eventHandler = remember { PhotosPreviewNavEventHandler(navController) }
+            FriendsScreen(
+                onExitConfirm = ::finish,
+                handleNavEvent = eventHandler::handleEvent
+            )
+        }
+    }
 
-                PhotosPreview(
-                    userId = route.userId,
-                    targetPhotoIndex = route.targetPhotoIndex,
-                    photoIds = route.photoIds.fromIdsString(),
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { hideBottomBar() }
-            }
-            composable<Destination.PhotosScreen>(
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
-                popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(600)
-                    ) + fadeOut(tween(300))
-                }
-            ) {
-                val route = it.toRoute<Destination.PhotosScreen>()
-                val eventHandler = remember { PhotosScreenNavEventHandler(navController) }
+    private fun NavGraphBuilder.profileScreenComposable(navController: NavHostController) {
+        composable<Destination.ProfileScreen>(
+            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+            popEnterTransition = { fadeIn(tween(0)) },
+            exitTransition = {
+                slideOutHorizontally(
+                    animationSpec = tween(600),
+                    targetOffsetX = { -it / 2 }
+                ) + fadeOut(tween(300))
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(600)
+                ) + fadeOut(tween(300))
+            },
+        ) { backStackEntry ->
+            val route = backStackEntry.toRoute<Destination.ProfileScreen>()
+            val eventHandler = remember { ProfileScreenNavEventHandler(navController) }
 
-                PhotosScreen(route.userId, eventHandler::handleEvent)
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.VideoPreview>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val route = it.toRoute<Destination.VideoPreview>()
+            ProfileScreen(
+                userId = route.userId,
+                isPrivate = route.isPrivate,
+                handleNavEvent = eventHandler::handleEvent
+            )
+        }
+    }
 
-                VideoPreview(
-                    ownerId = route.ownerId,
-                    videoId = route.id,
-                    accessKey = route.accessKey.takeIf { it != BLANK_ACCESS_KEY } ?: "",
-                    onBackClick = navController::popBackStack
-                )
+    private fun NavGraphBuilder.searchScreenComposable(navController: NavHostController) {
+        composable<Destination.SearchScreen>(
+            enterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) }
+        ) {
+            val eventHandler = remember { SearchScreenNavEventHandler(navController) }
+            SearchScreen(eventHandler::handleEvent)
+        }
+    }
 
-                LaunchedEffect(Unit) {
-                    hideBottomBar()
-                }
+    private fun NavGraphBuilder.photosPreviewComposable(navController: NavHostController) {
+        composable<Destination.PhotosPreview>(
+            enterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) }
+        ) {
+            val route = it.toRoute<Destination.PhotosPreview>()
+            val eventHandler = remember { PhotosPreviewNavEventHandler(navController) }
+
+            PhotosPreview(
+                userId = route.userId,
+                targetPhotoIndex = route.targetPhotoIndex,
+                photoIds = route.photoIds.fromIdsString(),
+                handleNavEvent = eventHandler::handleEvent
+            )
+        }
+    }
+
+    private fun NavGraphBuilder.photosScreenComposable(navController: NavHostController) {
+        composable<Destination.PhotosScreen>(
+            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+            popEnterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(600)
+                ) + fadeOut(tween(300))
             }
+        ) {
+            val route = it.toRoute<Destination.PhotosScreen>()
+            val eventHandler = remember { PhotosScreenNavEventHandler(navController) }
+
+            PhotosScreen(route.userId, eventHandler::handleEvent)
+        }
+    }
+
+    private fun NavGraphBuilder.videoPreviewComposable(navController: NavHostController) {
+        composable<Destination.VideoPreview>(
+            enterTransition = { fadeIn(tween(0)) },
+            exitTransition = { fadeOut(tween(0)) }
+        ) {
+            val route = it.toRoute<Destination.VideoPreview>()
+
+            VideoPreview(
+                ownerId = route.ownerId,
+                videoId = route.id,
+                accessKey = route.accessKey.takeIf { it != BLANK_ACCESS_KEY } ?: "",
+                onBackClick = navController::popBackStack
+            )
         }
     }
 

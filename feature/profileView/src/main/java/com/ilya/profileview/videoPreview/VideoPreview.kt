@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.ilya.core.appCommon.compose.basicComposables.snackbar.SnackbarEventEffect
 import com.ilya.paging.models.Likes
 import com.ilya.paging.models.VideoExtended
@@ -55,7 +54,6 @@ fun VideoPreview(
 ) {
     val viewModel: VideoPreviewViewModel = hiltViewModel()
 
-    val systemUiController = rememberSystemUiController()
     val video by viewModel.videoState.collectAsState()
     val likes by viewModel.likesState.collectAsState()
     val snackbarState by viewModel.snackbarState.collectAsState()
@@ -63,7 +61,6 @@ fun VideoPreview(
     val snackbarHost = remember { SnackbarHostState() }
 
     BackHandler {
-        systemUiController.isStatusBarVisible = true
         onBackClick()
     }
 
@@ -78,7 +75,6 @@ fun VideoPreview(
             VideoPreviewTopBar(
                 videoTitle = video?.title ?: "",
                 onBackClick = {
-                    systemUiController.isStatusBarVisible = true
                     onBackClick()
                 }
             )
@@ -106,7 +102,6 @@ fun VideoPreview(
     }
 
     LaunchedEffect(Unit) {
-        systemUiController.isStatusBarVisible = false
         viewModel.handleEvent(VideoPreviewEvent.Start(ownerId, videoId, accessKey))
     }
 

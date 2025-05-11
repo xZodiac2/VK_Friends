@@ -9,17 +9,17 @@ import retrofit2.create
 import javax.inject.Inject
 
 internal class FriendsManageVkRepository @Inject constructor(
-    retrofit: Retrofit
+  retrofit: Retrofit
 ) : FriendsManageRemoteRepository {
 
-    private val api = retrofit.create<FriendsManageVkApi>()
+  private val api = retrofit.create<FriendsManageVkApi>()
 
-    override suspend fun addFriend(accessToken: String, userId: Long) {
-        withContext(Dispatchers.IO) { api.addFriend(accessToken, userId) }
-    }
+  override suspend fun addFriend(accessToken: String, userId: Long) {
+    withContext(Dispatchers.IO) { api.addFriend(accessToken, userId) }
+  }
 
-    override suspend fun deleteFriend(accessToken: String, userId: Long) {
-        withContext(Dispatchers.IO) { api.deleteFriend(accessToken, userId) }
-    }
+  override suspend fun deleteFriend(accessToken: String, userId: Long) {
+    withContext(Dispatchers.IO) { api.deleteFriend(accessToken, userId) }
+  }
 
 }

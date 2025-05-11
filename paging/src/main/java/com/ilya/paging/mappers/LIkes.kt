@@ -5,8 +5,8 @@ import com.ilya.paging.models.Likes
 
 
 fun LikesDto.toLikes(): Likes {
-    return Likes(
-        count = count,
-        userLikes = userLikes == 1
-    )
+  return Likes(
+    count = count,
+    userLikes = userLikes == 1
+  )
 }

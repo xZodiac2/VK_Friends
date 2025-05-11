@@ -67,153 +67,153 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsScreen(handleNavEvent: (FriendsScreenNavEvent) -> Unit, onExitConfirm: () -> Unit) {
-    val viewModel: FriendsScreenViewModel = hiltViewModel()
+  val viewModel: FriendsScreenViewModel = hiltViewModel()
 
-    val friends = remember { viewModel.friendsFlow }
-    val alertDialogState = viewModel.alertDialogState.collectAsState()
-    val snackbarState = viewModel.snackbarState.collectAsState()
+  val friends = remember { viewModel.friendsFlow }
+  val alertDialogState = viewModel.alertDialogState.collectAsState()
+  val snackbarState = viewModel.snackbarState.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+  val snackbarHostState = remember { SnackbarHostState() }
+  val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    BackHandler { viewModel.handleEvent(FriendsScreenEvent.BackPress(onExitConfirm)) }
-    AlertDialogStateHandler(state = alertDialogState.value)
+  BackHandler { viewModel.handleEvent(FriendsScreenEvent.BackPress(onExitConfirm)) }
+  AlertDialogStateHandler(state = alertDialogState.value)
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        topBar = {
-            TopBar(
-                accountOwnerState = viewModel.accountOwnerState,
-                onAvatarClick = { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) },
-                onPlaceholderClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
-                scrollBehavior = scrollBehavior
-            )
-        },
-        containerColor = LocalColorScheme.current.primary
-    ) { padding ->
-        Content(
-            friendsFlow = friends,
-            padding = padding,
-            onEmptyAccessToken = { handleNavEvent(FriendsScreenNavEvent.EmptyAccessToken) },
-            onFriendClick = { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) },
-        )
-    }
-
-    SnackbarEventEffect(
-        state = snackbarState.value,
-        onConsumed = { viewModel.handleEvent(FriendsScreenEvent.SnackbarConsumed) },
-        action = { snackbarHostState.showSnackbar(it) }
+  Scaffold(
+    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    topBar = {
+      TopBar(
+        accountOwnerState = viewModel.accountOwnerState,
+        onAvatarClick = { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) },
+        onPlaceholderClick = { viewModel.handleEvent(FriendsScreenEvent.PlaceholderAvatarClick) },
+        scrollBehavior = scrollBehavior
+      )
+    },
+    containerColor = LocalColorScheme.current.primary
+  ) { padding ->
+    Content(
+      friendsFlow = friends,
+      padding = padding,
+      onEmptyAccessToken = { handleNavEvent(FriendsScreenNavEvent.EmptyAccessToken) },
+      onFriendClick = { handleNavEvent(FriendsScreenNavEvent.OpenProfile(it)) },
     )
+  }
 
-    LaunchedEffect(Unit) {
-        viewModel.handleEvent(FriendsScreenEvent.Start)
-    }
+  SnackbarEventEffect(
+    state = snackbarState.value,
+    onConsumed = { viewModel.handleEvent(FriendsScreenEvent.SnackbarConsumed) },
+    action = { snackbarHostState.showSnackbar(it) }
+  )
+
+  LaunchedEffect(Unit) {
+    viewModel.handleEvent(FriendsScreenEvent.Start)
+  }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    accountOwnerState: StateFlow<User?>,
-    onAvatarClick: (Long) -> Unit,
-    onPlaceholderClick: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
+  accountOwnerState: StateFlow<User?>,
+  onAvatarClick: (Long) -> Unit,
+  onPlaceholderClick: () -> Unit,
+  scrollBehavior: TopAppBarScrollBehavior
 ) {
-    val accountOwner = accountOwnerState.collectAsState()
+  val accountOwner = accountOwnerState.collectAsState()
 
-    TopAppBar(
-        title = {
-            Text(
-                modifier = Modifier.padding(start = 12.dp),
-                text = stringResource(id = R.string.friends_screen_name),
-                color = LocalColorScheme.current.primaryTextColor,
-                fontSize = LocalTypography.current.large,
-                fontWeight = FontWeight.W500
-            )
-        },
-        navigationIcon = {
-            AsyncImage(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .clickable { accountOwner.value?.id?.let(onAvatarClick) ?: onPlaceholderClick() },
-                model = ImageRequest.Builder(LocalContext.current)
-                    .placeholder(R.drawable.avatar)
-                    .fallback(R.drawable.avatar)
-                    .data(accountOwner.value?.photoUrl)
-                    .build(),
-                contentDescription = "ownerPhoto200",
-                contentScale = ContentScale.Crop
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = LocalColorScheme.current.secondary,
-            scrolledContainerColor = LocalColorScheme.current.secondary
-        ),
-        windowInsets = WindowInsets(left = 16.dp),
-        scrollBehavior = scrollBehavior
-    )
+  TopAppBar(
+    title = {
+      Text(
+        modifier = Modifier.padding(start = 12.dp),
+        text = stringResource(id = R.string.friends_screen_name),
+        color = LocalColorScheme.current.primaryTextColor,
+        fontSize = LocalTypography.current.large,
+        fontWeight = FontWeight.W500
+      )
+    },
+    navigationIcon = {
+      AsyncImage(
+        modifier = Modifier
+          .size(36.dp)
+          .clip(CircleShape)
+          .clickable { accountOwner.value?.id?.let(onAvatarClick) ?: onPlaceholderClick() },
+        model = ImageRequest.Builder(LocalContext.current)
+          .placeholder(R.drawable.avatar)
+          .fallback(R.drawable.avatar)
+          .data(accountOwner.value?.photoUrl)
+          .build(),
+        contentDescription = "ownerPhoto200",
+        contentScale = ContentScale.Crop
+      )
+    },
+    colors = TopAppBarDefaults.topAppBarColors(
+      containerColor = LocalColorScheme.current.secondary,
+      scrolledContainerColor = LocalColorScheme.current.secondary
+    ),
+    windowInsets = WindowInsets(left = 16.dp),
+    scrollBehavior = scrollBehavior
+  )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun Content(
-    friendsFlow: Flow<PagingData<User>>,
-    padding: PaddingValues,
-    onFriendClick: (Long) -> Unit,
-    onEmptyAccessToken: () -> Unit,
+  friendsFlow: Flow<PagingData<User>>,
+  padding: PaddingValues,
+  onFriendClick: (Long) -> Unit,
+  onEmptyAccessToken: () -> Unit,
 ) {
-    val friends = friendsFlow.collectAsLazyPagingItems()
-    val initialDataLoaded = remember { derivedStateOf { friends.itemCount > 0 } }
-    val isRefreshing = friends.loadState.refresh == LoadState.Loading && initialDataLoaded.value
+  val friends = friendsFlow.collectAsLazyPagingItems()
+  val initialDataLoaded = remember { derivedStateOf { friends.itemCount > 0 } }
+  val isRefreshing = friends.loadState.refresh == LoadState.Loading && initialDataLoaded.value
 
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = { friends.refresh() }
-    )
+  val pullRefreshState = rememberPullRefreshState(
+    refreshing = isRefreshing,
+    onRefresh = { friends.refresh() }
+  )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-            .pullRefresh(pullRefreshState)
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(padding)
+      .pullRefresh(pullRefreshState)
+  ) {
+    LazyVerticalGrid(
+      columns = GridCells.Fixed(2),
+      contentPadding = PaddingValues(16.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(count = friends.itemCount, key = friends.itemKey { it.id }) { Friend(friends, it, onFriendClick) }
-            item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
-            item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
-            item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }
-        }
-
-        PullRefreshIndicator(
-            refreshing = isRefreshing,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = LocalColorScheme.current.primaryIconTintColor,
-            backgroundColor = LocalColorScheme.current.cardContainerColor
-        )
+      items(count = friends.itemCount, key = friends.itemKey { it.id }) { Friend(friends, it, onFriendClick) }
+      item(span = { GridItemSpan(2) }) { ResolveRefresh(friends, onEmptyAccessToken) }
+      item(span = { GridItemSpan(2) }) { ResolveAppend(friends, onEmptyAccessToken) }
+      item(span = { GridItemSpan(2) }) { OnEmptyFriends(friends) }
     }
+
+    PullRefreshIndicator(
+      refreshing = isRefreshing,
+      state = pullRefreshState,
+      modifier = Modifier.align(Alignment.TopCenter),
+      contentColor = LocalColorScheme.current.primaryIconTintColor,
+      backgroundColor = LocalColorScheme.current.cardContainerColor
+    )
+  }
 }
 
 @Composable
 private fun Friend(
-    friends: LazyPagingItems<User>,
-    index: Int,
-    onFriendClick: (Long) -> Unit
+  friends: LazyPagingItems<User>,
+  index: Int,
+  onFriendClick: (Long) -> Unit
 ) {
-    val friend = friends[index]
-    if (friend != null) {
-        FriendCard(
-            user = friend,
-            onCardClick = { onFriendClick(friend.id) }
-        )
-    }
+  val friend = friends[index]
+  if (friend != null) {
+    FriendCard(
+      user = friend,
+      onCardClick = { onFriendClick(friend.id) }
+    )
+  }
 }
 
 

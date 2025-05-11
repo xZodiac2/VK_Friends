@@ -5,5 +5,5 @@ import com.ilya.paging.models.Likes
 
 @Stable
 internal class PhotosLikesState(
-    val likes: Map<Long, Likes>
+  val likes: Map<Long, Likes>
 )

@@ -7,35 +7,35 @@ import com.ilya.paging.models.Likes
 import javax.inject.Inject
 
 class ResolveLikeUseCase @Inject constructor(
-    private val repository: LikesRemoteRepository
+  private val repository: LikesRemoteRepository
 ) : UseCase<ResolveLikeUseCase.InvokeData, Result<Likes>> {
 
-    override suspend fun invoke(data: InvokeData): Result<Likes> {
-        val likes = data.info.likes ?: return Result.failure(IllegalArgumentException())
+  override suspend fun invoke(data: InvokeData): Result<Likes> {
+    val likes = data.info.likes ?: return Result.failure(IllegalArgumentException())
 
-        val likesCount = if (likes.userLikes) {
-            repository.deleteLike(
-                accessToken = data.accessToken,
-                type = data.info.objectType,
-                ownerId = data.info.ownerId,
-                itemId = data.info.id
-            )
-        } else {
-            repository.addLike(
-                accessToken = data.accessToken,
-                type = data.info.objectType,
-                ownerId = data.info.ownerId,
-                itemId = data.info.id
-            )
-        }
-
-        return Result.success(Likes(likesCount, !likes.userLikes))
+    val likesCount = if (likes.userLikes) {
+      repository.deleteLike(
+        accessToken = data.accessToken,
+        type = data.info.objectType,
+        ownerId = data.info.ownerId,
+        itemId = data.info.id
+      )
+    } else {
+      repository.addLike(
+        accessToken = data.accessToken,
+        type = data.info.objectType,
+        ownerId = data.info.ownerId,
+        itemId = data.info.id
+      )
     }
 
-    data class InvokeData(
-        val info: LikeableCommonInfo,
-        val accessToken: String
-    )
+    return Result.success(Likes(likesCount, !likes.userLikes))
+  }
+
+  data class InvokeData(
+    val info: LikeableCommonInfo,
+    val accessToken: String
+  )
 
 }
 

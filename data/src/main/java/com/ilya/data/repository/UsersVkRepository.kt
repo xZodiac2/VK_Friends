@@ -11,59 +11,59 @@ import javax.inject.Inject
 
 
 internal class UsersVkRepository @Inject constructor(
-    retrofit: Retrofit
+  retrofit: Retrofit
 ) : UsersRemoteRepository {
 
-    private val api = retrofit.create<UsersVkApi>()
+  private val api = retrofit.create<UsersVkApi>()
 
-    override suspend fun getFriends(
-        accessToken: String,
-        count: Int,
-        offset: Int,
-        fields: List<String>
-    ): List<UserDto> {
-        return withContext(Dispatchers.IO) {
-            api.getFriends(
-                accessToken = accessToken,
-                fields = fields,
-                count = count,
-                offset = offset
-            )
-        }.responseData.items
-    }
+  override suspend fun getFriends(
+    accessToken: String,
+    count: Int,
+    offset: Int,
+    fields: List<String>
+  ): List<UserDto> {
+    return withContext(Dispatchers.IO) {
+      api.getFriends(
+        accessToken = accessToken,
+        fields = fields,
+        count = count,
+        offset = offset
+      )
+    }.responseData.items
+  }
 
-    override suspend fun searchUsers(
-        accessToken: String,
-        count: Int,
-        offset: Int,
-        query: String,
-        fields: List<String>
-    ): List<UserDto> {
-        return withContext(Dispatchers.IO) {
-            api.searchUsers(
-                accessToken = accessToken,
-                query = query,
-                fields = fields,
-                count = count,
-                offset = offset
-            )
-        }.responseData.items
-    }
+  override suspend fun searchUsers(
+    accessToken: String,
+    count: Int,
+    offset: Int,
+    query: String,
+    fields: List<String>
+  ): List<UserDto> {
+    return withContext(Dispatchers.IO) {
+      api.searchUsers(
+        accessToken = accessToken,
+        query = query,
+        fields = fields,
+        count = count,
+        offset = offset
+      )
+    }.responseData.items
+  }
 
-    override suspend fun getSuggestions(
-        accessToken: String,
-        count: Int,
-        offset: Int,
-        fields: List<String>
-    ): List<UserDto> {
-        return withContext(Dispatchers.IO) {
-            api.getSuggestions(
-                accessToken = accessToken,
-                fields = fields,
-                count = count,
-                offset = offset
-            )
-        }.responseData.items
-    }
+  override suspend fun getSuggestions(
+    accessToken: String,
+    count: Int,
+    offset: Int,
+    fields: List<String>
+  ): List<UserDto> {
+    return withContext(Dispatchers.IO) {
+      api.getSuggestions(
+        accessToken = accessToken,
+        fields = fields,
+        count = count,
+        offset = offset
+      )
+    }.responseData.items
+  }
 
 }

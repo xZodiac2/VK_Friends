@@ -14,36 +14,36 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class AuthorizationScreenViewModel @Inject constructor(
-    private val accessTokenManager: AccessTokenManager
+  private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
 
-    private val _authorizationScreenState =
-        MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.NotAuthorized)
-    val authorizationScreenState = _authorizationScreenState.asStateFlow()
+  private val _authorizationScreenState =
+    MutableStateFlow<AuthorizationScreenState>(AuthorizationScreenState.NotAuthorized)
+  val authorizationScreenState = _authorizationScreenState.asStateFlow()
 
-    private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
-    val snackbarState = _snackbarState.asStateFlow()
+  private val _snackbarState = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
+  val snackbarState = _snackbarState.asStateFlow()
 
-    fun handleEvent(event: AuthorizationScreenEvent) {
-        when (event) {
-            is AuthorizationScreenEvent.Authorize -> onAuthorize(event.accessToken)
-            is AuthorizationScreenEvent.Fail -> onFail()
-            is AuthorizationScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
-        }
+  fun handleEvent(event: AuthorizationScreenEvent) {
+    when (event) {
+      is AuthorizationScreenEvent.Authorize -> onAuthorize(event.accessToken)
+      is AuthorizationScreenEvent.Fail -> onFail()
+      is AuthorizationScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
     }
+  }
 
-    private fun onFail() {
-        _snackbarState.value = SnackbarState.Triggered(StringResource.FromId(R.string.error_auth))
-    }
+  private fun onFail() {
+    _snackbarState.value = SnackbarState.Triggered(StringResource.FromId(R.string.error_auth))
+  }
 
-    private fun onSnackbarConsumed() {
-        _snackbarState.value = SnackbarState.Consumed
-    }
+  private fun onSnackbarConsumed() {
+    _snackbarState.value = SnackbarState.Consumed
+  }
 
-    private fun onAuthorize(token: AccessToken) {
-        accessTokenManager.accessToken = token
-        _authorizationScreenState.value = AuthorizationScreenState.Authorized
-    }
+  private fun onAuthorize(token: AccessToken) {
+    accessTokenManager.accessToken = token
+    _authorizationScreenState.value = AuthorizationScreenState.Authorized
+  }
 
 }
 

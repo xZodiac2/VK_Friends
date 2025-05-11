@@ -30,66 +30,66 @@ import com.ilya.theme.LocalColorScheme
 
 @Composable
 internal fun SearchBar(
-    onSearch: (String) -> Unit,
-    topBarCollapsed: Boolean,
-    modifier: Modifier = Modifier,
+  onSearch: (String) -> Unit,
+  topBarCollapsed: Boolean,
+  modifier: Modifier = Modifier,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    var inputStateValue by rememberSaveable { mutableStateOf("") }
+  val keyboardController = LocalSoftwareKeyboardController.current
+  var inputStateValue by rememberSaveable { mutableStateOf("") }
 
-    val background = animateColorAsState(
-        targetValue = if (topBarCollapsed) {
-            LocalColorScheme.current.secondary
-        } else {
-            LocalColorScheme.current.primary
-        },
-        label = "searchBarBackground"
+  val background = animateColorAsState(
+    targetValue = if (topBarCollapsed) {
+      LocalColorScheme.current.secondary
+    } else {
+      LocalColorScheme.current.primary
+    },
+    label = "searchBarBackground"
+  )
+
+  Box(
+    modifier = modifier
+      .background(background.value)
+      .fillMaxWidth()
+      .padding(16.dp),
+  ) {
+    OutlinedTextField(
+      modifier = Modifier.fillMaxWidth(),
+      value = inputStateValue,
+      onValueChange = { inputStateValue = it },
+      leadingIcon = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
+      trailingIcon = {
+        if (inputStateValue.isNotBlank()) {
+          IconButton(
+            onClick = {
+              inputStateValue = ""
+              onSearch(inputStateValue)
+            }
+          ) {
+            Icon(imageVector = Icons.Outlined.Close, contentDescription = null)
+          }
+        }
+      },
+      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+      keyboardActions = KeyboardActions(onSearch = {
+        onSearch(inputStateValue)
+        keyboardController?.hide()
+      }),
+      placeholder = { Text(text = stringResource(id = R.string.search)) },
+      colors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = LocalColorScheme.current.valueTextFieldColor,
+        unfocusedTextColor = LocalColorScheme.current.valueTextFieldColor,
+        focusedContainerColor = LocalColorScheme.current.containerTextFieldColor,
+        unfocusedContainerColor = LocalColorScheme.current.containerTextFieldColor,
+        focusedTrailingIconColor = LocalColorScheme.current.selectedIconColor,
+        unfocusedTrailingIconColor = LocalColorScheme.current.selectedIconColor,
+        focusedLeadingIconColor = LocalColorScheme.current.selectedIconColor,
+        unfocusedLeadingIconColor = LocalColorScheme.current.selectedIconColor,
+        focusedPlaceholderColor = LocalColorScheme.current.placeholderTextFieldColor,
+        unfocusedPlaceholderColor = LocalColorScheme.current.placeholderTextFieldColor,
+        focusedBorderColor = LocalColorScheme.current.focusedIndicatorTextFieldColor,
+        unfocusedBorderColor = LocalColorScheme.current.unfocusedIndicatorTextFieldColor,
+        cursorColor = LocalColorScheme.current.primaryTextColor
+      )
     )
-
-    Box(
-        modifier = modifier
-            .background(background.value)
-            .fillMaxWidth()
-            .padding(16.dp),
-    ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = inputStateValue,
-            onValueChange = { inputStateValue = it },
-            leadingIcon = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
-            trailingIcon = {
-                if (inputStateValue.isNotBlank()) {
-                    IconButton(
-                        onClick = {
-                            inputStateValue = ""
-                            onSearch(inputStateValue)
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Outlined.Close, contentDescription = null)
-                    }
-                }
-            },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {
-                onSearch(inputStateValue)
-                keyboardController?.hide()
-            }),
-            placeholder = { Text(text = stringResource(id = R.string.search)) },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = LocalColorScheme.current.valueTextFieldColor,
-                unfocusedTextColor = LocalColorScheme.current.valueTextFieldColor,
-                focusedContainerColor = LocalColorScheme.current.containerTextFieldColor,
-                unfocusedContainerColor = LocalColorScheme.current.containerTextFieldColor,
-                focusedTrailingIconColor = LocalColorScheme.current.selectedIconColor,
-                unfocusedTrailingIconColor = LocalColorScheme.current.selectedIconColor,
-                focusedLeadingIconColor = LocalColorScheme.current.selectedIconColor,
-                unfocusedLeadingIconColor = LocalColorScheme.current.selectedIconColor,
-                focusedPlaceholderColor = LocalColorScheme.current.placeholderTextFieldColor,
-                unfocusedPlaceholderColor = LocalColorScheme.current.placeholderTextFieldColor,
-                focusedBorderColor = LocalColorScheme.current.focusedIndicatorTextFieldColor,
-                unfocusedBorderColor = LocalColorScheme.current.unfocusedIndicatorTextFieldColor,
-                cursorColor = LocalColorScheme.current.primaryTextColor
-            )
-        )
-    }
+  }
 }

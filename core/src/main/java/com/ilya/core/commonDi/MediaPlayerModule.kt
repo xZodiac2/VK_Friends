@@ -12,10 +12,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object MediaPlayerModule {
 
-    @Singleton
-    @Provides
-    fun provideMediaPlayer(): MediaPlayer {
-        return MediaPlayer().configure()
-    }
+  @Singleton
+  @Provides
+  fun provideMediaPlayer(): MediaPlayer {
+    return MediaPlayer().configure()
+  }
 
 }

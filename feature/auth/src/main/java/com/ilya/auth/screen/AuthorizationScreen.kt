@@ -22,43 +22,43 @@ import com.vk.id.onetap.compose.onetap.OneTap
 
 @Composable
 fun AuthorizationScreen(onAuthorized: () -> Unit) {
-    val viewModel = hiltViewModel<AuthorizationScreenViewModel>()
+  val viewModel = hiltViewModel<AuthorizationScreenViewModel>()
 
-    val screenState by viewModel.authorizationScreenState.collectAsState()
-    val snackbarState by viewModel.snackbarState.collectAsState()
+  val screenState by viewModel.authorizationScreenState.collectAsState()
+  val snackbarState by viewModel.snackbarState.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
+  val snackbarHostState = remember { SnackbarHostState() }
 
-    SnackbarEventEffect(
-        state = snackbarState,
-        onConsumed = { viewModel.handleEvent(AuthorizationScreenEvent.SnackbarConsumed) },
-        action = { snackbarHostState.showSnackbar(it) }
-    )
+  SnackbarEventEffect(
+    state = snackbarState,
+    onConsumed = { viewModel.handleEvent(AuthorizationScreenEvent.SnackbarConsumed) },
+    action = { snackbarHostState.showSnackbar(it) }
+  )
 
-    when (screenState) {
-        AuthorizationScreenState.NotAuthorized -> {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                containerColor = LocalColorScheme.current.background
-            ) { padding ->
-                Box(
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    OneTap(
-                        modifier = Modifier.padding(horizontal = 32.dp),
-                        onAuth = { viewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
-                        onFail = { viewModel.handleEvent(AuthorizationScreenEvent.Fail) }
-                    )
-                }
-            }
+  when (screenState) {
+    AuthorizationScreenState.NotAuthorized -> {
+      Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = LocalColorScheme.current.background
+      ) { padding ->
+        Box(
+          modifier = Modifier
+            .padding(padding)
+            .fillMaxSize(),
+          contentAlignment = Alignment.Center
+        ) {
+          OneTap(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            onAuth = { viewModel.handleEvent(AuthorizationScreenEvent.Authorize(it)) },
+            onFail = { viewModel.handleEvent(AuthorizationScreenEvent.Fail) }
+          )
         }
-
-        AuthorizationScreenState.Authorized -> onAuthorized()
+      }
     }
+
+    AuthorizationScreenState.Authorized -> onAuthorized()
+  }
 
 }
 

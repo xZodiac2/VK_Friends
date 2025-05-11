@@ -11,44 +11,44 @@ import com.ilya.data.retrofit.api.dto.UserDto
 import com.ilya.paging.mappers.toPhoto
 
 fun UserDto.toUser(photos: List<PhotoDto>): User {
-    return User(
-        id = id,
-        firstName = firstName,
-        lastName = lastName,
-        photoUrl = photoUrl,
-        friendStatus = FriendStatus.entries.find { it.value == friendStatus }
-            ?: FriendStatus.NOT_FRIENDS,
-        birthday = birthday,
-        status = status,
-        city = city?.toCity(),
-        relation = Relation.entries.find { it.value == relation } ?: Relation.NOT_STATED,
-        partner = partner?.toPartner(),
-        sex = Sex.entries.find { it.value == sex } ?: Sex.NOT_STATED,
-        counters = counters?.toCounters(),
-        photos = photos.map { it.toPhoto() }
-    )
+  return User(
+    id = id,
+    firstName = firstName,
+    lastName = lastName,
+    photoUrl = photoUrl,
+    friendStatus = FriendStatus.entries.find { it.value == friendStatus }
+      ?: FriendStatus.NOT_FRIENDS,
+    birthday = birthday,
+    status = status,
+    city = city?.toCity(),
+    relation = Relation.entries.find { it.value == relation } ?: Relation.NOT_STATED,
+    partner = partner?.toPartner(),
+    sex = Sex.entries.find { it.value == sex } ?: Sex.NOT_STATED,
+    counters = counters?.toCounters(),
+    photos = photos.map { it.toPhoto() }
+  )
 }
 
 
 private fun CountersDto.toCounters(): Counters {
-    return Counters(
-        friends = friends,
-        subscriptions = subscriptions,
-        followers = followers
-    )
+  return Counters(
+    friends = friends,
+    subscriptions = subscriptions,
+    followers = followers
+  )
 }
 
 fun PartnerDto.toPartner(): Partner {
-    return Partner(
-        id = id,
-        firstName = firstName,
-        lastName = lastName
-    )
+  return Partner(
+    id = id,
+    firstName = firstName,
+    lastName = lastName
+  )
 }
 
 private fun CityDto.toCity(): City {
-    return City(
-        name = name,
-        id = id
-    )
+  return City(
+    name = name,
+    id = id
+  )
 }

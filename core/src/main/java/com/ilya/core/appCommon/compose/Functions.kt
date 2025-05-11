@@ -7,13 +7,13 @@ import androidx.paging.compose.LazyPagingItems
 import com.ilya.core.appCommon.base.Switch
 
 fun <T : Any> LazyPagingItems<T>.isEmpty(): Boolean {
-    return this.itemCount == 0
+  return this.itemCount == 0
 }
 
 @Composable
 @NonRestartableComposable
 fun <T> rememberSwitch(first: T, second: T): Switch<T> {
-    val switch = remember(first, second) { Switch(first, second) }
-    return switch
+  val switch = remember(first, second) { Switch(first, second) }
+  return switch
 }
 

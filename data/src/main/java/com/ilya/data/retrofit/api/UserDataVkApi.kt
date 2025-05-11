@@ -11,42 +11,42 @@ import retrofit2.http.Query
 
 internal interface UserDataVkApi {
 
-    @GET("users.get?v=$CURRENT_API_VERSION")
-    suspend fun getUserData(
-        @Query("access_token") accessToken: String,
-        @Query("user_ids") userId: Long,
-        @Query("fields") fields: String,
-        @Query("name_case") nameCase: String
-    ): UserDataResponse
+  @GET("users.get?v=$CURRENT_API_VERSION")
+  suspend fun getUserData(
+    @Query("access_token") accessToken: String,
+    @Query("user_ids") userId: Long,
+    @Query("fields") fields: String,
+    @Query("name_case") nameCase: String
+  ): UserDataResponse
 
-    @GET("video.get?v=$CURRENT_API_VERSION")
-    suspend fun getVideoData(
-        @Query("access_token") accessToken: String,
-        @Query("owner_id") ownerId: Long,
-        @Query("videos") videoId: String,
-    ): VideoExtendedResponse
+  @GET("video.get?v=$CURRENT_API_VERSION")
+  suspend fun getVideoData(
+    @Query("access_token") accessToken: String,
+    @Query("owner_id") ownerId: Long,
+    @Query("videos") videoId: String,
+  ): VideoExtendedResponse
 
-    @GET("photos.getAll?v=$CURRENT_API_VERSION")
-    suspend fun getPhotos(
-        @Query("access_token") accessToken: String,
-        @Query("owner_id") ownerId: Long,
-        @Query("offset") offset: Int,
-        @Query("count") count: Int,
-        @Query("extended") extended: Int
-    ) : PhotosResponse
+  @GET("photos.getAll?v=$CURRENT_API_VERSION")
+  suspend fun getPhotos(
+    @Query("access_token") accessToken: String,
+    @Query("owner_id") ownerId: Long,
+    @Query("offset") offset: Int,
+    @Query("count") count: Int,
+    @Query("extended") extended: Int
+  ): PhotosResponse
 
-    @GET("photos.getById?v=$CURRENT_API_VERSION&extended=1")
-    suspend fun getPhotos(
-        @Query("access_token") accessToken: String,
-        @Query("photos") photoIds: String
-    ): RestrainedPhotosListResponse
+  @GET("photos.getById?v=$CURRENT_API_VERSION&extended=1")
+  suspend fun getPhotos(
+    @Query("access_token") accessToken: String,
+    @Query("photos") photoIds: String
+  ): RestrainedPhotosListResponse
 
-    @GET("video.get?v=$CURRENT_API_VERSION")
-    suspend fun getVideo(
-        @Query("access_token") accessToken: String,
-        @Query("owner_id") ownerId: Long,
-        @Query("videos") videoId: String
-    ): VideoExtendedResponse
+  @GET("video.get?v=$CURRENT_API_VERSION")
+  suspend fun getVideo(
+    @Query("access_token") accessToken: String,
+    @Query("owner_id") ownerId: Long,
+    @Query("videos") videoId: String
+  ): VideoExtendedResponse
 
 }
 

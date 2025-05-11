@@ -9,15 +9,15 @@ import retrofit2.Retrofit
 import javax.inject.Inject
 
 internal class GroupVkRepository @Inject constructor(
-    retrofit: Retrofit
+  retrofit: Retrofit
 ) : GroupsRemoteRepository {
 
-    private val api = retrofit.create(GroupsVkApi::class.java)
+  private val api = retrofit.create(GroupsVkApi::class.java)
 
-    override suspend fun getGroup(accessToken: String, groupId: Long): GroupDto {
-        return withContext(Dispatchers.IO) {
-            api.getGroup(accessToken, groupId)
-        }.response.groups.first()
-    }
+  override suspend fun getGroup(accessToken: String, groupId: Long): GroupDto {
+    return withContext(Dispatchers.IO) {
+      api.getGroup(accessToken, groupId)
+    }.response.groups.first()
+  }
 
 }

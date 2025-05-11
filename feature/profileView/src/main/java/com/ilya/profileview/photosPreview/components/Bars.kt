@@ -33,75 +33,75 @@ import com.ilya.theme.LocalTypography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewTopBar(
-    onBackClick: () -> Unit,
-    photosCount: Int,
-    currentPage: Int
+  onBackClick: () -> Unit,
+  photosCount: Int,
+  currentPage: Int
 ) {
-    TopAppBar(
-        title = {
-            if (photosCount != 0) {
-                Text(
-                    text = stringResource(R.string.photo_number, currentPage + 1, photosCount),
-                    color = Color.White,
-                    fontSize = LocalTypography.current.large
-                )
-            }
-        },
-        navigationIcon = {
-            IconButton(onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "backFromPhoto",
-                    tint = Color.White
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
-    )
+  TopAppBar(
+    title = {
+      if (photosCount != 0) {
+        Text(
+          text = stringResource(R.string.photo_number, currentPage + 1, photosCount),
+          color = Color.White,
+          fontSize = LocalTypography.current.large
+        )
+      }
+    },
+    navigationIcon = {
+      IconButton(onBackClick) {
+        Icon(
+          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+          contentDescription = "backFromPhoto",
+          tint = Color.White
+        )
+      }
+    },
+    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
+  )
 }
 
 @Composable
 fun PreviewBottomBar(
-    likes: Likes?,
-    currentPhoto: Photo?,
-    onLikeClick: (LikeableCommonInfo?) -> Unit
+  likes: Likes?,
+  currentPhoto: Photo?,
+  onLikeClick: (LikeableCommonInfo?) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.07f)
-            .background(Color.Black)
-            .padding(start = 16.dp, bottom = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .fillMaxHeight(0.07f)
+      .background(Color.Black)
+      .padding(start = 16.dp, bottom = 16.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    IconButton(
+      modifier = Modifier.size(32.dp),
+      onClick = { onLikeClick(currentPhoto?.likeableCommonInfo?.copy(likes = likes)) }
     ) {
-        IconButton(
-            modifier = Modifier.size(32.dp),
-            onClick = { onLikeClick(currentPhoto?.likeableCommonInfo?.copy(likes = likes)) }
-        ) {
-            Icon(
-                modifier = Modifier.fillMaxSize(),
-                imageVector = if (likes?.userLikes == true) {
-                    Icons.Default.Favorite
-                } else {
-                    Icons.Default.FavoriteBorder
-                },
-                contentDescription = "like",
-                tint = likes?.let {
-                    if (it.userLikes) {
-                        Color.Red
-                    } else {
-                        Color.White
-                    }
-                } ?: Color.Gray
-            )
-        }
-        likes?.let {
-            Text(
-                text = it.count.toString(),
-                color = if (it.userLikes) Color.Red else Color.White,
-                fontSize = LocalTypography.current.big
-            )
-        }
+      Icon(
+        modifier = Modifier.fillMaxSize(),
+        imageVector = if (likes?.userLikes == true) {
+          Icons.Default.Favorite
+        } else {
+          Icons.Default.FavoriteBorder
+        },
+        contentDescription = "like",
+        tint = likes?.let {
+          if (it.userLikes) {
+            Color.Red
+          } else {
+            Color.White
+          }
+        } ?: Color.Gray
+      )
     }
+    likes?.let {
+      Text(
+        text = it.count.toString(),
+        color = if (it.userLikes) Color.Red else Color.White,
+        fontSize = LocalTypography.current.big
+      )
+    }
+  }
 }

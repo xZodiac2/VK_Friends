@@ -10,11 +10,11 @@ import com.ilya.profileViewDomain.toUser
 import javax.inject.Inject
 
 class GetUserDataUseCase @Inject constructor(
-    private val vkApiExecutor: VkApiExecutor<UserExtendedResponseData>
+  private val vkApiExecutor: VkApiExecutor<UserExtendedResponseData>
 ) : UseCase<GetUserDataUseCase.InvokeData, User> {
 
-    override suspend fun invoke(data: InvokeData): User {
-        val vkScriptRequest = """
+  override suspend fun invoke(data: InvokeData): User {
+    val vkScriptRequest = """
             var user = API.users.get({
                 "user_ids": [${data.userId}],
                 "fields": [${FIELDS.joinToString(",") { "\"$it\"" }}]
@@ -44,35 +44,35 @@ class GetUserDataUseCase @Inject constructor(
             };
         """.trimIndent()
 
-        val response = vkApiExecutor.execute(
-            accessToken = data.accessToken,
-            code = vkScriptRequest
-        )
-
-        val photos = response.photos
-        val user = response.user.toUser(photos ?: emptyList())
-        val partner = response.partner?.toPartner() ?: return user
-
-        return user.copy(partner = partner)
-    }
-
-    companion object {
-        private val FIELDS = listOf(
-            "photo_200_orig",
-            "city",
-            "bdate",
-            "status",
-            "friend_status",
-            "relation",
-            "sex",
-            "counters"
-        )
-    }
-
-    data class InvokeData(
-        val accessToken: String,
-        val userId: Long,
+    val response = vkApiExecutor.execute(
+      accessToken = data.accessToken,
+      code = vkScriptRequest
     )
+
+    val photos = response.photos
+    val user = response.user.toUser(photos ?: emptyList())
+    val partner = response.partner?.toPartner() ?: return user
+
+    return user.copy(partner = partner)
+  }
+
+  companion object {
+    private val FIELDS = listOf(
+      "photo_200_orig",
+      "city",
+      "bdate",
+      "status",
+      "friend_status",
+      "relation",
+      "sex",
+      "counters"
+    )
+  }
+
+  data class InvokeData(
+    val accessToken: String,
+    val userId: Long,
+  )
 
 }
 

@@ -29,107 +29,107 @@ import com.ilya.theme.LocalTypography
 
 @Composable
 fun ResolveRefresh(friends: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) {
-    when (val state = friends.loadState.refresh) {
-        LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
-        is LoadState.Error -> {
-            OnPagingError(
-                modifier = Modifier.height(500.dp),
-                errorType = state.error.correspondingErrorType(),
-                onTryAgainClick = { friends.refresh() },
-                onEmptyAccessToken = onEmptyAccessToken
-            )
-        }
-
-        is LoadState.NotLoading -> Unit
+  when (val state = friends.loadState.refresh) {
+    LoadState.Loading -> OnLoading(modifier = Modifier.height(500.dp))
+    is LoadState.Error -> {
+      OnPagingError(
+        modifier = Modifier.height(500.dp),
+        errorType = state.error.correspondingErrorType(),
+        onTryAgainClick = { friends.refresh() },
+        onEmptyAccessToken = onEmptyAccessToken
+      )
     }
+
+    is LoadState.NotLoading -> Unit
+  }
 }
 
 @Composable
 private fun OnPagingError(
-    modifier: Modifier = Modifier,
-    errorType: ErrorType,
-    onTryAgainClick: () -> Unit,
-    onEmptyAccessToken: () -> Unit,
+  modifier: Modifier = Modifier,
+  errorType: ErrorType,
+  onTryAgainClick: () -> Unit,
+  onEmptyAccessToken: () -> Unit,
 ) {
-    when (errorType) {
-        ErrorType.NoInternet -> OnError(
-            modifier = modifier,
-            message = StringResource.FromId(R.string.error_no_able_to_get_data),
-            buttonText = StringResource.FromId(R.string.retry),
-            onButtonClick = onTryAgainClick
-        )
+  when (errorType) {
+    ErrorType.NoInternet -> OnError(
+      modifier = modifier,
+      message = StringResource.FromId(R.string.error_no_able_to_get_data),
+      buttonText = StringResource.FromId(R.string.retry),
+      onButtonClick = onTryAgainClick
+    )
 
-        ErrorType.NoAccessToken -> onEmptyAccessToken()
-        is ErrorType.Unknown -> OnError(
-            modifier = modifier,
-            message = StringResource.FromId(
-                id = R.string.error_unknown,
-                formatArgs = listOf(errorType.error.message.toString())
-            ),
-            buttonText = StringResource.FromId(id = R.string.retry),
-            onButtonClick = onTryAgainClick
-        )
-    }
+    ErrorType.NoAccessToken -> onEmptyAccessToken()
+    is ErrorType.Unknown -> OnError(
+      modifier = modifier,
+      message = StringResource.FromId(
+        id = R.string.error_unknown,
+        formatArgs = listOf(errorType.error.message.toString())
+      ),
+      buttonText = StringResource.FromId(id = R.string.retry),
+      onButtonClick = onTryAgainClick
+    )
+  }
 }
 
 @Composable
 private fun OnLoading(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) { CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor) }
+  Box(
+    modifier = modifier.fillMaxWidth(),
+    contentAlignment = Alignment.Center
+  ) { CircularProgressIndicator(color = LocalColorScheme.current.primaryIconTintColor) }
 }
 
 @Composable
 fun ResolveAppend(friends: LazyPagingItems<User>, onEmptyAccessToken: () -> Unit) {
-    when (val state = friends.loadState.append) {
-        LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
-        is LoadState.Error -> {
-            OnPagingError(
-                modifier = Modifier.height(120.dp),
-                errorType = state.error.correspondingErrorType(),
-                onTryAgainClick = { friends.retry() },
-                onEmptyAccessToken = onEmptyAccessToken
-            )
-        }
-
-        is LoadState.NotLoading -> Unit
+  when (val state = friends.loadState.append) {
+    LoadState.Loading -> OnLoading(modifier = Modifier.height(120.dp))
+    is LoadState.Error -> {
+      OnPagingError(
+        modifier = Modifier.height(120.dp),
+        errorType = state.error.correspondingErrorType(),
+        onTryAgainClick = { friends.retry() },
+        onEmptyAccessToken = onEmptyAccessToken
+      )
     }
+
+    is LoadState.NotLoading -> Unit
+  }
 }
 
 @Composable
 fun OnEmptyFriends(friends: LazyPagingItems<User>) {
-    if (friends.isEmpty() && friends.loadState.refresh is LoadState.NotLoading) {
-        Box(
-            modifier = Modifier
-                .height(350.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Icon(
-                    modifier = Modifier.size(100.dp),
-                    painter = painterResource(R.drawable.empty),
-                    contentDescription = "emptiness",
-                    tint = LocalColorScheme.current.secondaryTextColor
-                )
-                Text(
-                    text = stringResource(R.string.no_friends_found),
-                    fontSize = LocalTypography.current.big,
-                    color = LocalColorScheme.current.secondaryTextColor
-                )
-            }
-        }
+  if (friends.isEmpty() && friends.loadState.refresh is LoadState.NotLoading) {
+    Box(
+      modifier = Modifier
+        .height(350.dp)
+        .fillMaxWidth(),
+      contentAlignment = Alignment.Center
+    ) {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+      ) {
+        Icon(
+          modifier = Modifier.size(100.dp),
+          painter = painterResource(R.drawable.empty),
+          contentDescription = "emptiness",
+          tint = LocalColorScheme.current.secondaryTextColor
+        )
+        Text(
+          text = stringResource(R.string.no_friends_found),
+          fontSize = LocalTypography.current.big,
+          color = LocalColorScheme.current.secondaryTextColor
+        )
+      }
     }
+  }
 }
 
 private fun Throwable.correspondingErrorType(): ErrorType {
-    return when (this) {
-        is PaginationError.NoInternet -> ErrorType.NoInternet
-        is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
-        else -> ErrorType.Unknown(this)
-    }
+  return when (this) {
+    is PaginationError.NoInternet -> ErrorType.NoInternet
+    is PaginationError.NoAccessToken -> ErrorType.NoAccessToken
+    else -> ErrorType.Unknown(this)
+  }
 }

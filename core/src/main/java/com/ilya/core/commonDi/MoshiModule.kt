@@ -12,12 +12,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object MoshiModule {
 
-    @Singleton
-    @Provides
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-    }
+  @Singleton
+  @Provides
+  fun provideMoshi(): Moshi {
+    return Moshi.Builder()
+      .addLast(KotlinJsonAdapterFactory())
+      .build()
+  }
 
 }

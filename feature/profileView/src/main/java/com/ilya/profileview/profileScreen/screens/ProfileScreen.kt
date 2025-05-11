@@ -65,207 +65,207 @@ import kotlinx.coroutines.flow.Flow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    userId: Long,
-    isPrivate: Boolean,
-    handleNavEvent: (ProfileScreenNavEvent) -> Unit
+  userId: Long,
+  isPrivate: Boolean,
+  handleNavEvent: (ProfileScreenNavEvent) -> Unit
 ) {
-    val viewModel = hiltViewModel<ProfileScreenViewModel>()
-    val eventReceiver = remember { EventReceiver(viewModel) }
+  val viewModel = hiltViewModel<ProfileScreenViewModel>()
+  val eventReceiver = remember { EventReceiver(viewModel) }
 
-    if (isPrivate) {
-        PrivateProfile(viewModel, userId, eventReceiver, handleNavEvent)
-        return
+  if (isPrivate) {
+    PrivateProfile(viewModel, userId, eventReceiver, handleNavEvent)
+    return
+  }
+
+  val screenState = viewModel.screenState.collectAsState()
+  val likesState = viewModel.postLikesState.collectAsState()
+  val currentLoopingAudio = viewModel.currentLoopingAudio.collectAsState()
+  val snackbarState = viewModel.snackbarState.collectAsState()
+  val snackbarHostState = remember { SnackbarHostState() }
+  val posts = remember { viewModel.postsFlow }
+  val audioLoadingState = viewModel.audioIndicatorState.collectAsState()
+
+  val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+  BackHandler(onBack = eventReceiver::onBackClick)
+
+  Scaffold(
+    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+    containerColor = LocalColorScheme.current.primary,
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    topBar = {
+      val contentScrolled by remember { derivedStateOf { scrollBehavior.state.contentOffset < -50 } }
+      val onBackClick = remember { eventReceiver::onBackClick }
+
+      TopBar(
+        userId = userId,
+        contentScrolled = contentScrolled,
+        onBackClick = onBackClick
+      )
     }
+  ) { padding ->
+    when (val state = screenState.value) {
+      ProfileScreenState.Loading -> OnLoading(
+        modifier = Modifier
+          .padding(padding)
+          .fillMaxHeight()
+      )
 
-    val screenState = viewModel.screenState.collectAsState()
-    val likesState = viewModel.postLikesState.collectAsState()
-    val currentLoopingAudio = viewModel.currentLoopingAudio.collectAsState()
-    val snackbarState = viewModel.snackbarState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val posts = remember { viewModel.postsFlow }
-    val audioLoadingState = viewModel.audioIndicatorState.collectAsState()
+      is ProfileScreenState.Error -> OnErrorState(
+        errorType = state.errorType,
+        onEmptyAccessToken = {
+          eventReceiver.onEmptyAccessToken()
+        },
+        onTryAgainClick = { eventReceiver.onRetry() },
+        padding = padding
+      )
 
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-    BackHandler(onBack = eventReceiver::onBackClick)
-
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = LocalColorScheme.current.primary,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            val contentScrolled by remember { derivedStateOf { scrollBehavior.state.contentOffset < -50 } }
-            val onBackClick = remember { eventReceiver::onBackClick }
-
-            TopBar(
-                userId = userId,
-                contentScrolled = contentScrolled,
-                onBackClick = onBackClick
-            )
+      is ProfileScreenState.ViewData -> {
+        Box {
+          Content(
+            user = state.user,
+            postsFlow = posts,
+            paddingValues = padding,
+            likes = likesState,
+            currentLoopingAudio = currentLoopingAudio,
+            eventReceiver = eventReceiver
+          )
+          AudioLoadIndicator(audioLoadingState)
         }
-    ) { padding ->
-        when (val state = screenState.value) {
-            ProfileScreenState.Loading -> OnLoading(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxHeight()
-            )
-
-            is ProfileScreenState.Error -> OnErrorState(
-                errorType = state.errorType,
-                onEmptyAccessToken = {
-                    eventReceiver.onEmptyAccessToken()
-                },
-                onTryAgainClick = { eventReceiver.onRetry() },
-                padding = padding
-            )
-
-            is ProfileScreenState.ViewData -> {
-                Box {
-                    Content(
-                        user = state.user,
-                        postsFlow = posts,
-                        paddingValues = padding,
-                        likes = likesState,
-                        currentLoopingAudio = currentLoopingAudio,
-                        eventReceiver = eventReceiver
-                    )
-                    AudioLoadIndicator(audioLoadingState)
-                }
-            }
-        }
+      }
     }
+  }
 
-    CommentsBottomSheet(viewModel.bottomSheetState, eventReceiver)
+  CommentsBottomSheet(viewModel.bottomSheetState, eventReceiver)
 
-    SnackbarEventEffect(
-        state = snackbarState.value,
-        onConsumed = eventReceiver::onSnackbarConsumed,
-        action = { snackbarHostState.showSnackbar(it) }
-    )
+  SnackbarEventEffect(
+    state = snackbarState.value,
+    onConsumed = eventReceiver::onSnackbarConsumed,
+    action = { snackbarHostState.showSnackbar(it) }
+  )
 
-    LaunchedEffect(Unit) {
-        eventReceiver.onStart(userId)
-        viewModel.navEventFlow.collect(handleNavEvent)
-    }
+  LaunchedEffect(Unit) {
+    eventReceiver.onStart(userId)
+    viewModel.navEventFlow.collect(handleNavEvent)
+  }
 
 }
 
 @Composable
 private fun BoxScope.AudioLoadIndicator(audioLoadingState: State<AudioLoadIndicatorState>) {
-    if (audioLoadingState.value == AudioLoadIndicatorState.Loading) {
-        LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .align(Alignment.BottomCenter),
-            color = LocalColorScheme.current.primaryIconTintColor,
-            trackColor = LocalColorScheme.current.primary
-        )
-    }
+  if (audioLoadingState.value == AudioLoadIndicatorState.Loading) {
+    LinearProgressIndicator(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(2.dp)
+        .align(Alignment.BottomCenter),
+      color = LocalColorScheme.current.primaryIconTintColor,
+      trackColor = LocalColorScheme.current.primary
+    )
+  }
 }
 
 @Composable
 internal fun OnErrorState(
-    errorType: ErrorType,
-    onEmptyAccessToken: () -> Unit,
-    onTryAgainClick: () -> Unit,
-    padding: PaddingValues
+  errorType: ErrorType,
+  onEmptyAccessToken: () -> Unit,
+  onTryAgainClick: () -> Unit,
+  padding: PaddingValues
 ) {
-    Box(modifier = Modifier.padding(padding)) {
-        when (errorType) {
-            ErrorType.NoInternet -> OnError(
-                modifier = Modifier.fillMaxHeight(),
-                message = StringResource.FromId(id = R.string.no_able_to_get_data),
-                buttonText = StringResource.FromId(id = R.string.try_again),
-                onButtonClick = onTryAgainClick
-            )
+  Box(modifier = Modifier.padding(padding)) {
+    when (errorType) {
+      ErrorType.NoInternet -> OnError(
+        modifier = Modifier.fillMaxHeight(),
+        message = StringResource.FromId(id = R.string.no_able_to_get_data),
+        buttonText = StringResource.FromId(id = R.string.try_again),
+        onButtonClick = onTryAgainClick
+      )
 
-            ErrorType.NoAccessToken -> onEmptyAccessToken()
-            is ErrorType.Unknown -> OnError(
-                modifier = Modifier.fillMaxHeight(),
-                message = StringResource.FromId(
-                    id = R.string.error_unknown,
-                    listOf(errorType.error.toString())
-                ),
-                buttonText = StringResource.FromId(id = R.string.try_again),
-                onButtonClick = onTryAgainClick
-            )
-        }
+      ErrorType.NoAccessToken -> onEmptyAccessToken()
+      is ErrorType.Unknown -> OnError(
+        modifier = Modifier.fillMaxHeight(),
+        message = StringResource.FromId(
+          id = R.string.error_unknown,
+          listOf(errorType.error.toString())
+        ),
+        buttonText = StringResource.FromId(id = R.string.try_again),
+        onButtonClick = onTryAgainClick
+      )
     }
+  }
 }
 
 /* posts.itemSnapshotList.toSet() usage in this method required because of VK API sometimes send two same posts by
 different query parameters, and LazyColumn throws exception because of using two same item keys  */
 @Composable
 private fun Content(
-    user: User,
-    postsFlow: Flow<PagingData<Post>>,
-    paddingValues: PaddingValues,
-    likes: State<PostsLikesState>,
-    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
-    eventReceiver: ProfileScreenEventReceiver
+  user: User,
+  postsFlow: Flow<PagingData<Post>>,
+  paddingValues: PaddingValues,
+  likes: State<PostsLikesState>,
+  currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+  eventReceiver: ProfileScreenEventReceiver
 ) {
-    val posts = postsFlow.collectAsLazyPagingItems()
-    val postsList = remember(posts.itemCount) { posts.itemSnapshotList.toSet().toImmutableList() }
+  val posts = postsFlow.collectAsLazyPagingItems()
+  val postsList = remember(posts.itemCount) { posts.itemSnapshotList.toSet().toImmutableList() }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item { ProfileHeader(user, eventReceiver) }
-        item {
-            Photos(
-                photos = user.photos,
-                onPhotoClick = { userId, targetPhotoIndex ->
-                    eventReceiver.onPhotoClick(userId, targetPhotoIndex)
-                },
-                onOpenPhotosClick = { eventReceiver.onOpenPhotosClick(user.id) }
-            )
-        }
-        items(count = postsList.size, key = { postsList.elementAt(it)?.id ?: 0 }) {
-            // Pager fetches new data by getting element exactly from LazyPagingItems<T>
-            posts[it]
-            Post(
-                postsList = postsList,
-                index = it,
-                currentLoopingAudio = currentLoopingAudio,
-                likesState = likes,
-                eventReceiver = eventReceiver
-            )
-        }
-        item { ResolveAppend(posts, eventReceiver) }
-        item { ResolveRefresh(posts, eventReceiver) }
-        item { OnEmptyPostsMessage(posts) }
+  LazyColumn(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(paddingValues),
+    verticalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+    item { ProfileHeader(user, eventReceiver) }
+    item {
+      Photos(
+        photos = user.photos,
+        onPhotoClick = { userId, targetPhotoIndex ->
+          eventReceiver.onPhotoClick(userId, targetPhotoIndex)
+        },
+        onOpenPhotosClick = { eventReceiver.onOpenPhotosClick(user.id) }
+      )
     }
+    items(count = postsList.size, key = { postsList.elementAt(it)?.id ?: 0 }) {
+      // Pager fetches new data by getting element exactly from LazyPagingItems<T>
+      posts[it]
+      Post(
+        postsList = postsList,
+        index = it,
+        currentLoopingAudio = currentLoopingAudio,
+        likesState = likes,
+        eventReceiver = eventReceiver
+      )
+    }
+    item { ResolveAppend(posts, eventReceiver) }
+    item { ResolveRefresh(posts, eventReceiver) }
+    item { OnEmptyPostsMessage(posts) }
+  }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { posts.itemSnapshotList.items }.collect { posts ->
-            val newLikes = posts.associate { it.id to it.likes }
-            eventReceiver.onPostAdded(newLikes)
-        }
+  LaunchedEffect(Unit) {
+    snapshotFlow { posts.itemSnapshotList.items }.collect { posts ->
+      val newLikes = posts.associate { it.id to it.likes }
+      eventReceiver.onPostAdded(newLikes)
     }
+  }
 
 }
 
 @Composable
 private fun Post(
-    postsList: ImmutableList<Post?>,
-    index: Int,
-    currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
-    likesState: State<PostsLikesState>,
-    eventReceiver: ProfileScreenEventReceiver
+  postsList: ImmutableList<Post?>,
+  index: Int,
+  currentLoopingAudio: State<ImmutablePair<Audio?, Boolean>>,
+  likesState: State<PostsLikesState>,
+  eventReceiver: ProfileScreenEventReceiver
 ) {
-    val post = remember { postsList.elementAt(index) }
+  val post = remember { postsList.elementAt(index) }
 
-    post?.let {
-        PostCard(
-            post = it,
-            likes = likesState,
-            currentLoopingAudio = currentLoopingAudio,
-            eventReceiver = eventReceiver,
-        )
-    }
+  post?.let {
+    PostCard(
+      post = it,
+      likes = likesState,
+      currentLoopingAudio = currentLoopingAudio,
+      eventReceiver = eventReceiver,
+    )
+  }
 }

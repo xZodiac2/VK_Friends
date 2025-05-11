@@ -7,11 +7,11 @@ import retrofit2.http.Query
 
 internal interface UserDataExecuteVkApi {
 
-    @POST("execute?v=$CURRENT_API_VERSION")
-    suspend fun execute(
-        @Query("access_token") accessToken: String,
-        @Query("code") code: String
-    ): UserExtendedResponse
+  @POST("execute?v=$CURRENT_API_VERSION")
+  suspend fun execute(
+    @Query("access_token") accessToken: String,
+    @Query("code") code: String
+  ): UserExtendedResponse
 
 }
 

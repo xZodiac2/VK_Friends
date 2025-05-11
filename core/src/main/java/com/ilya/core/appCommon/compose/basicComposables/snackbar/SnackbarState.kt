@@ -5,6 +5,6 @@ import com.ilya.core.appCommon.StringResource
 
 @Stable
 sealed interface SnackbarState {
-    data object Consumed : SnackbarState
-    data class Triggered(val text: StringResource) : SnackbarState
+  data object Consumed : SnackbarState
+  data class Triggered(val text: StringResource) : SnackbarState
 }

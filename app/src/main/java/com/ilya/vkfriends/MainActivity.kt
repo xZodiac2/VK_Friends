@@ -60,239 +60,239 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var accessTokenManager: AccessTokenManager
+  @Inject
+  lateinit var accessTokenManager: AccessTokenManager
 
-    @Inject
-    lateinit var mediaPlayer: MediaPlayer
+  @Inject
+  lateinit var mediaPlayer: MediaPlayer
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            VkFriendsAppTheme {
-                val navController = rememberNavController()
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+      VkFriendsAppTheme {
+        val navController = rememberNavController()
 
-                var bottomBarVisible by remember { mutableStateOf(false) }
+        var bottomBarVisible by remember { mutableStateOf(false) }
 
-                Scaffold(
-                    bottomBar = {
-                        if (bottomBarVisible) {
-                            BottomBar(navController)
-                        }
-                    },
-                    containerColor = LocalColorScheme.current.primary
-                ) { paddingValues ->
-                    Navigation(
-                        navController = navController,
-                        paddingValues = paddingValues,
-                        hideBottomBar = { bottomBarVisible = false },
-                        showBottomBar = { bottomBarVisible = true }
-                    )
-                }
+        Scaffold(
+          bottomBar = {
+            if (bottomBarVisible) {
+              BottomBar(navController)
             }
-        }
-    }
-
-    @Composable
-    private fun BottomBar(navController: NavController) {
-        val currentBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = currentBackStackEntry?.destination
-        val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
-
-        NavigationBar(
-            containerColor = LocalColorScheme.current.secondary,
-            modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
-        ) {
-            navigationBarItems.forEach { item ->
-                NavigationBarItem(
-                    selected = currentDestination?.hierarchy?.any {
-                        currentBackStackEntry?.lastDestinationName == item.destination::class.simpleName
-                    } == true,
-                    onClick = {
-                        navController.navigate(item.destination) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    icon = item.icon,
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = LocalColorScheme.current.selectedIconColor,
-                        unselectedIconColor = LocalColorScheme.current.unselectedIconColor,
-                        indicatorColor = LocalColorScheme.current.bottomNavSelectedIndicatorColor
-                    )
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun Navigation(
-        navController: NavHostController,
-        paddingValues: PaddingValues,
-        hideBottomBar: () -> Unit,
-        showBottomBar: () -> Unit,
-    ) {
-        val startDestination = when (accessTokenManager.accessToken) {
-            null -> Destination.AuthScreen
-            else -> Destination.FriendsScreen
-        }
-
-        NavHost(
-            modifier = Modifier.padding(paddingValues),
+          },
+          containerColor = LocalColorScheme.current.primary
+        ) { paddingValues ->
+          Navigation(
             navController = navController,
-            startDestination = startDestination
-        ) {
-            composable<Destination.AuthScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                AuthorizationScreen {
-                    navController.navigate(Destination.FriendsScreen) {
-                        popUpTo(Destination.AuthScreen) { inclusive = true }
-                    }
-                }
-            }
-            composable<Destination.FriendsScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val eventHandler = remember { FriendsScreenNavEventHandler(navController) }
-
-                FriendsScreen(
-                    onExitConfirm = ::finish,
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.ProfileScreen>(
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
-                popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = {
-                    slideOutHorizontally(
-                        animationSpec = tween(600),
-                        targetOffsetX = { -it / 2 }
-                    ) + fadeOut(tween(300))
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(600)
-                    ) + fadeOut(tween(300))
-                },
-            ) { backStackEntry ->
-                val route = backStackEntry.toRoute<Destination.ProfileScreen>()
-                val eventHandler = remember { ProfileScreenNavEventHandler(navController) }
-
-                ProfileScreen(
-                    userId = route.userId,
-                    isPrivate = route.isPrivate,
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.SearchScreen>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val eventHandler = remember { SearchScreenNavEventHandler(navController) }
-                SearchScreen(eventHandler::handleEvent)
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.PhotosPreview>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val route = it.toRoute<Destination.PhotosPreview>()
-                val eventHandler = remember { PhotosPreviewNavEventHandler(navController) }
-
-                PhotosPreview(
-                    userId = route.userId,
-                    targetPhotoIndex = route.targetPhotoIndex,
-                    photoIds = route.photoIds.fromIdsString(),
-                    handleNavEvent = eventHandler::handleEvent
-                )
-                LaunchedEffect(Unit) { hideBottomBar() }
-            }
-            composable<Destination.PhotosScreen>(
-                enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
-                popEnterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(600)
-                    ) + fadeOut(tween(300))
-                }
-            ) {
-                val route = it.toRoute<Destination.PhotosScreen>()
-                val eventHandler = remember { PhotosScreenNavEventHandler(navController) }
-
-                PhotosScreen(route.userId, eventHandler::handleEvent)
-                LaunchedEffect(Unit) { showBottomBar() }
-            }
-            composable<Destination.VideoPreview>(
-                enterTransition = { fadeIn(tween(0)) },
-                exitTransition = { fadeOut(tween(0)) }
-            ) {
-                val route = it.toRoute<Destination.VideoPreview>()
-
-                VideoPreview(
-                    ownerId = route.ownerId,
-                    videoId = route.id,
-                    accessKey = route.accessKey.takeIf { it != BLANK_ACCESS_KEY } ?: "",
-                    onBackClick = navController::popBackStack
-                )
-
-                LaunchedEffect(Unit) {
-                    hideBottomBar()
-                }
-            }
+            paddingValues = paddingValues,
+            hideBottomBar = { bottomBarVisible = false },
+            showBottomBar = { bottomBarVisible = true }
+          )
         }
+      }
+    }
+  }
+
+  @Composable
+  private fun BottomBar(navController: NavController) {
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = currentBackStackEntry?.destination
+    val navigationBarItems = listOf(NavigationBarItem.FriendsView, NavigationBarItem.Search)
+
+    NavigationBar(
+      containerColor = LocalColorScheme.current.secondary,
+      modifier = Modifier.border(1.dp, LocalColorScheme.current.secondary)
+    ) {
+      navigationBarItems.forEach { item ->
+        NavigationBarItem(
+          selected = currentDestination?.hierarchy?.any {
+            currentBackStackEntry?.lastDestinationName == item.destination::class.simpleName
+          } == true,
+          onClick = {
+            navController.navigate(item.destination) {
+              popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+              }
+              launchSingleTop = true
+              restoreState = true
+            }
+          },
+          icon = item.icon,
+          colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = LocalColorScheme.current.selectedIconColor,
+            unselectedIconColor = LocalColorScheme.current.unselectedIconColor,
+            indicatorColor = LocalColorScheme.current.bottomNavSelectedIndicatorColor
+          )
+        )
+      }
+    }
+  }
+
+  @Composable
+  private fun Navigation(
+    navController: NavHostController,
+    paddingValues: PaddingValues,
+    hideBottomBar: () -> Unit,
+    showBottomBar: () -> Unit,
+  ) {
+    val startDestination = when (accessTokenManager.accessToken) {
+      null -> Destination.AuthScreen
+      else -> Destination.FriendsScreen
     }
 
-    private fun String.fromIdsString(): Map<Long, String> {
-        return try {
-            val ids = this.split(",")
-            ids.associate {
-                val idWithAccessKey = it.split("_")
-                if (idWithAccessKey[1] == BLANK_ACCESS_KEY) {
-                    idWithAccessKey[0].toLong() to ""
-                } else {
-                    idWithAccessKey[0].toLong() to idWithAccessKey[1]
-                }
-            }
-        } catch (e: IndexOutOfBoundsException) {
-            logThrowable(e)
-            emptyMap()
-        } catch (e: NumberFormatException) {
-            logThrowable(e)
-            emptyMap()
+    NavHost(
+      modifier = Modifier.padding(paddingValues),
+      navController = navController,
+      startDestination = startDestination
+    ) {
+      composable<Destination.AuthScreen>(
+        enterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) }
+      ) {
+        AuthorizationScreen {
+          navController.navigate(Destination.FriendsScreen) {
+            popUpTo(Destination.AuthScreen) { inclusive = true }
+          }
         }
-    }
+      }
+      composable<Destination.FriendsScreen>(
+        enterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) }
+      ) {
+        val eventHandler = remember { FriendsScreenNavEventHandler(navController) }
 
-    override fun onStop() {
-        super.onStop()
-        try {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-            } else {
-                mediaPlayer.reset()
-            }
-        } catch (e: IllegalStateException) {
-            logThrowable(e)
-        }
-    }
+        FriendsScreen(
+          onExitConfirm = ::finish,
+          handleNavEvent = eventHandler::handleEvent
+        )
+        LaunchedEffect(Unit) { showBottomBar() }
+      }
+      composable<Destination.ProfileScreen>(
+        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+        popEnterTransition = { fadeIn(tween(0)) },
+        exitTransition = {
+          slideOutHorizontally(
+            animationSpec = tween(600),
+            targetOffsetX = { -it / 2 }
+          ) + fadeOut(tween(300))
+        },
+        popExitTransition = {
+          slideOutOfContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = tween(600)
+          ) + fadeOut(tween(300))
+        },
+      ) { backStackEntry ->
+        val route = backStackEntry.toRoute<Destination.ProfileScreen>()
+        val eventHandler = remember { ProfileScreenNavEventHandler(navController) }
 
-    override fun onRestart() {
-        super.onRestart()
-        try {
-            mediaPlayer.start()
-        } catch (e: IllegalStateException) {
-            logThrowable(e)
+        ProfileScreen(
+          userId = route.userId,
+          isPrivate = route.isPrivate,
+          handleNavEvent = eventHandler::handleEvent
+        )
+        LaunchedEffect(Unit) { showBottomBar() }
+      }
+      composable<Destination.SearchScreen>(
+        enterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) }
+      ) {
+        val eventHandler = remember { SearchScreenNavEventHandler(navController) }
+        SearchScreen(eventHandler::handleEvent)
+        LaunchedEffect(Unit) { showBottomBar() }
+      }
+      composable<Destination.PhotosPreview>(
+        enterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) }
+      ) {
+        val route = it.toRoute<Destination.PhotosPreview>()
+        val eventHandler = remember { PhotosPreviewNavEventHandler(navController) }
+
+        PhotosPreview(
+          userId = route.userId,
+          targetPhotoIndex = route.targetPhotoIndex,
+          photoIds = route.photoIds.fromIdsString(),
+          handleNavEvent = eventHandler::handleEvent
+        )
+        LaunchedEffect(Unit) { hideBottomBar() }
+      }
+      composable<Destination.PhotosScreen>(
+        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
+        popEnterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) },
+        popExitTransition = {
+          slideOutOfContainer(
+            towards = AnimatedContentTransitionScope.SlideDirection.Right,
+            animationSpec = tween(600)
+          ) + fadeOut(tween(300))
         }
+      ) {
+        val route = it.toRoute<Destination.PhotosScreen>()
+        val eventHandler = remember { PhotosScreenNavEventHandler(navController) }
+
+        PhotosScreen(route.userId, eventHandler::handleEvent)
+        LaunchedEffect(Unit) { showBottomBar() }
+      }
+      composable<Destination.VideoPreview>(
+        enterTransition = { fadeIn(tween(0)) },
+        exitTransition = { fadeOut(tween(0)) }
+      ) {
+        val route = it.toRoute<Destination.VideoPreview>()
+
+        VideoPreview(
+          ownerId = route.ownerId,
+          videoId = route.id,
+          accessKey = route.accessKey.takeIf { it != BLANK_ACCESS_KEY } ?: "",
+          onBackClick = navController::popBackStack
+        )
+
+        LaunchedEffect(Unit) {
+          hideBottomBar()
+        }
+      }
     }
+  }
+
+  private fun String.fromIdsString(): Map<Long, String> {
+    return try {
+      val ids = this.split(",")
+      ids.associate {
+        val idWithAccessKey = it.split("_")
+        if (idWithAccessKey[1] == BLANK_ACCESS_KEY) {
+          idWithAccessKey[0].toLong() to ""
+        } else {
+          idWithAccessKey[0].toLong() to idWithAccessKey[1]
+        }
+      }
+    } catch (e: IndexOutOfBoundsException) {
+      logThrowable(e)
+      emptyMap()
+    } catch (e: NumberFormatException) {
+      logThrowable(e)
+      emptyMap()
+    }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    try {
+      if (mediaPlayer.isPlaying) {
+        mediaPlayer.pause()
+      } else {
+        mediaPlayer.reset()
+      }
+    } catch (e: IllegalStateException) {
+      logThrowable(e)
+    }
+  }
+
+  override fun onRestart() {
+    super.onRestart()
+    try {
+      mediaPlayer.start()
+    } catch (e: IllegalStateException) {
+      logThrowable(e)
+    }
+  }
 
 }

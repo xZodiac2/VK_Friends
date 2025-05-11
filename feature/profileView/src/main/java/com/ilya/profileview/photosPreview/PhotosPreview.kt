@@ -11,47 +11,47 @@ import com.ilya.profileview.photosPreview.event.PhotosPreviewNavEvent
 
 @Composable
 fun PhotosPreview(
-    userId: Long,
-    targetPhotoIndex: Int,
-    photoIds: Map<Long, String> = emptyMap(),
-    handleNavEvent: (PhotosPreviewNavEvent) -> Unit
+  userId: Long,
+  targetPhotoIndex: Int,
+  photoIds: Map<Long, String> = emptyMap(),
+  handleNavEvent: (PhotosPreviewNavEvent) -> Unit
 ) {
-    val viewModel: PhotosPreviewViewModel = hiltViewModel()
-    val systemUiController = rememberSystemUiController()
+  val viewModel: PhotosPreviewViewModel = hiltViewModel()
+  val systemUiController = rememberSystemUiController()
 
-    BackHandler {
+  BackHandler {
+    systemUiController.isStatusBarVisible = true
+    handleNavEvent(PhotosPreviewNavEvent.BackClick)
+  }
+
+  if (photoIds.isEmpty()) {
+    AllPhotosPreview(
+      viewModel = viewModel,
+      userId = userId,
+      targetPhotoIndex = targetPhotoIndex,
+      onBackClick = {
         systemUiController.isStatusBarVisible = true
         handleNavEvent(PhotosPreviewNavEvent.BackClick)
-    }
+      },
+      navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
+    )
+  } else {
+    RestrainedPhotosPreview(
+      viewModel = viewModel,
+      userId = userId,
+      targetPhotoIndex = targetPhotoIndex,
+      photoIds = photoIds,
+      onBackClick = {
+        systemUiController.isStatusBarVisible = true
+        handleNavEvent(PhotosPreviewNavEvent.BackClick)
+      },
+      navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
+    )
+  }
 
-    if (photoIds.isEmpty()) {
-        AllPhotosPreview(
-            viewModel = viewModel,
-            userId = userId,
-            targetPhotoIndex = targetPhotoIndex,
-            onBackClick = {
-                systemUiController.isStatusBarVisible = true
-                handleNavEvent(PhotosPreviewNavEvent.BackClick)
-            },
-            navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
-        )
-    } else {
-        RestrainedPhotosPreview(
-            viewModel = viewModel,
-            userId = userId,
-            targetPhotoIndex = targetPhotoIndex,
-            photoIds = photoIds,
-            onBackClick = {
-                systemUiController.isStatusBarVisible = true
-                handleNavEvent(PhotosPreviewNavEvent.BackClick)
-            },
-            navigateToAuth = { handleNavEvent(PhotosPreviewNavEvent.NavigateToAuth) }
-        )
-    }
-
-    LaunchedEffect(Unit) {
-        systemUiController.isStatusBarVisible = false
-    }
+  LaunchedEffect(Unit) {
+    systemUiController.isStatusBarVisible = false
+  }
 
 }
 

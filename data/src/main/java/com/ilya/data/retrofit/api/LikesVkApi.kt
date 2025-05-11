@@ -7,20 +7,20 @@ import retrofit2.http.Query
 
 internal interface LikesVkApi {
 
-    @POST("likes.add?v=$CURRENT_API_VERSION")
-    suspend fun addLike(
-        @Query("access_token") accessToken: String,
-        @Query("type") type: String,
-        @Query("owner_id") ownerId: Long,
-        @Query("item_id") itemId: Long,
-    ): LikesResponse
+  @POST("likes.add?v=$CURRENT_API_VERSION")
+  suspend fun addLike(
+    @Query("access_token") accessToken: String,
+    @Query("type") type: String,
+    @Query("owner_id") ownerId: Long,
+    @Query("item_id") itemId: Long,
+  ): LikesResponse
 
-    @POST("likes.delete?v=$CURRENT_API_VERSION")
-    suspend fun deleteLike(
-        @Query("access_token") accessToken: String,
-        @Query("type") type: String,
-        @Query("owner_id") ownerId: Long,
-        @Query("item_id") itemId: Long,
-    ): LikesResponse
+  @POST("likes.delete?v=$CURRENT_API_VERSION")
+  suspend fun deleteLike(
+    @Query("access_token") accessToken: String,
+    @Query("type") type: String,
+    @Query("owner_id") ownerId: Long,
+    @Query("item_id") itemId: Long,
+  ): LikesResponse
 
 }

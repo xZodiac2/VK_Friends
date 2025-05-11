@@ -46,124 +46,124 @@ import com.ilya.theme.LocalColorScheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ProfileHeader(user: User, eventReceiver: ProfileScreenEventReceiver) {
-    var showSheet by remember { mutableStateOf(false) }
+  var showSheet by remember { mutableStateOf(false) }
 
-    Card(
-        shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  Card(
+    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
+    colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 20.dp),
+      horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AvatarWithName(user.photoUrl, user.firstName, user.lastName)
-            Status(user.status)
-            ShowDetailsButton { showSheet = true }
-            FriendRequestButton(user.isAccountOwner, user.friendStatus) { eventReceiver.onFriendRequest(user) }
-        }
+      AvatarWithName(user.photoUrl, user.firstName, user.lastName)
+      Status(user.status)
+      ShowDetailsButton { showSheet = true }
+      FriendRequestButton(user.isAccountOwner, user.friendStatus) { eventReceiver.onFriendRequest(user) }
     }
+  }
 
-    if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            containerColor = LocalColorScheme.current.cardContainerColor,
-            dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.iconTintColor) }
-        ) { SheetContent(user) }
-    }
+  if (showSheet) {
+    ModalBottomSheet(
+      onDismissRequest = { showSheet = false },
+      containerColor = LocalColorScheme.current.cardContainerColor,
+      dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.iconTintColor) }
+    ) { SheetContent(user) }
+  }
 }
 
 @Composable
 private fun AvatarWithName(photoUrl: String, firstName: String, lastName: String) {
-    AsyncImage(
-        modifier = Modifier
-            .padding(top = 20.dp)
-            .size(140.dp)
-            .clip(CircleShape),
-        model = photoUrl,
-        contentDescription = "avatar",
-        contentScale = ContentScale.Crop
-    )
-    Text(
-        text = "$firstName $lastName",
-        fontSize = 28.sp,
-        modifier = Modifier.padding(top = 8.dp),
-        color = LocalColorScheme.current.primaryTextColor
-    )
+  AsyncImage(
+    modifier = Modifier
+      .padding(top = 20.dp)
+      .size(140.dp)
+      .clip(CircleShape),
+    model = photoUrl,
+    contentDescription = "avatar",
+    contentScale = ContentScale.Crop
+  )
+  Text(
+    text = "$firstName $lastName",
+    fontSize = 28.sp,
+    modifier = Modifier.padding(top = 8.dp),
+    color = LocalColorScheme.current.primaryTextColor
+  )
 }
 
 @Composable
 private fun Status(status: String) {
-    if (status.isNotBlank()) {
-        Text(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .widthIn(max = 350.dp),
-            text = status,
-            textAlign = TextAlign.Center,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            color = LocalColorScheme.current.primaryTextColor
-        )
-    }
+  if (status.isNotBlank()) {
+    Text(
+      modifier = Modifier
+        .padding(top = 8.dp)
+        .widthIn(max = 350.dp),
+      text = status,
+      textAlign = TextAlign.Center,
+      overflow = TextOverflow.Ellipsis,
+      maxLines = 2,
+      color = LocalColorScheme.current.primaryTextColor
+    )
+  }
 }
 
 @Composable
 private fun ShowDetailsButton(onClick: () -> Unit) {
-    TextButton(onClick) {
-        Row {
-            Icon(
-                modifier = Modifier
-                    .padding(top = 2.dp, end = 2.dp)
-                    .size(16.dp),
-                imageVector = Icons.Outlined.Info,
-                contentDescription = "more",
-                tint = LocalColorScheme.current.iconTintColor
-            )
-            Text(
-                text = stringResource(R.string.details),
-                color = LocalColorScheme.current.primaryTextColor,
-                fontWeight = FontWeight.W400,
-            )
-        }
+  TextButton(onClick) {
+    Row {
+      Icon(
+        modifier = Modifier
+          .padding(top = 2.dp, end = 2.dp)
+          .size(16.dp),
+        imageVector = Icons.Outlined.Info,
+        contentDescription = "more",
+        tint = LocalColorScheme.current.iconTintColor
+      )
+      Text(
+        text = stringResource(R.string.details),
+        color = LocalColorScheme.current.primaryTextColor,
+        fontWeight = FontWeight.W400,
+      )
     }
+  }
 }
 
 @Composable
 private fun FriendRequestButton(isAccountOwner: Boolean, friendStatus: FriendStatus, onClick: () -> Unit) {
-    if (!isAccountOwner) {
-        BaseButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 40.dp),
-            onClick = onClick,
-            style = BaseButtonStyles.Attractive
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(20.dp),
-                painter = when (friendStatus) {
-                    FriendStatus.NOT_FRIENDS -> painterResource(id = R.drawable.plus)
-                    FriendStatus.WAITING -> painterResource(id = R.drawable.clock)
-                    FriendStatus.FRIENDS -> painterResource(id = R.drawable.crossed_out_human)
-                    FriendStatus.SUBSCRIBED -> painterResource(id = R.drawable.plus)
-                },
-                contentDescription = "add",
-            )
-            Text(
-                text = stringResource(
-                    id = when (friendStatus) {
-                        FriendStatus.NOT_FRIENDS -> R.string.status_not_friend
-                        FriendStatus.FRIENDS -> R.string.status_friends
-                        FriendStatus.WAITING -> R.string.status_waiting_for_response
-                        FriendStatus.SUBSCRIBED -> R.string.status_friend_request
-                    }
-                ),
-                fontSize = 18.sp
-            )
-        }
+  if (!isAccountOwner) {
+    BaseButton(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 40.dp),
+      onClick = onClick,
+      style = BaseButtonStyles.Attractive
+    ) {
+      Icon(
+        modifier = Modifier
+          .padding(end = 8.dp)
+          .size(20.dp),
+        painter = when (friendStatus) {
+          FriendStatus.NOT_FRIENDS -> painterResource(id = R.drawable.plus)
+          FriendStatus.WAITING -> painterResource(id = R.drawable.clock)
+          FriendStatus.FRIENDS -> painterResource(id = R.drawable.crossed_out_human)
+          FriendStatus.SUBSCRIBED -> painterResource(id = R.drawable.plus)
+        },
+        contentDescription = "add",
+      )
+      Text(
+        text = stringResource(
+          id = when (friendStatus) {
+            FriendStatus.NOT_FRIENDS -> R.string.status_not_friend
+            FriendStatus.FRIENDS -> R.string.status_friends
+            FriendStatus.WAITING -> R.string.status_waiting_for_response
+            FriendStatus.SUBSCRIBED -> R.string.status_friend_request
+          }
+        ),
+        fontSize = 18.sp
+      )
     }
+  }
 }
 

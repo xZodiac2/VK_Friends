@@ -7,12 +7,12 @@ import java.io.Serializable
 class ImmutableList<T>(val list: List<T>) : List<T> by list
 
 fun <T> Iterable<T>.toImmutableList(): ImmutableList<T> {
-    return ImmutableList(this.toList())
+  return ImmutableList(this.toList())
 }
 
 @Immutable
 data class ImmutablePair<T, R>(val first: T, val second: R) : Serializable {
-    override fun toString(): String = "($first, $second)"
+  override fun toString(): String = "($first, $second)"
 }
 
 infix fun <T, R> T.with(that: R) = ImmutablePair(this, that)

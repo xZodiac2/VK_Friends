@@ -8,21 +8,21 @@ import com.ilya.vkfriends.navigation.Destination
 
 class PhotosPreviewNavEventHandler(private val navController: NavController) : EventHandler<PhotosPreviewNavEvent> {
 
-    override fun handleEvent(event: PhotosPreviewNavEvent) {
-        when (event) {
-            PhotosPreviewNavEvent.BackClick -> onBackClick()
-            PhotosPreviewNavEvent.NavigateToAuth -> onNavigateToAuth()
-        }
+  override fun handleEvent(event: PhotosPreviewNavEvent) {
+    when (event) {
+      PhotosPreviewNavEvent.BackClick -> onBackClick()
+      PhotosPreviewNavEvent.NavigateToAuth -> onNavigateToAuth()
     }
+  }
 
-    private fun onNavigateToAuth() {
-        navController.navigate(Destination.AuthScreen) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                inclusive = true
-            }
-        }
+  private fun onNavigateToAuth() {
+    navController.navigate(Destination.AuthScreen) {
+      popUpTo(navController.graph.findStartDestination().id) {
+        inclusive = true
+      }
     }
+  }
 
-    private fun onBackClick() = navController.popBackStack()
+  private fun onBackClick() = navController.popBackStack()
 
 }

@@ -16,22 +16,22 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 @InstallIn(ViewModelComponent::class)
 internal object RetrofitModule {
 
-    @Provides
-    fun provideRetrofit(moshi: Moshi): Retrofit {
-        val loggingInterceptor = HttpLoggingInterceptor { Log.d("okhttptag", it) }
-        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+  @Provides
+  fun provideRetrofit(moshi: Moshi): Retrofit {
+    val loggingInterceptor = HttpLoggingInterceptor { Log.d("okhttptag", it) }
+    loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .build()
+    val okHttpClient = OkHttpClient.Builder()
+      .addInterceptor(loggingInterceptor)
+      .build()
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
+    val retrofit = Retrofit.Builder()
+      .baseUrl(BASE_URL)
+      .client(okHttpClient)
+      .addConverterFactory(MoshiConverterFactory.create(moshi))
+      .build()
 
-        return retrofit
-    }
+    return retrofit
+  }
 
 }

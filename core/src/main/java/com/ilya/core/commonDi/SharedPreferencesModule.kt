@@ -13,12 +13,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object SharedPreferencesModule {
 
-    @Singleton
-    @Provides
-    fun provideSharedPrefs(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-    }
+  @Singleton
+  @Provides
+  fun provideSharedPrefs(@ApplicationContext context: Context): SharedPreferences {
+    return context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+  }
 
-    private const val SHARED_PREFERENCES_NAME = "com.ilya.vkfriends.sharedPrefs"
+  private const val SHARED_PREFERENCES_NAME = "com.ilya.vkfriends.sharedPrefs"
 
 }

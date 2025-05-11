@@ -25,75 +25,75 @@ import com.ilya.theme.LocalColorScheme
 
 @Composable
 fun BaseButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
-    style: BaseButtonStyles = BaseButtonStyles.Attractive,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable RowScope.() -> Unit,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit,
+  enabled: Boolean = true,
+  elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
+  style: BaseButtonStyles = BaseButtonStyles.Attractive,
+  contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+  interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+  content: @Composable RowScope.() -> Unit,
 ) {
-    Button(
-        onClick,
-        modifier,
-        enabled,
-        shape = RoundedCornerShape(8.dp),
-        colors = style.resolveColors(),
-        elevation,
-        border = style.resolveBorder(),
-        contentPadding,
-        interactionSource,
-        content
-    )
+  Button(
+    onClick,
+    modifier,
+    enabled,
+    shape = RoundedCornerShape(8.dp),
+    colors = style.resolveColors(),
+    elevation,
+    border = style.resolveBorder(),
+    contentPadding,
+    interactionSource,
+    content
+  )
 }
 
 sealed interface BaseButtonStyles {
-    data object Attractive : BaseButtonStyles
-    data object Unattractive : BaseButtonStyles
+  data object Attractive : BaseButtonStyles
+  data object Unattractive : BaseButtonStyles
 }
 
 @Composable
 private fun BaseButtonStyles.resolveColors(): ButtonColors = with(ButtonDefaults) {
-    return when (this@resolveColors) {
-        BaseButtonStyles.Attractive -> buttonColors(containerColor = LocalColorScheme.current.buttonColor)
-        BaseButtonStyles.Unattractive -> buttonColors(
-            containerColor = LocalColorScheme.current.primary,
-            contentColor = LocalColorScheme.current.buttonColor
-        )
-    }
+  return when (this@resolveColors) {
+    BaseButtonStyles.Attractive -> buttonColors(containerColor = LocalColorScheme.current.buttonColor)
+    BaseButtonStyles.Unattractive -> buttonColors(
+      containerColor = LocalColorScheme.current.primary,
+      contentColor = LocalColorScheme.current.buttonColor
+    )
+  }
 }
 
 @Composable
 private fun BaseButtonStyles.resolveBorder(): BorderStroke? {
-    return when (this) {
-        BaseButtonStyles.Attractive -> null
-        BaseButtonStyles.Unattractive -> BorderStroke(
-            width = 2.dp,
-            color = LocalColorScheme.current.buttonColor
-        )
-    }
+  return when (this) {
+    BaseButtonStyles.Attractive -> null
+    BaseButtonStyles.Unattractive -> BorderStroke(
+      width = 2.dp,
+      color = LocalColorScheme.current.buttonColor
+    )
+  }
 }
 
 @Composable
 fun OnError(
-    modifier: Modifier = Modifier,
-    message: StringResource,
-    buttonText: StringResource,
-    onButtonClick: () -> Unit
+  modifier: Modifier = Modifier,
+  message: StringResource,
+  buttonText: StringResource,
+  onButtonClick: () -> Unit
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = message.resolve(),
-            textAlign = TextAlign.Center,
-            color = LocalColorScheme.current.primaryTextColor
-        )
-        BaseButton(onClick = onButtonClick) {
-            Text(text = buttonText.resolve())
-        }
+  Column(
+    modifier = modifier.fillMaxWidth(),
+    verticalArrangement = Arrangement.Center,
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    Text(
+      text = message.resolve(),
+      textAlign = TextAlign.Center,
+      color = LocalColorScheme.current.primaryTextColor
+    )
+    BaseButton(onClick = onButtonClick) {
+      Text(text = buttonText.resolve())
     }
+  }
 }

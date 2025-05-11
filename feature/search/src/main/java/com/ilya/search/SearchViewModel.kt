@@ -25,75 +25,75 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class SearchViewModel @Inject constructor(
-    private val usersPagingSourceFactory: UsersPagingSource.Factory,
-    private val accessTokenManager: AccessTokenManager
+  private val usersPagingSourceFactory: UsersPagingSource.Factory,
+  private val accessTokenManager: AccessTokenManager
 ) : ViewModel() {
 
-    private val searchValuesFlow = MutableSharedFlow<String>()
+  private val searchValuesFlow = MutableSharedFlow<String>()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val usersFlow = searchValuesFlow
-        .map(::newPager)
-        .flatMapLatest { it.flow }
-        .cachedIn(viewModelScope)
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val usersFlow = searchValuesFlow
+    .map(::newPager)
+    .flatMapLatest { it.flow }
+    .cachedIn(viewModelScope)
 
-    private val _snackbarStateFlow = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
-    val snackbarStateFlow = _snackbarStateFlow.asStateFlow()
+  private val _snackbarStateFlow = MutableStateFlow<SnackbarState>(SnackbarState.Consumed)
+  val snackbarStateFlow = _snackbarStateFlow.asStateFlow()
 
-    private val _accountOwnerStateFlow = MutableStateFlow<User?>(null)
-    val accountOwnerStateFlow = _accountOwnerStateFlow.asStateFlow()
+  private val _accountOwnerStateFlow = MutableStateFlow<User?>(null)
+  val accountOwnerStateFlow = _accountOwnerStateFlow.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            delay(100)
-            searchValuesFlow.emit("")
-        }
+  init {
+    viewModelScope.launch {
+      delay(100)
+      searchValuesFlow.emit("")
     }
+  }
 
-    private fun newPager(query: String): Pager<Int, User> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                initialLoadSize = PAGE_SIZE
-            ),
-            pagingSourceFactory = { usersPagingSourceFactory.newInstance(query) }
-        )
-    }
+  private fun newPager(query: String): Pager<Int, User> {
+    return Pager(
+      config = PagingConfig(
+        pageSize = PAGE_SIZE,
+        initialLoadSize = PAGE_SIZE
+      ),
+      pagingSourceFactory = { usersPagingSourceFactory.newInstance(query) }
+    )
+  }
 
-    fun handleEvent(event: SearchScreenEvent) {
-        when (event) {
-            SearchScreenEvent.PlugAvatarClick -> onPlugAvatarClick()
-            SearchScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
-            SearchScreenEvent.Start -> onStart()
-            is SearchScreenEvent.Search -> onSearch(event.query)
-        }
+  fun handleEvent(event: SearchScreenEvent) {
+    when (event) {
+      SearchScreenEvent.PlugAvatarClick -> onPlugAvatarClick()
+      SearchScreenEvent.SnackbarConsumed -> onSnackbarConsumed()
+      SearchScreenEvent.Start -> onStart()
+      is SearchScreenEvent.Search -> onSearch(event.query)
     }
+  }
 
-    private fun onStart() {
-        if (_accountOwnerStateFlow.value == null) {
-            val accessTokenValue = accessTokenManager.accessToken ?: return
-            _accountOwnerStateFlow.value = accessTokenValue.userData.toUser(accessTokenValue)
-        }
+  private fun onStart() {
+    if (_accountOwnerStateFlow.value == null) {
+      val accessTokenValue = accessTokenManager.accessToken ?: return
+      _accountOwnerStateFlow.value = accessTokenValue.userData.toUser(accessTokenValue)
     }
+  }
 
-    private fun onSearch(query: String) {
-        viewModelScope.launch {
-            searchValuesFlow.emit(query)
-        }
+  private fun onSearch(query: String) {
+    viewModelScope.launch {
+      searchValuesFlow.emit(query)
     }
+  }
 
-    private fun onSnackbarConsumed() {
-        _snackbarStateFlow.value = SnackbarState.Consumed
-    }
+  private fun onSnackbarConsumed() {
+    _snackbarStateFlow.value = SnackbarState.Consumed
+  }
 
-    private fun onPlugAvatarClick() {
-        _snackbarStateFlow.value =
-            SnackbarState.Triggered(StringResource.FromId(R.string.data_not_loaded_yet))
-    }
+  private fun onPlugAvatarClick() {
+    _snackbarStateFlow.value =
+      SnackbarState.Triggered(StringResource.FromId(R.string.data_not_loaded_yet))
+  }
 
-    companion object {
-        const val PAGE_SIZE = 80
-    }
+  companion object {
+    const val PAGE_SIZE = 80
+  }
 
 }
 

@@ -25,42 +25,42 @@ import com.ilya.theme.LocalTypography
 
 @Composable
 internal fun UserCard(
-    modifier: Modifier = Modifier,
-    onCardClick: () -> Unit,
-    user: User
+  modifier: Modifier = Modifier,
+  onCardClick: () -> Unit,
+  user: User
 ) {
-    Card(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clickable { onCardClick() },
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  Card(
+    modifier = Modifier
+      .aspectRatio(1f)
+      .clickable { onCardClick() },
+    elevation = CardDefaults.cardElevation(8.dp),
+    colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  ) {
+    Column(
+      modifier = modifier
+        .fillMaxSize()
+        .padding(horizontal = 14.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize(0.7f)
-                    .clip(CircleShape)
-                    .aspectRatio(1f),
-                model = user.photoUrl,
-                contentDescription = "user_photo",
-                contentScale = ContentScale.Crop
-            )
-            Text(
-                text = "${user.firstName} ${user.lastName}",
-                fontSize = LocalTypography.current.small,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                color = LocalColorScheme.current.primaryTextColor,
-                textAlign = TextAlign.Center
-            )
-        }
-
+      AsyncImage(
+        modifier = Modifier
+          .fillMaxSize(0.7f)
+          .clip(CircleShape)
+          .aspectRatio(1f),
+        model = user.photoUrl,
+        contentDescription = "user_photo",
+        contentScale = ContentScale.Crop
+      )
+      Text(
+        text = "${user.firstName} ${user.lastName}",
+        fontSize = LocalTypography.current.small,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        color = LocalColorScheme.current.primaryTextColor,
+        textAlign = TextAlign.Center
+      )
     }
+
+  }
 }

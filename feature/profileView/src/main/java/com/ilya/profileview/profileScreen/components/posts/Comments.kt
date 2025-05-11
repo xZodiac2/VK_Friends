@@ -87,412 +87,412 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CommentsBottomSheet(
-    stateFlow: StateFlow<CommentsBottomSheetState>,
-    eventReceiver: ProfileScreenEventReceiver
+  stateFlow: StateFlow<CommentsBottomSheetState>,
+  eventReceiver: ProfileScreenEventReceiver
 ) {
-    val commentsSheetState = stateFlow.collectAsState()
-    val sheetState = rememberModalBottomSheetState()
+  val commentsSheetState = stateFlow.collectAsState()
+  val sheetState = rememberModalBottomSheetState()
 
-    if (commentsSheetState.value.showSheet) {
-        val shape = animateDpAsState(
-            targetValue = if (sheetState.targetValue == SheetValue.Expanded) 0.dp else 30.dp,
-            label = "sheetCorners",
-            animationSpec = tween(200)
-        )
+  if (commentsSheetState.value.showSheet) {
+    val shape = animateDpAsState(
+      targetValue = if (sheetState.targetValue == SheetValue.Expanded) 0.dp else 30.dp,
+      label = "sheetCorners",
+      animationSpec = tween(200)
+    )
 
-        ModalBottomSheet(
-            modifier = Modifier.fillMaxSize(),
-            onDismissRequest = { eventReceiver.onDismissCommentsSheet() },
-            sheetState = sheetState,
-            shape = RoundedCornerShape(shape.value),
-            containerColor = LocalColorScheme.current.cardContainerColor,
-            dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.primaryTextColor) }
-        ) {
-            CommentsSheetContent(commentsSheetState.value, eventReceiver)
-        }
+    ModalBottomSheet(
+      modifier = Modifier.fillMaxSize(),
+      onDismissRequest = { eventReceiver.onDismissCommentsSheet() },
+      sheetState = sheetState,
+      shape = RoundedCornerShape(shape.value),
+      containerColor = LocalColorScheme.current.cardContainerColor,
+      dragHandle = { BottomSheetDefaults.DragHandle(color = LocalColorScheme.current.primaryTextColor) }
+    ) {
+      CommentsSheetContent(commentsSheetState.value, eventReceiver)
     }
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommentsSheetContent(
-    commentsSheetState: CommentsBottomSheetState,
-    eventReceiver: ProfileScreenEventReceiver
+  commentsSheetState: CommentsBottomSheetState,
+  eventReceiver: ProfileScreenEventReceiver
 ) {
-    val commentsFlow = rememberUpdatedState(commentsSheetState.commentsFlow)
-    val comments = commentsFlow.value.collectAsLazyPagingItems()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+  val commentsFlow = rememberUpdatedState(commentsSheetState.commentsFlow)
+  val comments = commentsFlow.value.collectAsLazyPagingItems()
+  val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            val contentScrolled by remember { derivedStateOf { scrollBehavior.state.contentOffset < -50 } }
-            CommentsTopBar(contentScrolled)
-        },
-        containerColor = LocalColorScheme.current.cardContainerColor,
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.padding(padding),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            items(comments.itemCount, key = comments.itemKey { it.id }) { index ->
-                Comment(
-                    comments = comments,
-                    index = index,
-                    commentsSheetState = commentsSheetState,
-                    onLikeClick = { eventReceiver.onLike(it) }
-                )
-            }
-            item { ResolveRefresh(comments, eventReceiver) }
-            item { ResolveAppend(comments, eventReceiver) }
-            item { OnEmptyCommentsMessage(comments) }
-        }
+  Scaffold(
+    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+    topBar = {
+      val contentScrolled by remember { derivedStateOf { scrollBehavior.state.contentOffset < -50 } }
+      CommentsTopBar(contentScrolled)
+    },
+    containerColor = LocalColorScheme.current.cardContainerColor,
+  ) { padding ->
+    LazyColumn(
+      modifier = Modifier.padding(padding),
+      verticalArrangement = Arrangement.spacedBy(24.dp),
+      contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+      items(comments.itemCount, key = comments.itemKey { it.id }) { index ->
+        Comment(
+          comments = comments,
+          index = index,
+          commentsSheetState = commentsSheetState,
+          onLikeClick = { eventReceiver.onLike(it) }
+        )
+      }
+      item { ResolveRefresh(comments, eventReceiver) }
+      item { ResolveAppend(comments, eventReceiver) }
+      item { OnEmptyCommentsMessage(comments) }
     }
+  }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { comments.itemSnapshotList.items }.collect { items ->
-            val newLikes = items.mapNotNull {
-                it.likes?.let { likes -> it.id to likes }
-            }.toMap()
-            val newThreadLikes = items.flatMap {
-                it.thread.mapNotNull { threadComment ->
-                    threadComment.likes?.let { likes -> threadComment.id to likes }
-                }
-            }.toMap()
-
-            eventReceiver.onCommentsAdded(newLikes + newThreadLikes)
+  LaunchedEffect(Unit) {
+    snapshotFlow { comments.itemSnapshotList.items }.collect { items ->
+      val newLikes = items.mapNotNull {
+        it.likes?.let { likes -> it.id to likes }
+      }.toMap()
+      val newThreadLikes = items.flatMap {
+        it.thread.mapNotNull { threadComment ->
+          threadComment.likes?.let { likes -> threadComment.id to likes }
         }
+      }.toMap()
+
+      eventReceiver.onCommentsAdded(newLikes + newThreadLikes)
     }
+  }
 }
 
 @Composable
 private fun Comment(
-    comments: LazyPagingItems<Comment>,
-    index: Int,
-    commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (LikeableCommonInfo) -> Unit
+  comments: LazyPagingItems<Comment>,
+  index: Int,
+  commentsSheetState: CommentsBottomSheetState,
+  onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
-    val comment = comments[index]
+  val comment = comments[index]
 
-    if (comment != null) {
-        val isCommentThreadExpanded = remember { mutableStateOf(false) }
+  if (comment != null) {
+    val isCommentThreadExpanded = remember { mutableStateOf(false) }
 
-        CommentBody(comment, isCommentThreadExpanded, commentsSheetState, onLikeClick)
-        if (comment.thread.isNotEmpty()) {
-            ThreadComments(comment.thread, isCommentThreadExpanded, commentsSheetState, onLikeClick)
-        }
+    CommentBody(comment, isCommentThreadExpanded, commentsSheetState, onLikeClick)
+    if (comment.thread.isNotEmpty()) {
+      ThreadComments(comment.thread, isCommentThreadExpanded, commentsSheetState, onLikeClick)
     }
+  }
 }
 
 @Composable
 private fun CommentBody(
-    comment: Comment,
-    isThreadExpanded: MutableState<Boolean>,
-    commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (LikeableCommonInfo) -> Unit
+  comment: Comment,
+  isThreadExpanded: MutableState<Boolean>,
+  commentsSheetState: CommentsBottomSheetState,
+  onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            model = ImageRequest.Builder(LocalContext.current)
-                .fallback(R.drawable.avatar)
-                .data(comment.owner?.photoUrl)
-                .build(),
-            contentScale = ContentScale.Crop,
-            contentDescription = "commentOwnerAvatar",
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Column {
-                if (comment.isDeleted) {
-                    Text(
-                        text = stringResource(R.string.comment_deleted),
-                        color = LocalColorScheme.current.secondaryTextColor,
-                        fontSize = LocalTypography.current.small
-                    )
-                } else {
-                    Text(
-                        text = comment.owner?.let { "${it.firstName} ${it.lastName}" }
-                            ?: stringResource(R.string.user_not_supports),
-                        color = LocalColorScheme.current.secondaryTextColor,
-                        fontSize = LocalTypography.current.tiny
-                    )
-                    Text(
-                        text = comment.text.ifEmpty { stringResource(R.string.comment_is_not_supports) },
-                        color = if (comment.text.isEmpty()) {
-                            LocalColorScheme.current.secondaryTextColor
-                        } else {
-                            LocalColorScheme.current.primaryTextColor
-                        },
-                        fontSize = LocalTypography.current.small
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = comment.date,
-                    color = LocalColorScheme.current.secondaryTextColor,
-                    fontSize = LocalTypography.current.tiny
-                )
-                CommentLikes(
-                    commentsSheetState = commentsSheetState,
-                    commentId = comment.id,
-                    isDeleted = comment.isDeleted,
-                    onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
-                )
-            }
-            if (comment.thread.isNotEmpty()) {
-                ExpandThreadButton(isThreadExpanded, comment.thread.size)
-            }
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(12.dp)
+  ) {
+    AsyncImage(
+      modifier = Modifier
+        .size(40.dp)
+        .clip(CircleShape),
+      model = ImageRequest.Builder(LocalContext.current)
+        .fallback(R.drawable.avatar)
+        .data(comment.owner?.photoUrl)
+        .build(),
+      contentScale = ContentScale.Crop,
+      contentDescription = "commentOwnerAvatar",
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Column {
+        if (comment.isDeleted) {
+          Text(
+            text = stringResource(R.string.comment_deleted),
+            color = LocalColorScheme.current.secondaryTextColor,
+            fontSize = LocalTypography.current.small
+          )
+        } else {
+          Text(
+            text = comment.owner?.let { "${it.firstName} ${it.lastName}" }
+              ?: stringResource(R.string.user_not_supports),
+            color = LocalColorScheme.current.secondaryTextColor,
+            fontSize = LocalTypography.current.tiny
+          )
+          Text(
+            text = comment.text.ifEmpty { stringResource(R.string.comment_is_not_supports) },
+            color = if (comment.text.isEmpty()) {
+              LocalColorScheme.current.secondaryTextColor
+            } else {
+              LocalColorScheme.current.primaryTextColor
+            },
+            fontSize = LocalTypography.current.small
+          )
         }
+      }
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = comment.date,
+          color = LocalColorScheme.current.secondaryTextColor,
+          fontSize = LocalTypography.current.tiny
+        )
+        CommentLikes(
+          commentsSheetState = commentsSheetState,
+          commentId = comment.id,
+          isDeleted = comment.isDeleted,
+          onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
+        )
+      }
+      if (comment.thread.isNotEmpty()) {
+        ExpandThreadButton(isThreadExpanded, comment.thread.size)
+      }
     }
+  }
 }
 
 @Composable
 private fun ExpandThreadButton(isCommentThreadExpanded: MutableState<Boolean>, threadSize: Int) {
-    val textSwitch = rememberSwitch(R.string.show_thread, R.string.hide)
-    val text = remember { mutableIntStateOf(textSwitch.value()) }
+  val textSwitch = rememberSwitch(R.string.show_thread, R.string.hide)
+  val text = remember { mutableIntStateOf(textSwitch.value()) }
 
-    Row(
-        modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-            isCommentThreadExpanded.value = !isCommentThreadExpanded.value
-            text.intValue = textSwitch.toggle()
-        },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        val iconRotation = animateFloatAsState(
-            targetValue = if (isCommentThreadExpanded.value) -180f else 0f,
-            label = "expandIconRotation"
-        )
-        Icon(
-            modifier = Modifier.rotate(iconRotation.value),
-            imageVector = Icons.Default.KeyboardArrowUp,
-            contentDescription = "showThread",
-            tint = LocalColorScheme.current.secondaryTextColor
-        )
-        AnimatedContent(
-            targetState = text.intValue,
-            label = "expandButtonText",
-            transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) }
-        ) { targetValue ->
-            Text(
-                text = stringResource(targetValue, threadSize),
-                fontSize = LocalTypography.current.tiny,
-                color = LocalColorScheme.current.secondaryTextColor
-            )
-        }
+  Row(
+    modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
+      isCommentThreadExpanded.value = !isCommentThreadExpanded.value
+      text.intValue = textSwitch.toggle()
+    },
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    val iconRotation = animateFloatAsState(
+      targetValue = if (isCommentThreadExpanded.value) -180f else 0f,
+      label = "expandIconRotation"
+    )
+    Icon(
+      modifier = Modifier.rotate(iconRotation.value),
+      imageVector = Icons.Default.KeyboardArrowUp,
+      contentDescription = "showThread",
+      tint = LocalColorScheme.current.secondaryTextColor
+    )
+    AnimatedContent(
+      targetState = text.intValue,
+      label = "expandButtonText",
+      transitionSpec = { fadeIn(tween(100)) togetherWith fadeOut(tween(100)) }
+    ) { targetValue ->
+      Text(
+        text = stringResource(targetValue, threadSize),
+        fontSize = LocalTypography.current.tiny,
+        color = LocalColorScheme.current.secondaryTextColor
+      )
     }
+  }
 }
 
 @Composable
 private fun ThreadComments(
-    thread: List<Comment>,
-    isExpanded: State<Boolean>,
-    commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (LikeableCommonInfo) -> Unit
+  thread: List<Comment>,
+  isExpanded: State<Boolean>,
+  commentsSheetState: CommentsBottomSheetState,
+  onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .padding(start = 40.dp)
-            .fillMaxWidth()
-            .animateContentSize()
-    ) {
-        if (isExpanded.value) {
-            Column(
-                modifier = Modifier.padding(top = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                for (comment in thread) {
-                    ThreadCommentBody(comment, commentsSheetState, onLikeClick)
-                }
-            }
+  Box(
+    modifier = Modifier
+      .padding(start = 40.dp)
+      .fillMaxWidth()
+      .animateContentSize()
+  ) {
+    if (isExpanded.value) {
+      Column(
+        modifier = Modifier.padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+      ) {
+        for (comment in thread) {
+          ThreadCommentBody(comment, commentsSheetState, onLikeClick)
         }
+      }
     }
+  }
 }
 
 @Composable
 private fun ThreadCommentBody(
-    comment: Comment,
-    commentsSheetState: CommentsBottomSheetState,
-    onLikeClick: (LikeableCommonInfo) -> Unit
+  comment: Comment,
+  commentsSheetState: CommentsBottomSheetState,
+  onLikeClick: (LikeableCommonInfo) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            model = ImageRequest.Builder(LocalContext.current)
-                .fallback(R.drawable.avatar)
-                .data(comment.owner?.photoUrl)
-                .build(),
-            contentScale = ContentScale.Crop,
-            contentDescription = "commentOwnerAvatar",
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Column {
-                if (comment.isDeleted) {
-                    Text(
-                        text = stringResource(R.string.comment_deleted),
-                        color = LocalColorScheme.current.secondaryTextColor,
-                        fontSize = LocalTypography.current.small
-                    )
-                } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = comment.owner?.let { "${it.firstName} ${it.lastName}" }
-                                ?: stringResource(R.string.user_not_supports),
-                            color = LocalColorScheme.current.secondaryTextColor,
-                            fontSize = LocalTypography.current.tiny
-                        )
-                        Icon(
-                            modifier = Modifier.size(12.dp),
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            tint = LocalColorScheme.current.secondaryTextColor,
-                            contentDescription = "replyTo"
-                        )
-                        Text(
-                            text = comment.replyToUser?.firstName ?: stringResource(R.string.user_not_supports),
-                            color = LocalColorScheme.current.secondaryTextColor,
-                            fontSize = LocalTypography.current.tiny
-                        )
-                    }
-                    val commentText = comment.text.ifEmpty { stringResource(R.string.comment_is_not_supports) }
-                    val commentTextColor = if (comment.text.isEmpty()) {
-                        LocalColorScheme.current.secondaryTextColor
-                    } else {
-                        LocalColorScheme.current.primaryTextColor
-                    }
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(12.dp)
+  ) {
+    AsyncImage(
+      modifier = Modifier
+        .size(40.dp)
+        .clip(CircleShape),
+      model = ImageRequest.Builder(LocalContext.current)
+        .fallback(R.drawable.avatar)
+        .data(comment.owner?.photoUrl)
+        .build(),
+      contentScale = ContentScale.Crop,
+      contentDescription = "commentOwnerAvatar",
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Column {
+        if (comment.isDeleted) {
+          Text(
+            text = stringResource(R.string.comment_deleted),
+            color = LocalColorScheme.current.secondaryTextColor,
+            fontSize = LocalTypography.current.small
+          )
+        } else {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+          ) {
+            Text(
+              text = comment.owner?.let { "${it.firstName} ${it.lastName}" }
+                ?: stringResource(R.string.user_not_supports),
+              color = LocalColorScheme.current.secondaryTextColor,
+              fontSize = LocalTypography.current.tiny
+            )
+            Icon(
+              modifier = Modifier.size(12.dp),
+              imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+              tint = LocalColorScheme.current.secondaryTextColor,
+              contentDescription = "replyTo"
+            )
+            Text(
+              text = comment.replyToUser?.firstName ?: stringResource(R.string.user_not_supports),
+              color = LocalColorScheme.current.secondaryTextColor,
+              fontSize = LocalTypography.current.tiny
+            )
+          }
+          val commentText = comment.text.ifEmpty { stringResource(R.string.comment_is_not_supports) }
+          val commentTextColor = if (comment.text.isEmpty()) {
+            LocalColorScheme.current.secondaryTextColor
+          } else {
+            LocalColorScheme.current.primaryTextColor
+          }
 
-                    Text(
-                        text = commentText,
-                        color = commentTextColor,
-                        fontSize = LocalTypography.current.small
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = comment.date,
-                    color = LocalColorScheme.current.secondaryTextColor,
-                    fontSize = LocalTypography.current.tiny
-                )
-                CommentLikes(
-                    commentsSheetState = commentsSheetState,
-                    commentId = comment.id,
-                    isDeleted = comment.isDeleted,
-                    onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
-                )
-            }
+          Text(
+            text = commentText,
+            color = commentTextColor,
+            fontSize = LocalTypography.current.small
+          )
         }
+      }
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = comment.date,
+          color = LocalColorScheme.current.secondaryTextColor,
+          fontSize = LocalTypography.current.tiny
+        )
+        CommentLikes(
+          commentsSheetState = commentsSheetState,
+          commentId = comment.id,
+          isDeleted = comment.isDeleted,
+          onLikeClick = { onLikeClick(comment.likeableCommonInfo.copy(likes = it)) }
+        )
+      }
     }
+  }
 }
 
 @Composable
 private fun CommentLikes(
-    commentsSheetState: CommentsBottomSheetState,
-    commentId: Long,
-    isDeleted: Boolean,
-    onLikeClick: (Likes) -> Unit
+  commentsSheetState: CommentsBottomSheetState,
+  commentId: Long,
+  isDeleted: Boolean,
+  onLikeClick: (Likes) -> Unit
 ) {
-    val likes = rememberUpdatedState(commentsSheetState.likes[commentId])
+  val likes = rememberUpdatedState(commentsSheetState.likes[commentId])
 
-    if (!isDeleted) {
-        Row(
-            modifier = Modifier
-                .animateContentSize()
-                .clickable { likes.value?.let(onLikeClick) },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            likes.value?.let { likesValue ->
-                AnimatedContent(
-                    targetState = likesValue.count,
-                    transitionSpec = {
-                        slideInVertically {
-                            if (likesValue.userLikes) -it else it
-                        } togetherWith slideOutVertically {
-                            if (likesValue.userLikes) it else -it
-                        }
-                    },
-                    label = "commentLikes"
-                ) { targetState ->
-                    Text(
-                        text = targetState.toString(),
-                        fontSize = LocalTypography.current.tiny,
-                        color = if (likes.value?.userLikes == true) {
-                            Color.Red
-                        } else {
-                            LocalColorScheme.current.secondaryTextColor
-                        }
-                    )
-                }
+  if (!isDeleted) {
+    Row(
+      modifier = Modifier
+        .animateContentSize()
+        .clickable { likes.value?.let(onLikeClick) },
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+      likes.value?.let { likesValue ->
+        AnimatedContent(
+          targetState = likesValue.count,
+          transitionSpec = {
+            slideInVertically {
+              if (likesValue.userLikes) -it else it
+            } togetherWith slideOutVertically {
+              if (likesValue.userLikes) it else -it
             }
-            Icon(
-                modifier = Modifier.size(16.dp),
-                imageVector = if (likes.value?.userLikes == true) {
-                    Icons.Default.Favorite
-                } else {
-                    Icons.Default.FavoriteBorder
-                },
-                contentDescription = "commentLikesIcon",
-                tint = if (likes.value?.userLikes == true) {
-                    Color.Red
-                } else {
-                    LocalColorScheme.current.secondaryTextColor
-                }
-            )
+          },
+          label = "commentLikes"
+        ) { targetState ->
+          Text(
+            text = targetState.toString(),
+            fontSize = LocalTypography.current.tiny,
+            color = if (likes.value?.userLikes == true) {
+              Color.Red
+            } else {
+              LocalColorScheme.current.secondaryTextColor
+            }
+          )
         }
+      }
+      Icon(
+        modifier = Modifier.size(16.dp),
+        imageVector = if (likes.value?.userLikes == true) {
+          Icons.Default.Favorite
+        } else {
+          Icons.Default.FavoriteBorder
+        },
+        contentDescription = "commentLikesIcon",
+        tint = if (likes.value?.userLikes == true) {
+          Color.Red
+        } else {
+          LocalColorScheme.current.secondaryTextColor
+        }
+      )
     }
+  }
 }
 
 @Composable
 private fun OnEmptyCommentsMessage(comments: LazyPagingItems<Comment>) {
-    if (comments.isEmpty() && comments.loadState.refresh is LoadState.NotLoading) {
-        Box(modifier = Modifier.height(200.dp), contentAlignment = Alignment.Center) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    modifier = Modifier.fillMaxWidth(0.28f),
-                    painter = painterResource(R.drawable.comment),
-                    contentDescription = "comment",
-                    tint = LocalColorScheme.current.secondaryTextColor
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    text = stringResource(R.string.no_comments),
-                    color = LocalColorScheme.current.secondaryTextColor,
-                    fontSize = LocalTypography.current.average,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+  if (comments.isEmpty() && comments.loadState.refresh is LoadState.NotLoading) {
+    Box(modifier = Modifier.height(200.dp), contentAlignment = Alignment.Center) {
+      Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Icon(
+          modifier = Modifier.fillMaxWidth(0.28f),
+          painter = painterResource(R.drawable.comment),
+          contentDescription = "comment",
+          tint = LocalColorScheme.current.secondaryTextColor
+        )
+        Text(
+          modifier = Modifier.fillMaxWidth(0.9f),
+          text = stringResource(R.string.no_comments),
+          color = LocalColorScheme.current.secondaryTextColor,
+          fontSize = LocalTypography.current.average,
+          textAlign = TextAlign.Center
+        )
+      }
     }
+  }
 }
 
 

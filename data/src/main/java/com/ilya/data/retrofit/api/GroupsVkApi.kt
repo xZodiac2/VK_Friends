@@ -7,10 +7,10 @@ import retrofit2.http.Query
 
 internal interface GroupsVkApi {
 
-    @GET("groups.getById?v=$CURRENT_API_VERSION")
-    suspend fun getGroup(
-        @Query("access_token") accessToken: String,
-        @Query("group_id") groupId: Long
-    ): GroupResponse
+  @GET("groups.getById?v=$CURRENT_API_VERSION")
+  suspend fun getGroup(
+    @Query("access_token") accessToken: String,
+    @Query("group_id") groupId: Long
+  ): GroupResponse
 
 }

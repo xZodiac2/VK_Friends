@@ -10,29 +10,29 @@ import com.ilya.paging.models.Size
 
 
 fun FirstFrameDto.toFirstFrame(): FirstFrame {
-    return FirstFrame(
-        url = url,
-        width = width,
-        height = height
-    )
+  return FirstFrame(
+    url = url,
+    width = width,
+    height = height
+  )
 }
 
 fun PhotoDto.toPhoto(): Photo {
-    return Photo(
-        albumId = albumId,
-        id = id,
-        ownerId = ownerId,
-        likes = likes?.toLikes(),
-        sizes = sizes.map { it.toSize() },
-        accessKey = accessKey
-    )
+  return Photo(
+    albumId = albumId,
+    id = id,
+    ownerId = ownerId,
+    likes = likes?.toLikes(),
+    sizes = sizes.map { it.toSize() },
+    accessKey = accessKey
+  )
 }
 
 fun SizeDto.toSize(): Size {
-    return Size(
-        type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
-        height = height,
-        width = width,
-        url = url,
-    )
+  return Size(
+    type = PhotoSize.entries.find { it.value == type } ?: PhotoSize.NOT_STATED,
+    height = height,
+    width = width,
+    url = url,
+  )
 }

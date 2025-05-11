@@ -40,103 +40,103 @@ import com.ilya.theme.LocalTypography
 
 @Composable
 internal fun PrivateProfile(
-    viewModel: ProfileScreenViewModel,
-    userId: Long,
-    eventReceiver: ProfileScreenEventReceiver,
-    handleNavEvent: (ProfileScreenNavEvent) -> Unit
+  viewModel: ProfileScreenViewModel,
+  userId: Long,
+  eventReceiver: ProfileScreenEventReceiver,
+  handleNavEvent: (ProfileScreenNavEvent) -> Unit
 ) {
-    val screenState = viewModel.screenState.collectAsState()
-    val snackbarState by viewModel.snackbarState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+  val screenState = viewModel.screenState.collectAsState()
+  val snackbarState by viewModel.snackbarState.collectAsState()
+  val snackbarHostState = remember { SnackbarHostState() }
 
-    SnackbarEventEffect(
-        state = snackbarState,
-        onConsumed = eventReceiver::onSnackbarConsumed,
-        action = { snackbarHostState.showSnackbar(it) }
-    )
+  SnackbarEventEffect(
+    state = snackbarState,
+    onConsumed = eventReceiver::onSnackbarConsumed,
+    action = { snackbarHostState.showSnackbar(it) }
+  )
 
-    Scaffold(
-        containerColor = LocalColorScheme.current.primary,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopBar(
-                onBackClick = eventReceiver::onBackClick,
-                userId = userId,
-                contentScrolled = false,
-            )
-        }
-    ) { padding ->
-        when (val stateValue = screenState.value) {
-            ProfileScreenState.Loading -> OnLoading(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxHeight()
-            )
-
-            is ProfileScreenState.ViewData -> {
-                Column(
-                    modifier = Modifier.padding(padding),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ProfileHeader(
-                        user = stateValue.user,
-                        eventReceiver = eventReceiver
-                    )
-                    PrivateProfileBanner()
-                }
-            }
-
-            is ProfileScreenState.Error -> OnErrorState(
-                errorType = stateValue.errorType,
-                onEmptyAccessToken = eventReceiver::onEmptyAccessToken,
-                onTryAgainClick = eventReceiver::onRetry,
-                padding = padding
-            )
-        }
+  Scaffold(
+    containerColor = LocalColorScheme.current.primary,
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    topBar = {
+      TopBar(
+        onBackClick = eventReceiver::onBackClick,
+        userId = userId,
+        contentScrolled = false,
+      )
     }
+  ) { padding ->
+    when (val stateValue = screenState.value) {
+      ProfileScreenState.Loading -> OnLoading(
+        modifier = Modifier
+          .padding(padding)
+          .fillMaxHeight()
+      )
 
-    LaunchedEffect(Unit) {
-        eventReceiver.onStart(userId)
-        viewModel.navEventFlow.collect(handleNavEvent)
+      is ProfileScreenState.ViewData -> {
+        Column(
+          modifier = Modifier.padding(padding),
+          verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+          ProfileHeader(
+            user = stateValue.user,
+            eventReceiver = eventReceiver
+          )
+          PrivateProfileBanner()
+        }
+      }
+
+      is ProfileScreenState.Error -> OnErrorState(
+        errorType = stateValue.errorType,
+        onEmptyAccessToken = eventReceiver::onEmptyAccessToken,
+        onTryAgainClick = eventReceiver::onRetry,
+        padding = padding
+      )
     }
+  }
+
+  LaunchedEffect(Unit) {
+    eventReceiver.onStart(userId)
+    viewModel.navEventFlow.collect(handleNavEvent)
+  }
 
 }
 
 @Composable
 private fun PrivateProfileBanner() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  Card(
+    modifier = Modifier.fillMaxWidth(),
+    colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor)
+  ) {
+    Row(
+      modifier = Modifier
+        .padding(20.dp)
+        .align(Alignment.CenterHorizontally),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .align(Alignment.CenterHorizontally),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Lock,
-                modifier = Modifier
-                    .fillMaxSize(0.15f)
-                    .aspectRatio(1f),
-                tint = LocalColorScheme.current.primaryTextColor,
-                contentDescription = "privateProfile"
-            )
-            Column(
-                modifier = Modifier.padding(start = 28.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.private_profile),
-                    color = LocalColorScheme.current.primaryTextColor,
-                    fontSize = LocalTypography.current.big
-                )
-                Text(
-                    text = stringResource(R.string.add_user_to_friends_to_see_info),
-                    color = LocalColorScheme.current.secondaryTextColor
-                )
-            }
-        }
+      Icon(
+        imageVector = Icons.Default.Lock,
+        modifier = Modifier
+          .fillMaxSize(0.15f)
+          .aspectRatio(1f),
+        tint = LocalColorScheme.current.primaryTextColor,
+        contentDescription = "privateProfile"
+      )
+      Column(
+        modifier = Modifier.padding(start = 28.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        Text(
+          text = stringResource(R.string.private_profile),
+          color = LocalColorScheme.current.primaryTextColor,
+          fontSize = LocalTypography.current.big
+        )
+        Text(
+          text = stringResource(R.string.add_user_to_friends_to_see_info),
+          color = LocalColorScheme.current.secondaryTextColor
+        )
+      }
     }
+  }
 }

@@ -19,49 +19,49 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class PhotosScreenViewModel @Inject constructor(
-    private val photosPagingSourceFactory: PhotosPagingSource.Factory,
+  private val photosPagingSourceFactory: PhotosPagingSource.Factory,
 ) : ViewModel() {
 
-    private var userId = MutableStateFlow(DEFAULT_USER_ID)
+  private var userId = MutableStateFlow(DEFAULT_USER_ID)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val photosFlow: Flow<PagingData<Photo>> = userId.flatMapLatest { id ->
-        if (id == DEFAULT_USER_ID) {
-            return@flatMapLatest flow { emit(PagingData.empty()) }
-        }
-        newPager(id).flow
-    }.cachedIn(viewModelScope)
+  @OptIn(ExperimentalCoroutinesApi::class)
+  val photosFlow: Flow<PagingData<Photo>> = userId.flatMapLatest { id ->
+    if (id == DEFAULT_USER_ID) {
+      return@flatMapLatest flow { emit(PagingData.empty()) }
+    }
+    newPager(id).flow
+  }.cachedIn(viewModelScope)
 
-    private fun newPager(userId: Long): Pager<Int, Photo> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                initialLoadSize = PAGE_SIZE,
-            ),
-            pagingSourceFactory = {
-                val initData = PhotosPagingSource.InitData(
-                    userId = userId,
-                    isPreview = false
-                )
-
-                photosPagingSourceFactory.newInstance(initData)
-            }
+  private fun newPager(userId: Long): Pager<Int, Photo> {
+    return Pager(
+      config = PagingConfig(
+        pageSize = PAGE_SIZE,
+        initialLoadSize = PAGE_SIZE,
+      ),
+      pagingSourceFactory = {
+        val initData = PhotosPagingSource.InitData(
+          userId = userId,
+          isPreview = false
         )
-    }
 
-    fun handleEvent(event: PhotosScreenEvent) {
-        when (event) {
-            is PhotosScreenEvent.Start -> onStart(event.userId)
-        }
-    }
+        photosPagingSourceFactory.newInstance(initData)
+      }
+    )
+  }
 
-    private fun onStart(userId: Long) {
-        this.userId.value = userId
+  fun handleEvent(event: PhotosScreenEvent) {
+    when (event) {
+      is PhotosScreenEvent.Start -> onStart(event.userId)
     }
+  }
 
-    companion object {
-        private const val DEFAULT_USER_ID: Long = -1
-        private const val PAGE_SIZE = 50
-    }
+  private fun onStart(userId: Long) {
+    this.userId.value = userId
+  }
+
+  companion object {
+    private const val DEFAULT_USER_ID: Long = -1
+    private const val PAGE_SIZE = 50
+  }
 
 }

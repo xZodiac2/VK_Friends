@@ -34,75 +34,75 @@ import com.ilya.theme.LocalTypography
 
 @Composable
 internal fun Photos(
-    photos: List<Photo>,
-    onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit,
-    onOpenPhotosClick: () -> Unit
+  photos: List<Photo>,
+  onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit,
+  onOpenPhotosClick: () -> Unit
 ) {
-    if (photos.isNotEmpty()) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor),
-            elevation = CardDefaults.cardElevation(8.dp),
+  if (photos.isNotEmpty()) {
+    Card(
+      modifier = Modifier.fillMaxWidth(),
+      colors = CardDefaults.cardColors(containerColor = LocalColorScheme.current.cardContainerColor),
+      elevation = CardDefaults.cardElevation(8.dp),
+    ) {
+      Column {
+        Box(
+          modifier = Modifier
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(LocalColorScheme.current.primary)
+            .fillMaxSize(),
+          contentAlignment = Alignment.Center
         ) {
-            Column {
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LocalColorScheme.current.primary)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    PhotosGrid(photos, onPhotoClick)
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    TextButton(onOpenPhotosClick) {
-                        Text(
-                            text = stringResource(R.string.open_photos),
-                            color = LocalColorScheme.current.primaryTextColor,
-                            fontSize = LocalTypography.current.average
-                        )
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "seeAll",
-                            tint = LocalColorScheme.current.primaryTextColor
-                        )
-                    }
-                }
-            }
+          PhotosGrid(photos, onPhotoClick)
         }
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+          horizontalArrangement = Arrangement.Center
+        ) {
+          TextButton(onOpenPhotosClick) {
+            Text(
+              text = stringResource(R.string.open_photos),
+              color = LocalColorScheme.current.primaryTextColor,
+              fontSize = LocalTypography.current.average
+            )
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+              contentDescription = "seeAll",
+              tint = LocalColorScheme.current.primaryTextColor
+            )
+          }
+        }
+      }
     }
+  }
 }
 
 @Composable
 private fun PhotosGrid(photos: List<Photo>, onPhotoClick: (userId: Long, targetPhotoIndex: Int) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        photos.chunked(3).forEach {
-            Row(modifier = Modifier.fillMaxWidth((1f / 3f) * it.size)) {
-                it.forEach { photo ->
-                    val index = photos.indexOf(photo)
-                    AsyncImage(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .aspectRatio(1f)
-                            .clickable { onPhotoClick(photo.ownerId, index) },
-                        model = photo.sizes.find { it.type == PhotoSize.X }?.url,
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
+  Column(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(8.dp)
+  ) {
+    photos.chunked(3).forEach {
+      Row(modifier = Modifier.fillMaxWidth((1f / 3f) * it.size)) {
+        it.forEach { photo ->
+          val index = photos.indexOf(photo)
+          AsyncImage(
+            modifier = Modifier
+              .weight(1f)
+              .padding(2.dp)
+              .clip(RoundedCornerShape(4.dp))
+              .aspectRatio(1f)
+              .clickable { onPhotoClick(photo.ownerId, index) },
+            model = photo.sizes.find { it.type == PhotoSize.X }?.url,
+            contentDescription = "",
+            contentScale = ContentScale.Crop
+          )
         }
+      }
     }
+  }
 }

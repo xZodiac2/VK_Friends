@@ -10,40 +10,40 @@ import retrofit2.Retrofit
 import javax.inject.Inject
 
 internal class WallVkRepository @Inject constructor(
-    retrofit: Retrofit
+  retrofit: Retrofit
 ) : WallRemoteRepository {
 
-    private val api = retrofit.create(WallVkApi::class.java)
+  private val api = retrofit.create(WallVkApi::class.java)
 
-    override suspend fun getWall(
-        accessToken: String,
-        ownerId: Long,
-        count: Int,
-        offset: Int
-    ): List<PostDto> {
-        return withContext(Dispatchers.IO) {
-            api.getWall(
-                accessToken = accessToken,
-                ownerId = ownerId,
-                offset = offset,
-                count = count
-            )
-        }.response.items
-    }
+  override suspend fun getWall(
+    accessToken: String,
+    ownerId: Long,
+    count: Int,
+    offset: Int
+  ): List<PostDto> {
+    return withContext(Dispatchers.IO) {
+      api.getWall(
+        accessToken = accessToken,
+        ownerId = ownerId,
+        offset = offset,
+        count = count
+      )
+    }.response.items
+  }
 
-    override suspend fun getComments(
-        accessToken: String,
-        ownerId: Long,
-        postId: Long,
-        needLikes: Int,
-        offset: Int,
-        count: Int,
-        extended: Int,
-        fields: String,
-        threadCount: Int
-    ): CommentsResponseData {
-        return withContext(Dispatchers.IO) {
-            api.getComments(accessToken, ownerId, postId, needLikes, offset, count, extended, fields, threadCount)
-        }.response
-    }
+  override suspend fun getComments(
+    accessToken: String,
+    ownerId: Long,
+    postId: Long,
+    needLikes: Int,
+    offset: Int,
+    count: Int,
+    extended: Int,
+    fields: String,
+    threadCount: Int
+  ): CommentsResponseData {
+    return withContext(Dispatchers.IO) {
+      api.getComments(accessToken, ownerId, postId, needLikes, offset, count, extended, fields, threadCount)
+    }.response
+  }
 }

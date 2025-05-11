@@ -8,23 +8,23 @@ import com.ilya.vkfriends.navigation.Destination
 
 class FriendsScreenNavEventHandler(private val navController: NavController) : EventHandler<FriendsScreenNavEvent> {
 
-    override fun handleEvent(event: FriendsScreenNavEvent) {
-        when (event) {
-            FriendsScreenNavEvent.EmptyAccessToken -> onEmptyAccessToken()
-            is FriendsScreenNavEvent.OpenProfile -> onOpenProfile(event.id)
-        }
+  override fun handleEvent(event: FriendsScreenNavEvent) {
+    when (event) {
+      FriendsScreenNavEvent.EmptyAccessToken -> onEmptyAccessToken()
+      is FriendsScreenNavEvent.OpenProfile -> onOpenProfile(event.id)
     }
+  }
 
-    private fun onEmptyAccessToken() {
-        navController.navigate(Destination.AuthScreen) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                inclusive = true
-            }
-        }
+  private fun onEmptyAccessToken() {
+    navController.navigate(Destination.AuthScreen) {
+      popUpTo(navController.graph.findStartDestination().id) {
+        inclusive = true
+      }
     }
+  }
 
-    private fun onOpenProfile(id: Long) {
-        navController.navigate(Destination.ProfileScreen(id, false))
-    }
+  private fun onOpenProfile(id: Long) {
+    navController.navigate(Destination.ProfileScreen(id, false))
+  }
 
 }
